@@ -77,7 +77,7 @@
 
     let savedActions;
     const unsubscribe3 = currentScene.subscribe(scene => {
-        savedActions = scene.data.flags["director-actions"].filter(a => a);
+        savedActions = "director-actions" in scene.data.flags ? scene.data.flags["director-actions"].filter(a => a) : [];
         actions = savedActions ? savedActions : [{id: uuidv4(), tags: [], type: ''}];
     });
     onDestroy(unsubscribe3);
