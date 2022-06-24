@@ -1,29 +1,11 @@
-# Alpha HUD
-All essential information is at your fingertips!
-This module accumulates your tokens data and places it in your workspace.
-Also, it has a lot of handy shortcuts to manipulate them.
-It supports many third-party modules to be their companion, not a substitute.
-
-## Systems
-This module is developing primarily for DnD5e, but all basic features should work with others.
-In addition, it tested and somewhat supported with Pathfinder and Pathfinder 2e.
+# Director
+Are you annoyed with assigning a single tag for a huge bunch of tiles? Or with managing all your MATT-powered switches on a scene? This module is a solution!
+Just select all your tiles (or tokens) and drag&drop the tag to assign it. Choose a color for it (useless but fancy) and create an action: toggle your tiles' visibility or fire the Active Tiles' trigger. 
+Your actions are stored in the scene's data so that you can have many of them. The global tags are global; let's be consistent across the scenes!
 
 ## Integrations
-* Item Piles
-* Variant Encumbrance
-* Resource Icons
-* Crash's Tracking & Training
-* Monk's Token Bar
-* Token Action HUD
-* Item Collections (Containers)
-* Tagger
+* Tagger [required]
+* Monk's Active Tiles Triggers
 
-## TODO:
-[ ] More settings
-[ ] Non-GM mode
-[ ] Combat widget
-
-## Attribution
-It uses some parts from [Party Overview](https://github.com/mclemente/party-overview) module which is licensed under MIT license
-and [Token Action HUD](https://github.com/Drental/fvtt-tokenactionhud) licensed under [Foundry Virtual Tabletop EULA - Limited License Agreement for module development](https://foundryvtt.com/article/license/).
-
+## Plans
+- [ ] [Alpha HUD](https://github.com/averrin/alpha-hud) integrations. Scene widget with something like hotbar.
