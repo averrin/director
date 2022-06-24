@@ -1,0 +1,77 @@
+// @tailwind base;
+@tailwind components;
+@tailwind utilities;
+@tailwind variants;
+
+#director.window-app {
+    .window-content {
+        padding: 0px;
+    }
+
+    .svelte-select {
+        min-width: 200px;
+        border-radius: var(--rounded-btn, 0.5rem) !important;
+        background: #fff !important;
+    }
+
+    .drawer {
+        height: 100%;
+    }
+
+    .drawer-side ul {
+        margin: 0px;
+    }
+    button > i {
+        margin: 0px !important;
+    }
+}
+
+:root {
+  --p: 196 100% 46%;
+  --pf: 196 98% 40%;
+  --pc: 0 0% 100%;
+  --s: 15 98% 54%;
+  --sf: 15 84% 44%;
+  --sc: 0 0% 100%;
+  --a: 190 100% 26%;
+  --af: 190 100% 17%;
+  --ac: 0 0% 100%;
+  --n: 210 14% 32%;
+  --nf: 210 12% 21%;
+  --nc: 0 0% 100%;
+  --b1: 0 0% 100%;
+  --b2: 210 16% 95%;
+  --b3: 206 9% 84%;
+  --bc: 210 14% 32%;
+  --in: 196 90% 32%;
+  --su: 196 100% 46%;
+  --wa: 39 100% 50%;
+  --er: 0 78% 63%;
+
+  --rounded-box: 1rem; /* border-radius for cards and other big elements */
+  --rounded-btn: 0.5rem; /* border-radius for buttons and similar elements */
+  --rounded-badge: 9999px; /* border-radius for badge and other small elements */
+
+  --animation-btn: 0.25s; /* bounce animation time for button */
+  --animation-input: .4s; /* bounce animation time for checkbox, toggle, etc */
+
+  --padding-card: 2rem; /* default card-body padding */
+
+  --btn-text-case: uppercase; /* default text case for buttons */
+  --navbar-padding: .5rem; /* default padding for navbar */
+  --border-btn: 1px; /* default border size for button */
+  --focus-ring: 2px; /* focus ring size for button and inputs */
+  --focus-ring-offset: 2px; /* focus ring offset size for button and inputs */
+}
+
+.director-icon::before {
+    content: "🎬";
+}
+.isPopup {
+    // right: 2px;
+}
+
+.list-container {
+    z-index: 1000;
+}
+
