@@ -8,6 +8,16 @@ Your actions are stored in the scene's data so that you can have many of them. T
 - right click on tag opens a color picker
 - click on "visible/hidden" tag in a selection card toggles visibility
 
+## Supported actions
+It's not going to be MATT's alternative, so actions are pretty basic
+- Execute trigger [requires MATT]
+- Toggle visibility
+- Hide
+- Show
+- Kill [only for tokens]
+- Revive [only for tokens]
+
+
 ## Integrations
 * Tagger [required]
 * Monk's Active Tiles Triggers
