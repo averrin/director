@@ -24,8 +24,8 @@
     }
 </script>
 
-<div class="flex flex-row bg-white rounded-xl shadow-lg p-4 items-center space-x-4 cursor-move">
-    <button class="btn btn-outline btn-error btn-square" on:click={e => deleteAction(e, item.id)}>
+<div class="flex flex-row bg-white rounded-xl shadow-lg p-2 items-center space-x-2 cursor-move">
+    <button class="ui-btn ui-btn-outline ui-btn-error ui-btn-square" on:click={e => deleteAction(e, item.id)}>
         <XIcon class="h-8 w-8"/>
     </button>
     <div class="min-w-[300px]">
@@ -49,10 +49,10 @@
 	        on:select={e => handleSelect(e, item.id)}
 	        on:clear={e => handleClear(e, item.id)}/>
 	</div>
-	<button class="btn btn-square btn-outline" on:click={e => selectAction(e, item.id)}>
+	<button class="ui-btn ui-btn-square ui-btn-outline" on:click={e => selectAction(e, item.id)}>
         <i class="fas fa-expand text-base"></i>
 	</button>
-	<button class="btn btn-square" on:click={e => execAction(e, item.id)}>
+	<button class="ui-btn ui-btn-square" on:click={e => execAction(e, item.id)}>
         <i class="fas fa-play text-base"></i>
 	</button>
 </div>

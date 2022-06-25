@@ -27,4 +27,35 @@ export function initSettings(app) {
 	    type: Object,
 	    default: '{}',
     });
+
+    foundry.settings.register(moduleId, SETTINGS.UI_SCALE, {
+      name: 'UI scale',
+      hint: 'If ui are too big or too small for your display. Requires refresh.',
+      config: true,
+      type: Number,
+      default: 1,
+      onChange: value => {
+        debouncedReload();
+      },
+      range: {
+        min: 0.1,
+        max: 2,
+        step: 0.01
+      }
+    });
+
+	game.settings.register(moduleId, SETTINGS.RESOLUTION, {
+		name: "Selected image resolution",
+		hint: "Higher is better quality but slower",
+		scope: "world",
+		config: true,
+		range: {
+			min: 30,
+			max: 600,
+			step: 5,
+		},
+		default: 200,
+		type: Number,
+		onChange: debouncedReload
+	});
 }

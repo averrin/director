@@ -4,6 +4,8 @@
 @tailwind variants;
 
 #director.window-app {
+    min-width: 680px;
+
     .window-content {
         padding: 0px;
     }
@@ -14,15 +16,22 @@
         background: #fff !important;
     }
 
-    .drawer {
+    .ui-drawer {
         height: 100%;
     }
 
-    .drawer-side ul {
+    .ui-drawer-side ul {
         margin: 0px;
     }
     button > i {
         margin: 0px !important;
+    }
+    .ui-tabs {
+        justify-content: center;
+    }
+    .ui-tabs-boxed {
+        padding: 0.5rem;
+        border-radius: none;
     }
 }
 

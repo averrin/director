@@ -7,6 +7,8 @@ export const SETTINGS = {
     GLOBAL_TAGS: "global-tags",
     TAG_COLORS: "tag-colors",
     SHOW: "show",
+    UI_SCALE: "ui-scale",
+    RESOLUTION: "resolution",
 };
 
 export const HOOKS = [

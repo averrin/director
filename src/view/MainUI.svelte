@@ -8,6 +8,7 @@
     //import TagManager from './components/TagManager.svelte';
 
     import {logger} from '../modules/helpers.js';
+    import {setting} from '../modules/settings.js';
     import {moduleId, SETTINGS} from '../constants.js';
     import { ApplicationShell }   from '@typhonjs-fvtt/runtime/svelte/component/core';
     import Tags from './components/Tags.svelte'
@@ -17,6 +18,11 @@
     import {HsvPicker} from 'svelte-color-picker';
 
     import {tilesStore, tokensStore, currentScene}          from '../modules/stores.js';
+
+    import { getContext } from 'svelte';
+    const { application } = getContext('external');
+    const position = application.position;
+    position.scale = game.settings.get(moduleId, SETTINGS.UI_SCALE);
 
 
     let actions;
@@ -48,6 +54,17 @@
     let selection;
     let tiles = [];
     let tokens = [];
+    let thumbs = {};
+
+    async function updateThumbs() {
+        for (const obj of selection) {
+            if (!(obj.data.img in thumbs)) {
+                const thumb = await ImageHelper.createThumbnail(obj.data.img, { width: setting(SETTINGS.RESOLUTION), height: setting(SETTINGS.RESOLUTION) })
+                logger.info(thumb);
+                thumbs[obj.data.img] = thumb.thumb;
+            }
+        }
+    }
 
     function updateMutual() {
         tagsSelected = selection.map(t => Tagger.getTags(t).filter(t => t.trim() != ""));
@@ -61,17 +78,19 @@
         tagsMutualOld = [...tagsMutual];
     }
 
-    const unsubscribe = tilesStore.subscribe(value => {
+    const unsubscribe = tilesStore.subscribe(async (value) => {
         tiles = value;
         selection = [...tiles, ...tokens];
         updateMutual();
+        await updateThumbs();
     });
     onDestroy(unsubscribe);
 
-    const unsubscribe2 = tokensStore.subscribe(value => {
+    const unsubscribe2 = tokensStore.subscribe(async (value) => {
         tokens = value;
         selection = [...tiles, ...tokens];
         updateMutual();
+        await updateThumbs()
     });
     onDestroy(unsubscribe2);
 
@@ -212,7 +231,8 @@
         }
     };
 
-    let mode = "actions";
+    let modes = ["actions", "selection"];
+    let mode = modes[0];
 
     $: {
         actions = actions.filter(a => a);
@@ -224,19 +244,16 @@
 
 <svelte:options accessors={true}/>
 
-<input type="checkbox" id="color-modal" class="modal-toggle" bind:checked={pickerOpen}/>
-<label for="color-modal" class="modal cursor-pointer">
-  <label class="modal-box relative w-fit" for="">
+<input type="checkbox" id="color-modal" class="ui-modal-toggle" bind:checked={pickerOpen}/>
+<label for="color-modal" class="ui-modal cursor-pointer">
+  <label class="ui-modal-box relative w-fit" for="">
     <HsvPicker on:colorChange={changeColor} {startColor}/>
   </label>
 </label>
 
 <ApplicationShell bind:elementRoot>
     <main class="director-ui">
-    <div class="drawer drawer-mobile">
-      <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
-      <div class="drawer-content flex flex-col">
-            <div class="navbar bg-base-100">
+            <div class="ui-navbar bg-base-100">
                 <Tags
                     allowPaste={true}
 	                allowDrop={true}
@@ -251,11 +268,17 @@
 	            />
             </div>
 
+        <div class="ui-tabs ui-tabs-boxed">
+            {#each modes as m}
+              <a class="ui-tab ui-tab-lg" on:click={() => mode = m} class:ui-tab-active={m == mode}>{m}</a> 
+            {/each}
+        </div>
+
         {#if mode == "selection"}
             {#if selection.length > 1}
-            <div class="navbar bg-base-100 space-4">
+            <div class="ui-navbar bg-base-100 space-4">
                 <div class="flex-1 space-4 mr-1">
-                    <a class="btn btn-ghost normal-case text-xl no-animation">Mutual tags</a>
+                    <a class="ui-btn ui-btn-ghost normal-case text-xl no-animation">Mutual tags</a>
                     <div class="w-full">
                         <Tags
                             allowPaste={true}
@@ -273,7 +296,7 @@
 	                </div>
 	            </div>
                 <div class="flex-none">
-	                <button class="btn-square btn btn-primary" on:click={e => createAction(e, -1)}>
+	                <button class="ui-btn-square ui-btn ui-btn-primary" on:click={e => createAction(e, -1)}>
 	                    <PlusIcon/>
 	                </button>
 	            </div>
@@ -288,22 +311,25 @@
                     </div>
                 {/if}
                 {#each selection as tile, i}
-                        <div class="card card-side bg-base-100 shadow-xl">
-                          <figure><img class="h-[170px]" style="border: none;" src="{tile.data.img}" alt="Movie"></figure>
-                          <div class="card-body">
-                            <h2 class="card-title">
+                        <div class="ui-card ui-card-side bg-base-100 shadow-xl">
+                          <figure>
+                              <img class="h-[170px]" style="border: none;" src="{thumbs[tile.data.img]}" alt="Selected image">
+
+                              </figure>
+                          <div class="ui-card-body">
+                            <h2 class="ui-card-title">
                                 {#if !tile.data.name}
                                     Tile: {tile.id}
                                     {#if tile.data.flags['monks-active-tiles']?.actions?.length > 0}
-                                        <span class="badge badge-primary">MATT</span>
+                                        <span class="ui-badge badge-primary">MATT</span>
                                     {/if}
                                 {:else}
                                     Token: {tile.data.name}
                                 {/if}
                             {#if true}
-                                <span class="badge">{tile.data.width}x{tile.data.height}</span>
+                                <span class="ui-badge">{tile.data.width}x{tile.data.height}</span>
                             {/if}
-                            <span class="badge"
+                            <span class="ui-badge"
                                 class:badge-ghost={tile.data.hidden}
                                 class:badge-success={!tile.data.hidden}
                                 on:click={() => tile.document.update({hidden: !tile.data.hidden})}
@@ -328,10 +354,10 @@
 	                            />
 	                        </p>
                             
-                            <div class="card-actions justify-end flex-row">
-	                            <button class="w-40 btn" on:click={e => editObject(e, tile)}>Edit</button>
-	                            <button class="w-40 btn btn-outline btn-warning" on:click={e => tile.release()}>Deselect</button>
-	                            <button class="w-40 btn btn-primary" on:click={e => createAction(e, i)}>Create action</button>
+                            <div class="ui-card-actions justify-end flex-row">
+	                            <button class="w-32 ui-btn" on:click={e => editObject(e, tile)}>Edit</button>
+	                            <button class="w-32 ui-btn ui-btn-outline ui-btn-warning" on:click={e => tile.release()}>Deselect</button>
+	                            <button class="w-32 ui-btn ui-btn-primary" on:click={e => createAction(e, i)}>Create action</button>
                             </div>
                           </div>
                         </div>
@@ -342,7 +368,7 @@
         {#if mode == "actions"}
         <div class="flex flex-col p-1">
             <div>
-                <button class="btn btn-outline btn-primary" on:click={e => addAction()}>Add action</button>
+                <button class="ui-btn ui-btn-outline ui-btn-primary" on:click={e => addAction()}>Add action</button>
             </div>
             <div>
                 <SortableList 
@@ -367,15 +393,5 @@
             </div>
           </div> 
         {/if}
-      
-      </div> 
-      <div class="drawer-side">
-        <label for="my-drawer-2" class="drawer-overlay"></label> 
-        <ul class="menu p-4 overflow-y-auto w-48 bg-base-100 text-base-content">
-          <li><a class:active={mode == "actions"} on:click={() => mode = "actions"}>Actions</a></li>
-          <li><a class:active={mode == "selection"} on:click={() => mode = "selection"}>Selection</a></li>
-        </ul>
-      </div>
-    </div>
    </main>
 </ApplicationShell>
