@@ -10,11 +10,15 @@
   ],
   "dependencies": {
     "@typhonjs-fvtt/runtime": "^0.0.14",
+    "class-transformer": "^0.5.1",
     "consola": "^2.15.3",
     "daisyui": "^2.17.0",
+    "reflect-metadata": "^0.1.13",
     "svelte": "^3.46.0",
     "svelte-color-picker": "^1.0.7",
+    "svelte-icons": "^2.1.0",
     "svelte-select": "^5.0.0-beta.14",
+    "svelte-sortable": "^0.1.0",
     "svelte-sortable-list": "^1.1.0",
     "svelte-tags-input": "^2.9.2",
     "uuid": "^8.3.2"

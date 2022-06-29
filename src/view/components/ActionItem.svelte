@@ -2,7 +2,8 @@
     import Tags from '../components/Tags.svelte'
     import Select from 'svelte-select';
     import { XIcon } from "@rgossiaux/svelte-heroicons/solid";
-    import { moduleId, SETTINGS, actionTypes } from '../../constants.js';
+    import { actionTypes } from '../../constants.js';
+    import { tagColors }          from '../../modules/stores.js';
 
     export let item;
 
@@ -14,7 +15,6 @@
     export let onTagClick;
     export let actionTags;
     export let autoComplete;
-    export let colors;
 
     const groupBy = (i) => i.group;
 
@@ -37,7 +37,7 @@
             placeholder="Tag"
             {autoComplete}
             minChars=1
-            colors={colors}
+            colors={$tagColors}
             onTagClick={onTagClick}
             on:tags={e => actionTags(e, item.id)}
             tags={item.tags}

@@ -1,4 +1,5 @@
 import MainApplication from './view/MainApplication.js';
+import 'reflect-metadata';
 
 import { moduleId, SETTINGS } from "./constants.js";
 import { initSettings, setting } from "./modules/settings.js";

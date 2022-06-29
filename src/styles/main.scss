@@ -12,8 +12,22 @@
 
     .svelte-select {
         min-width: 200px;
+        max-width: 600px;
         border-radius: var(--rounded-btn, 0.5rem) !important;
         background: #fff !important;
+
+        input, .selection {
+            font-size: 1rem !important;
+        }
+    }
+
+    .ui-input-lg {
+        border-color: #ddd !important;
+        height: 40px !important;
+    }
+
+    .text-base {
+        font-size: 1rem !important;
     }
 
     .ui-drawer {
