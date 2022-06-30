@@ -108,7 +108,7 @@
    }
 </script>
 
-<div class="flex flex-col p-1">
+<div class="flex ui-flex-col ui-p-1">
    <div>
       <button class="ui-btn ui-btn-outline ui-btn-primary" on:click={(e) => addAction()}>Add action</button>
    </div>

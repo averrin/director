@@ -66,13 +66,13 @@
    {#if mode == "direct"}
       {#if variables && vars.length > 0}
          <button
-            class="ui-btn ui-btn-square m-0"
+            class="ui-btn ui-btn-square ui-m-0"
             style="background-color: darkcyan;"
             on:click={(e) => setMode(e, "variable")}
          >
             <svg
                xmlns="http://www.w3.org/2000/svg"
-               class="h-6 w-6"
+               class="ui-h-6 ui-w-6"
                fill="none"
                viewBox="0 0 24 24"
                stroke="currentColor"
@@ -89,7 +89,7 @@
             type="number"
             bind:value
             placeholder="0"
-            class="ui-input ui-input-lg text-base"
+            class="ui-input ui-input-lg ui-text-base"
          />
       {:else if type == "float"}
          <input
@@ -98,7 +98,7 @@
             bind:value
             placeholder="0.00"
             step="0.01"
-            class="ui-input ui-input-lg text-base"
+            class="ui-input ui-input-lg ui-text-base"
          />
       {:else if type == "effect_file"}
          <label class="ui-input-group">
@@ -114,7 +114,7 @@
             <button class="ui-btn ui-btn-square" on:click={selectFile}>
                <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="h-6 w-6"
+                  class="ui-h-6 ui-w-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -143,18 +143,18 @@
             type="text"
             bind:value
             placeholder="0"
-            class="ui-input ui-input-lg text-base"
+            class="ui-input ui-input-lg ui-text-base"
          />
       {/if}
    {:else}
       <button
-         class="ui-btn ui-btn-square m-0"
+         class="ui-btn ui-btn-square ui-m-0"
          style="background-color: #aa66cc;"
          on:click={(e) => setMode(e, "direct")}
       >
          <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
+            class="ui-h-6 ui-w-6"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

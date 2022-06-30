@@ -66,7 +66,7 @@
       tabs.push({
          mode: "sequencer",
          title: "Sequencer",
-         badge: "<span class='ui-badge mx-1' style='background-color: indianred'>beta</span>",
+         badge: "<span class='ui-badge ui-mx-1' style='background-color: indianred'>beta</span>",
       });
    }
    let mode = tabs.find((t) => t.default).mode;
@@ -75,8 +75,8 @@
 </script>
 
 <input type="checkbox" id="color-modal" class="ui-modal-toggle" bind:checked={pickerOpen} />
-<label for="color-modal" class="ui-modal cursor-pointer">
-   <label class="ui-modal-box relative w-fit" for="">
+<label for="color-modal" class="ui-modal ui-cursor-pointer">
+   <label class="ui-modal-box ui-relative ui-w-fit" for="">
       <HsvPicker on:colorChange={changeColor} {startColor} />
    </label>
 </label>

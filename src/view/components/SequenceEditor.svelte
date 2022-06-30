@@ -132,16 +132,16 @@
       <VariableComponent {variable} on:remove={deleteVariable} on:change={updateVariable} />
    {/each}
    <div>
-      <button class="my-2 ui-btn ui-btn-outline ui-btn-primary" on:click={(e) => addVariable()}>Add variable</button>
+      <button class="ui-my-2 ui-btn ui-btn-outline ui-btn-primary" on:click={(e) => addVariable()}>Add variable</button>
    </div>
 
-   <div class="overflow-auto max-h-[600px]" id="sequencer-content">
+   <div class="ui-overflow-auto ui-max-h-[600px]" id="sequencer-content">
       <Sortable items={seq.steps} let:item let:index on:change={sortSteps} options={{ handle: ".handle" }}>
-         <div class="flex flex-col bg-white rounded-xl shadow-lg p-2 space-x-4 my-1">
-            <div class="flex flex-row justify-start space-x-2">
-               <div class="flex-1 flex flex-row justify-start space-x-2">
+         <div class="ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-space-x-4 ui-my-1">
+            <div class="ui-flex ui-flex-row ui-justify-start ui-space-x-2">
+               <div class="ui-flex-1 ui-flex ui-flex-row ui-justify-start ui-space-x-2">
                   <button
-                     class="ui-btn ui-btn-square ui-btn-ghost handle justify-self-start cursor-move"
+                     class="ui-btn ui-btn-square ui-btn-ghost handle ui-justify-self-start ui-cursor-move"
                      style="color: #46525d; padding: 6px"
                   >
                      <FaArrowsAlt />
@@ -166,18 +166,18 @@
                      {/each}
                   {/if}
                </div>
-               <div class="flex-none">
+               <div class="ui-flex-none">
                   <button
-                     class="ui-btn ui-btn-outline ui-btn-error ui-btn-square justify-self-end"
+                     class="ui-btn ui-btn-outline ui-btn-error ui-btn-square ui-justify-self-end"
                      on:click={(e) => deleteStep(item)}
                   >
-                     <XIcon class="h-8 w-8" />
+                     <XIcon class="ui-h-8 ui-w-8" />
                   </button>
                </div>
             </div>
 
             {#each item.modifiers as mod (mod.id)}
-               <div class="flex flex-row bg-white rounded-xl shadow-lg py-2 px-4 gap-2 my-1">
+               <div class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-py-2 ui-px-4 ui-gap-2 ui-my-1">
                   <Select
                      items={modifierSpecs.filter((m) => item.type == m.group)}
                      {groupByCat}
@@ -200,15 +200,15 @@
                   {/if}
 
                   <button
-                     class="ui-btn ui-btn-outline ui-btn-error ui-btn-square justify-self-end"
+                     class="ui-btn ui-btn-outline ui-btn-error ui-btn-square ui-justify-self-end"
                      on:click={(e) => deleteModifier(item, mod)}
                   >
-                     <XIcon class="h-8 w-8" />
+                     <XIcon class="ui-h-8 ui-w-8" />
                   </button>
                </div>
             {/each}
             {#if modifierSpecs.filter((m) => item.type == m.group).length > 0}
-               <div class="p-1">
+               <div class="ui-p-1">
                   <button class="ui-btn ui-btn-outline ui-btn-primary" on:click={(e) => addModifier(item)}
                      >Add modifier</button
                   >
@@ -219,7 +219,7 @@
    </div>
 
    <div>
-      <button class="my-2 ui-btn ui-btn-outline ui-btn-primary" on:click={(e) => addStep()}>Add section</button>
+      <button class="ui-my-2 ui-btn ui-btn-outline ui-btn-primary" on:click={(e) => addStep()}>Add section</button>
    </div>
 
    <button class="ui-btn" on:click={play}>play</button>

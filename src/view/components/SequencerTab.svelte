@@ -58,7 +58,7 @@
 <input type="checkbox" id="seq-modal" class="ui-modal-toggle" />
 <div class="ui-modal">
    <div class="ui-modal-box">
-      <h3 class="py-4 font-bold text-lg">Edit sequence</h3>
+      <h3 class="ui-py-4 ui-font-bold ui-text-lg">Edit sequence</h3>
 
       <div class="ui-form-control">
          <label class="ui-label" for="">
@@ -76,11 +76,13 @@
    </div>
 </div>
 
-<div class="p-2">
-   <div class="flex flex-row bg-white rounded-xl shadow-lg p-2 space-x-4 my-1 items-center">
+<div class="ui-p-2">
+   <div class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-space-x-4 ui-my-1 ui-items-center">
       <Select items={$sequences} optionIdentifier="id" labelIdentifier="title" isClearable={false} bind:value={seq} />
       <label for="seq-modal" class="ui-btn ui-modal-button">Edit</label>
-      <button class="m-2 ui-btn ui-btn-outline ui-btn-primary w-36" on:click={(_) => addSeq()}>Add Sequence</button>
+      <button class="ui-m-2 ui-btn ui-btn-outline ui-btn-primary ui-w-36" on:click={(_) => addSeq()}
+         >Add Sequence</button
+      >
    </div>
 
    <SequenceEditor {seq} />
