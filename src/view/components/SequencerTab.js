@@ -102,10 +102,11 @@ export class DSequence {
       let i = 0;
       for (const step of seq) {
         if (this.onlySection != undefined && step.id != this.onlySection) continue;
-        let currentStep = s[step.type](...(await this.makeArgs(step)));
+        const args = await this.makeArgs(step);
+        let currentStep = s[step.type](...args);
         if (step.type == "effect") {
           currentStep = currentStep.origin(this.id);
-          // currentStep = currentStep.name(`${this.title}-${i}`);
+          currentStep = currentStep.name(args[0] || `${this.title}-${this.steps.length}`);
         }
         let currentModifier;
         for (const m of step.modifiers) {
@@ -185,7 +186,7 @@ export class Variable {
     if (typeof val === 'string' || val instanceof String) {
       if (val === "#manual") {
         const controlled = globalThis.canvas.tokens.controlled;
-        const t = await globalThis.warpgate.crosshairs.show({ drawIcon: false });
+        const t = await globalThis.warpgate.crosshairs.show({ drawIcon: true, label: 'Choose position' });
         controlled.forEach(t => t.control());
         return t;
       } else if (val.startsWith("#controlled")) {
@@ -219,6 +220,7 @@ export class Step {
     this.modifiers = [];
     this.setType(type)
     this.args = args || [];
+    this.collapsed = false;
   }
 
   setType(type) {
@@ -234,7 +236,6 @@ export class Step {
   }
 }
 
-let lastManual;
 export class Modifier {
   constructor(id, type, args) {
     this.id = id;

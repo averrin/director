@@ -37,21 +37,18 @@ export const actionTypes = [
 ];
 
 export const stepSpecs = [
-  { id: 'effect', label: 'Effect' },
+  { id: 'effect', label: 'Effect', args: [{ type: 'string', label: 'name' }] },
   { id: 'animation', label: 'Animation' },
   { id: 'sound', label: 'Sound' },
   { id: 'wait', label: 'Wait', args: [{ type: 'int', label: 'ms' }] },
   { id: 'macro', label: 'Macro', args: [{ type: 'macro', label: 'name' }] },
 ];
 
-const a = {
-  'ms': { type: 'int', label: 'ms' },
-}
 export const modifierSpecs = [
   //Effect
   { id: 'file', group: 'effect', args: [{ type: 'effect_file', label: 'file' }], cat: "Required" },
   { id: 'atLocation', group: 'effect', args: [{ type: 'position', label: 'pos' }], cat: "Required" },
-  { id: 'name', group: 'effect', args: [{ type: 'string', label: 'name' }], cat: "Generic" },
+  //{ id: 'name', group: 'effect', args: [{ type: 'string', label: 'name' }], cat: "Generic" },
 
   { id: 'scaleToObject', group: 'effect', args: [{ type: 'float', label: 'scale' }], cat: "Scale" },
   { id: 'scale', group: 'effect', args: [{ type: 'float', label: 'scale' }], cat: "Scale" },

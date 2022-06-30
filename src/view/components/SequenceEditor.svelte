@@ -13,6 +13,8 @@
    import ArgInput from "./ArgInput.svelte";
    import FaArrowsAlt from "svelte-icons/fa/FaArrowsAlt.svelte";
    import FaPlay from "svelte-icons/fa/FaPlay.svelte";
+   import FaExpandArrowsAlt from "svelte-icons/fa/FaExpandArrowsAlt.svelte";
+   import FaCompressArrowsAlt from "svelte-icons/fa/FaCompressArrowsAlt.svelte";
 
    const groupBy = (i) => i.group;
    const groupByCat = (i) => i.cat;
@@ -64,7 +66,6 @@
          seq = seqs.find((s) => s.id == seq.id);
          return seqs;
       });
-      await timeout(100);
    }
 
    function addModifier(step) {
@@ -74,9 +75,9 @@
       updateSequences();
    }
 
-   async function sortSteps(ev) {
+   function sortSteps(ev) {
       seq.steps = ev.detail;
-      await updateSequences();
+      updateSequences();
       seq = seq;
    }
 
@@ -127,6 +128,11 @@
    function updateVariable(v) {
       updateSequences();
    }
+
+   function toggleCollapsed(item) {
+      item.collapsed = !item.collapsed;
+      updateSequences();
+   }
 </script>
 
 {#if seq}
@@ -144,7 +150,7 @@
                <div class="ui-flex-1 ui-flex ui-flex-row ui-justify-start ui-space-x-2">
                   <button
                      class="ui-btn ui-btn-square ui-btn-ghost handle ui-justify-self-start ui-cursor-move"
-                     style="color: #46525d; padding: 6px"
+                     style="color: #46525d; padding: 8px"
                   >
                      <FaArrowsAlt />
                   </button>
@@ -170,7 +176,19 @@
                </div>
                <div class="ui-flex-none ui-btn-group">
                   <button
-                     style="padding: 6px"
+                     style="padding: 8px"
+                     class="ui-btn ui-btn-square ui-justify-self-end"
+                     class:ui-btn-outline={!item.collapsed}
+                     on:click={(e) => toggleCollapsed(item)}
+                  >
+                     {#if item.collapsed}
+                        <FaExpandArrowsAlt />
+                     {:else}
+                        <FaCompressArrowsAlt />
+                     {/if}
+                  </button>
+                  <button
+                     style="padding: 8px"
                      class="ui-btn ui-btn-outline ui-btn-square ui-justify-self-end"
                      on:click={(e) => playSection(item)}
                   >
@@ -185,43 +203,47 @@
                </div>
             </div>
 
-            {#each item.modifiers as mod (mod.id)}
-               <div class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-py-2 ui-px-4 ui-gap-2 ui-my-1">
-                  <Select
-                     items={modifierSpecs.filter((m) => item.type == m.group)}
-                     {groupByCat}
-                     optionIdentifier="id"
-                     labelIdentifier="id"
-                     on:select={(e) => setModType(e, item, mod)}
-                     value={mod.type}
-                  />
-                  {#if mod.spec?.args}
-                     {#each mod.spec.args as arg, i}
-                        <ArgInput
-                           vars={seq.variables}
-                           label={arg.label}
-                           variables={true}
-                           type={arg.type}
-                           value={mod.args[i]}
-                           on:change={(e) => setModArg(e, seq.steps[index], mod, i)}
-                        />
-                     {/each}
-                  {/if}
+            {#if !item.collapsed}
+               {#each item.modifiers as mod (mod.id)}
+                  <div
+                     class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-py-2 ui-px-4 ui-gap-2 ui-my-1"
+                  >
+                     <Select
+                        items={modifierSpecs.filter((m) => item.type == m.group)}
+                        {groupByCat}
+                        optionIdentifier="id"
+                        labelIdentifier="id"
+                        on:select={(e) => setModType(e, item, mod)}
+                        value={mod.type}
+                     />
+                     {#if mod.spec?.args}
+                        {#each mod.spec.args as arg, i}
+                           <ArgInput
+                              vars={seq.variables}
+                              label={arg.label}
+                              variables={true}
+                              type={arg.type}
+                              value={mod.args[i]}
+                              on:change={(e) => setModArg(e, seq.steps[index], mod, i)}
+                           />
+                        {/each}
+                     {/if}
 
-                  <button
-                     class="ui-btn ui-btn-outline ui-btn-error ui-btn-square ui-justify-self-end"
-                     on:click={(e) => deleteModifier(item, mod)}
-                  >
-                     <XIcon class="ui-h-8 ui-w-8" />
-                  </button>
-               </div>
-            {/each}
-            {#if modifierSpecs.filter((m) => item.type == m.group).length > 0}
-               <div class="ui-p-1">
-                  <button class="ui-btn ui-btn-outline ui-btn-primary" on:click={(e) => addModifier(item)}
-                     >Add modifier</button
-                  >
-               </div>
+                     <button
+                        class="ui-btn ui-btn-outline ui-btn-error ui-btn-square ui-justify-self-end"
+                        on:click={(e) => deleteModifier(item, mod)}
+                     >
+                        <XIcon class="ui-h-8 ui-w-8" />
+                     </button>
+                  </div>
+               {/each}
+               {#if modifierSpecs.filter((m) => item.type == m.group).length > 0}
+                  <div class="ui-p-1">
+                     <button class="ui-btn ui-btn-outline ui-btn-primary" on:click={(e) => addModifier(item)}
+                        >Add modifier</button
+                     >
+                  </div>
+               {/if}
             {/if}
          </div>
       </Sortable>

@@ -88,7 +88,6 @@
             on:pointerdown|stopPropagation={() => null}
             type="number"
             bind:value
-            placeholder="0"
             class="ui-input ui-input-lg ui-text-base"
          />
       {:else if type == "float"}
@@ -96,7 +95,6 @@
             on:pointerdown|stopPropagation={() => null}
             type="number"
             bind:value
-            placeholder="0.00"
             step="0.01"
             class="ui-input ui-input-lg ui-text-base"
          />
@@ -133,7 +131,6 @@
                on:pointerdown|stopPropagation={() => null}
                type="text"
                bind:value
-               placeholder="0"
                class="ui-input ui-input-lg ui-text-base"
             />
             <button class="ui-btn ui-btn-square" on:click={selectFile}>
@@ -191,7 +188,6 @@
             on:pointerdown|stopPropagation={() => null}
             type="text"
             bind:value
-            placeholder="0"
             class="ui-input ui-input-lg ui-text-base"
          />
       {/if}

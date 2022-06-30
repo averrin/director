@@ -155,7 +155,7 @@
 </script>
 
 <div bind:this={targetEl}>
-   {#each items as item, index}
+   {#each items as item, index (item.id)}
       <slot {item} {index} />
    {/each}
 </div>
