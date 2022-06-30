@@ -59,13 +59,14 @@
    }
 
    let tabs = [
-      { mode: "actions", title: "Actions", default: true },
+      { mode: "actions", title: "Actions" },
       { mode: "selection", title: "Selection" },
    ];
    if (setting(SETTINGS.SHOW_SEQUENCER)) {
       tabs.push({
          mode: "sequencer",
          title: "Sequencer",
+         default: true,
          badge: "<span class='ui-badge ui-mx-1' style='background-color: indianred'>beta</span>",
       });
    }

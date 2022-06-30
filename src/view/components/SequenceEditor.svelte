@@ -12,33 +12,28 @@
    import VariableComponent from "./Variable.svelte";
    import ArgInput from "./ArgInput.svelte";
    import FaArrowsAlt from "svelte-icons/fa/FaArrowsAlt.svelte";
+   import FaPlay from "svelte-icons/fa/FaPlay.svelte";
 
    const groupBy = (i) => i.group;
    const groupByCat = (i) => i.cat;
-   /*const e2 = new Step(uuidv4(), 'effect');
-    e2.modifiers = [
-        new Modifier(uuidv4(), 'file', ['jb2a.magic_signs.circle.02.abjuration.intro.green']),
-        new Modifier(uuidv4(), 'atLocation', ['@manual']),
-        new Modifier(uuidv4(), 'scale', [0.25]),
-        new Modifier(uuidv4(), 'belowTokens', []),
-    ];
-    seq.steps.push(e2)
-    seq.steps.push(new Step(uuidv4(), 'wait', [1000]))
-
-    const e = new Step(uuidv4(), 'effect');
-    e.modifiers = [
-        new Modifier(uuidv4(), 'atLocation', ['@controlled']),
-        new Modifier(uuidv4(), 'stretchTo', ['@manual-last']),
-        new Modifier(uuidv4(), 'file', ['jb2a.magic_missile']),
-        //new Modifier(uuidv4(), 'file', ['jb2a.arrow']),
-        new Modifier(uuidv4(), 'repeats', [3, 200, 300]),
-        new Modifier(uuidv4(), 'randomizeMirrorY', []),
-    ];
-    seq.steps.push(e)*/
+   async function stop() {
+      seq.stop();
+   }
+   let preloading = false;
+   async function preload() {
+      preloading = true;
+      await seq.preload();
+      preloading = false;
+   }
 
    async function play() {
       updateSequences();
       seq.play();
+   }
+
+   async function playSection(step) {
+      updateSequences();
+      seq.playSection(step.id);
    }
 
    async function addStep() {
@@ -55,6 +50,9 @@
       updateSequences();
    }
 
+   function timeout(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+   }
    async function updateSequences() {
       sequences.update((seqs) => {
          const i = seqs.indexOf(seqs.find((s) => s.id == seq.id));
@@ -66,17 +64,21 @@
          seq = seqs.find((s) => s.id == seq.id);
          return seqs;
       });
+      await timeout(100);
    }
 
    function addModifier(step) {
-      const e = new Modifier(uuidv4(), modifierSpecs[0].id);
+      const e = new Modifier(uuidv4(), "");
+      e.setType(modifierSpecs.filter((m) => m.group == step.type)[0].id, step.type);
       seq.steps.find((s) => s.id == step.id).modifiers.push(e);
       updateSequences();
    }
 
-   const sortSteps = (ev) => {
-      updateSequences();
-   };
+   async function sortSteps(ev) {
+      seq.steps = ev.detail;
+      await updateSequences();
+      seq = seq;
+   }
 
    function deleteModifier(step, mod) {
       step.modifiers = step.modifiers.filter((m) => m.id != mod.id);
@@ -100,12 +102,12 @@
 
    function setModArg(e, step, mod, i) {
       const m = seq.steps.find((s) => s.id == step.id).modifiers.find((m) => m.id == mod.id);
-      if (e.detail && typeof e.detail === "object") {
+      if (e.detail != undefined && e.detail != null && typeof e.detail === "object") {
          m.args[i] = e.detail.value;
       } else {
          m.args[i] = e.detail;
       }
-      if (m.args[i] != null) {
+      if (m.args[i] != null && e.detail != undefined) {
          updateSequences();
       }
    }
@@ -114,7 +116,7 @@
       seq.steps
          .find((s) => s.id == step.id)
          .modifiers.find((m) => m.id == mod.id)
-         .setType(e.detail.id);
+         .setType(e.detail.id, step.type);
       updateSequences();
    }
    function setStepType(e, step) {
@@ -156,7 +158,7 @@
                   {#if item.spec?.args}
                      {#each item.spec.args as arg, i}
                         <ArgInput
-                           vars={seq.variables}
+                           vars={seq.variables.filter((v) => v.type == arg.type)}
                            label={arg.label}
                            variables={true}
                            type={arg.type}
@@ -166,7 +168,14 @@
                      {/each}
                   {/if}
                </div>
-               <div class="ui-flex-none">
+               <div class="ui-flex-none ui-btn-group">
+                  <button
+                     style="padding: 6px"
+                     class="ui-btn ui-btn-outline ui-btn-square ui-justify-self-end"
+                     on:click={(e) => playSection(item)}
+                  >
+                     <FaPlay />
+                  </button>
                   <button
                      class="ui-btn ui-btn-outline ui-btn-error ui-btn-square ui-justify-self-end"
                      on:click={(e) => deleteStep(item)}
@@ -219,8 +228,14 @@
    </div>
 
    <div>
-      <button class="ui-my-2 ui-btn ui-btn-outline ui-btn-primary" on:click={(e) => addStep()}>Add section</button>
+      <button class="ui-my-2 ui-btn ui-btn-outline ui-btn-primary ui-w-full" on:click={(e) => addStep()}
+         >Add section</button
+      >
    </div>
 
-   <button class="ui-btn" on:click={play}>play</button>
+   <div class="ui-btn-group ui-w-full ui-justify-center">
+      <button class="ui-btn ui-btn-outline ui-w-[33%]" class:ui-loading={preloading} on:click={preload}>preload</button>
+      <button class="ui-btn ui-btn-error ui-btn-outline ui-w-[33%]" on:click={stop}>stop persists</button>
+      <button class="ui-btn ui-w-[33%]" on:click={play}>play</button>
+   </div>
 {/if}

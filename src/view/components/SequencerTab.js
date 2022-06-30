@@ -22,6 +22,7 @@ export class DSequence {
     return await this.constructSeq(this.steps);
   }
   reset() {
+    this.onlySection = undefined;
     for (const v of this.variables) {
       v.reset();
     }
@@ -30,40 +31,106 @@ export class DSequence {
   async play(overrides) {
     overrides = overrides || {};
     const sequence = await this.prepare(overrides);
+    if (sequence) {
+      const p = sequence.play();
+      this.reset();
+      return p;
+    } else {
+      this.reset();
+      return null;
+    }
+  }
+
+  async playSection(id) {
+    this.onlySection = id;
+    const sequence = await this.prepare();
     const p = sequence.play();
     this.reset();
     return p;
   }
 
-  async makeArgs(args) {
+  async stop() {
+    globalThis.Sequencer.EffectManager.endEffects({ origin: this.id });
+  }
+
+  async preload() {
+    let m_files = this.steps.map(s => s.modifiers.find(m => m.type == "file")).filter(m => m);
+    const files = [];
+    for (const f of m_files) {
+      files.push((await this.makeArgs(f))[0]);
+    }
+    logger.info("preloading", files);
+    return Promise.all([
+      globalThis.Sequencer.Preloader.preloadForClients(files, false),
+      globalThis.Sequencer.Preloader.preload(files, true),
+    ]);
+  }
+
+  async makeArgs(obj) {
+    const args = obj.args;
     const result = [];
+    const options = {};
+    let n = 0;
     for (const a of args) {
+      let val;
       if ((typeof a === 'string' || a instanceof String) && a.startsWith('@')) {
         const v = this.variables.find(vr => vr.name === a.slice(1));
         if (v) {
-          result.push(await v.getValue());
-          continue;
+          val = await v.getValue();
         }
       }
-      result.push(await Variable.calculateValue(a));
+      if (val === undefined) {
+        val = await Variable.calculateValue(a);
+      }
+      const spec = obj.spec.args[n];
+      if (spec.option) {
+        options[spec.label] = val;
+      } else {
+        result.push(val);
+      }
+      n++;
+    }
+    if (Object.entries(options).length > 0) {
+      result.push(options);
     }
     return result;
   }
 
   async constructSeq(seq) {
     const s = new globalThis.Sequence(moduleId);
-    for (const step of seq) {
-      const currentStep = s[step.type](...(await this.makeArgs(step.args)));
-      let currentModifier;
-      for (const m of step.modifiers) {
-        const args = await this.makeArgs(m.args);
-        logger.info(`.${m.type}(${args})`);
-        if (currentModifier) {
-          currentModifier = currentModifier[m.type](...args);
-        } else {
-          currentModifier = currentStep[m.type](...args);
+    try {
+      let i = 0;
+      for (const step of seq) {
+        if (this.onlySection != undefined && step.id != this.onlySection) continue;
+        let currentStep = s[step.type](...(await this.makeArgs(step)));
+        if (step.type == "effect") {
+          currentStep = currentStep.origin(this.id);
+          // currentStep = currentStep.name(`${this.title}-${i}`);
         }
+        let currentModifier;
+        for (const m of step.modifiers) {
+          const args = await this.makeArgs(m);
+          let argsString = args.map(a => {
+            if (Object.getPrototypeOf(a) == null || Object.getPrototypeOf(a) === Object.getPrototypeOf({})) {
+              return JSON.stringify(a).substring(0, 25);
+            } else {
+              return a;
+            }
+          });
+          argsString = argsString.join(', ');
+          logger.info(`.${m.type}(${argsString})`);
+          if (currentModifier) {
+            currentModifier = currentModifier[m.type](...args);
+          } else {
+            currentModifier = currentStep[m.type](...args);
+          }
+        }
+        i++;
       }
+    } catch (error) {
+      logger.error(error);
+      alert(error);
+      return null;
     }
     return s;
   }
@@ -174,9 +241,9 @@ export class Modifier {
     this.setType(type)
     this.args = args || [];
   }
-  setType(type) {
+  setType(type, sectionType) {
     this.type = type;
-    this.spec = modifierSpecs.find(s => s.id == this.type);
+    this.spec = modifierSpecs.filter(s => s.group == sectionType).find(s => s.id == this.type);
     this.args = [];
   }
 

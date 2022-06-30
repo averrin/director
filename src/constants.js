@@ -38,41 +38,52 @@ export const actionTypes = [
 
 export const stepSpecs = [
   { id: 'effect', label: 'Effect' },
+  { id: 'animation', label: 'Animation' },
+  { id: 'sound', label: 'Sound' },
   { id: 'wait', label: 'Wait', args: [{ type: 'int', label: 'ms' }] },
   { id: 'macro', label: 'Macro', args: [{ type: 'macro', label: 'name' }] },
 ];
+
+const a = {
+  'ms': { type: 'int', label: 'ms' },
+}
 export const modifierSpecs = [
+  //Effect
   { id: 'file', group: 'effect', args: [{ type: 'effect_file', label: 'file' }], cat: "Required" },
   { id: 'atLocation', group: 'effect', args: [{ type: 'position', label: 'pos' }], cat: "Required" },
+  { id: 'name', group: 'effect', args: [{ type: 'string', label: 'name' }], cat: "Generic" },
 
   { id: 'scaleToObject', group: 'effect', args: [{ type: 'float', label: 'scale' }], cat: "Scale" },
   { id: 'scale', group: 'effect', args: [{ type: 'float', label: 'scale' }], cat: "Scale" },
   { id: 'scaleIn', group: 'effect', args: [{ type: 'float', label: 'scale' }, { type: 'int', label: 'ms' }], cat: "Scale" }, // {ease: "easeInOutCubic"})
   { id: 'scaleOut', group: 'effect', args: [{ type: 'float', label: 'scale' }, { type: 'int', label: 'ms' }], cat: "Scale" }, // {ease: "easeInCubic"})
 
-  { id: 'stretchTo', group: 'effect', args: [{ type: 'position', label: 'pos' }] },
-  { id: 'attachTo', group: 'effect', args: [{ type: 'token', label: 'pos' }] },
-  { id: 'rotateTowards', group: 'effect', args: [{ type: 'position', label: 'pos' }] },
-  { id: 'moveTowards', group: 'effect', args: [{ type: 'position', label: 'pos' }] },
-  { id: 'moveSpeed', group: 'effect', args: [{ type: 'int', label: 'speed' }] },
+  { id: 'stretchTo', group: 'effect', args: [{ type: 'position', label: 'pos' }], cat: 'Move' },
+  { id: 'attachTo', group: 'effect', args: [{ type: 'token', label: 'token' }], cat: 'Move' },
+  { id: 'moveTowards', group: 'effect', args: [{ type: 'position', label: 'pos' }], cat: 'Move' },
+  { id: 'moveSpeed', group: 'effect', args: [{ type: 'int', label: 'speed' }], cat: 'Move' },
 
-  { id: 'repeats', group: 'effect', args: [{ type: 'int', label: 'count' }, { type: 'int', label: 'delay min' }, { type: 'int', label: 'delay max' }] },
+  { id: 'rotateTowards', group: 'effect', args: [{ type: 'position', label: 'pos' }, { type: 'int', label: 'duration', option: true }], cat: 'Rotate' },
+  { id: 'rotate', group: 'effect', args: [{ type: 'int', label: 'deg' }, { type: 'int', label: 'ms' }], cat: 'Rotate' }, // {ease: "easeInOutCubic"})
+  { id: 'rotateIn', group: 'effect', args: [{ type: 'int', label: 'deg' }, { type: 'int', label: 'ms' }], cat: 'Rotate' }, // {ease: "easeInOutCubic"})
+  { id: 'rotateOut', group: 'effect', args: [{ type: 'int', label: 'deg' }, { type: 'int', label: 'ms' }], cat: 'Rotate' }, //  {ease: "easeInCubic"})
+
+  { id: 'fadeIn', group: 'effect', args: [{ type: 'int', label: 'ms' }], cat: 'Fade' }, //1500, {ease: "easeOutCubic", delay: 500})
+  { id: 'fadeOut', group: 'effect', args: [{ type: 'int', label: 'ms' }], cat: 'Fade' },
+
+  { id: 'repeats', group: 'effect', args: [{ type: 'int', label: 'count' }, { type: 'int', label: 'delay min' }, { type: 'int', label: 'delay max' }], cat: 'Generic' },
+  { id: 'delay', group: 'effect', args: [{ type: 'int', label: 'ms' }], cat: 'Generic' },
+  { id: 'waitUntilFinished', group: 'effect', args: [{ type: 'int', label: 'ms' }], cat: 'Generic' },
+  { id: 'async', group: 'effect', args: [], cat: 'Generic' },
+  { id: 'duration', group: 'effect', args: [{ type: 'int', label: 'ms' }], cat: 'Generic' }, //1500, {ease: "easeOutCubic", delay: 500})
+
   { id: 'randomizeMirrorY', group: 'effect', args: [] },
   { id: 'belowTokens', group: 'effect', args: [] },
-  { id: 'duration', group: 'effect', args: [{ type: 'int', label: 'ms' }] }, //1500, {ease: "easeOutCubic", delay: 500})
-  { id: 'fadeIn', group: 'effect', args: [{ type: 'int', label: 'ms' }] }, //1500, {ease: "easeOutCubic", delay: 500})
-  { id: 'fadeOut', group: 'effect', args: [{ type: 'int', label: 'ms' }] },
-  { id: 'rotate', group: 'effect', args: [{ type: 'int', label: 'deg' }, { type: 'int', label: 'ms' }] }, // {ease: "easeInOutCubic"})
-  { id: 'rotateIn', group: 'effect', args: [{ type: 'int', label: 'deg' }, { type: 'int', label: 'ms' }] }, // {ease: "easeInOutCubic"})
-  { id: 'rotateOut', group: 'effect', args: [{ type: 'int', label: 'deg' }, { type: 'int', label: 'ms' }] }, //  {ease: "easeInCubic"})
-  { id: 'waitUntilFinished', group: 'effect', args: [{ type: 'int', label: 'ms' }] },
-  { id: 'async', group: 'effect', args: [] },
   { id: 'locally', group: 'effect', args: [] },
   { id: 'noLoop', group: 'effect', args: [{ type: 'bool', label: 'val' }] },
   { id: 'snapToGrid', group: 'effect', args: [{ type: 'bool', label: 'val' }] },
   { id: 'zeroSpriteRotation', group: 'effect', args: [{ type: 'bool', label: 'val' }] },
   { id: 'persist', group: 'effect', args: [{ type: 'bool', label: 'val' }] },
-  { id: 'delay', group: 'effect', args: [{ type: 'int', label: 'ms' }] },
   { id: 'startTime', group: 'effect', args: [{ type: 'int', label: 'ms' }] },
   { id: 'startTimePerc', group: 'effect', args: [{ type: 'float', label: 'val' }] },
   { id: 'endTime', group: 'effect', args: [{ type: 'int', label: 'ms' }] },
@@ -80,6 +91,46 @@ export const modifierSpecs = [
   { id: 'extraEndDuration', group: 'effect', args: [{ type: 'int', label: 'ms' }] },
   { id: 'timeRange', group: 'effect', args: [{ type: 'int', label: 'ms' }, { type: 'int', label: 'ms' }] },
 
+  //Animation
+  { id: 'on', group: 'animation', args: [{ type: 'token', label: 'token' }], cat: 'Required' },
+
+  { id: 'repeats', group: 'animation', args: [{ type: 'int', label: 'count' }, { type: 'int', label: 'delay min' }, { type: 'int', label: 'delay max' }] },
+  { id: 'delay', group: 'animation', args: [{ type: 'int', label: 'ms' }], cat: 'Generic' },
+  { id: 'waitUntilFinished', group: 'animation', args: [{ type: 'int', label: 'ms' }], cat: 'Generic' },
+  { id: 'async', group: 'animation', args: [], cat: 'Generic' },
+  { id: 'duration', group: 'animation', args: [{ type: 'int', label: 'ms' }], cat: 'Generic' }, //1500, {ease: "easeOutCubic", delay: 500})
+
+  { id: 'fade', group: 'animation', args: [{ type: 'int', label: 'ms' }], cat: 'Fade' }, //1500, {ease: "easeOutCubic", delay: 500})
+  { id: 'fadeIn', group: 'animation', args: [{ type: 'int', label: 'ms' }], cat: 'Fade' }, //1500, {ease: "easeOutCubic", delay: 500})
+  { id: 'fadeOut', group: 'animation', args: [{ type: 'int', label: 'ms' }], cat: 'Fade' },
+
+  { id: 'moveTowards', group: 'animation', args: [{ type: 'position', label: 'pos' }], cat: 'Move' },
+  { id: 'moveSpeed', group: 'animation', args: [{ type: 'int', label: 'speed' }], cat: 'Move' },
+  { id: 'snapToGrid', group: 'animation', args: [{ type: 'bool', label: 'val' }], cat: 'Move' },
+  { id: 'closestSquare', group: 'animation', args: [{ type: 'bool', label: 'val' }], cat: 'Move' },
+
+  { id: 'rotateTowards', group: 'animation', args: [{ type: 'position', label: 'pos' }, { type: 'int', label: 'duration', option: true }], cat: 'Rotate' },
+  { id: 'rotate', group: 'animation', args: [{ type: 'int', label: 'deg' }, { type: 'int', label: 'ms' }], cat: 'Rotate' }, // {ease: "easeInOutCubic"})
+  { id: 'rotateIn', group: 'animation', args: [{ type: 'int', label: 'deg' }, { type: 'int', label: 'ms' }], cat: 'Rotate' }, // {ease: "easeInOutCubic"})
+  { id: 'rotateOut', group: 'animation', args: [{ type: 'int', label: 'deg' }, { type: 'int', label: 'ms' }], cat: 'Rotate' }, //  {ease: "easeInCubic"})
+
+  { id: 'hide', group: 'animation', args: [{ type: 'bool', label: 'val' }], cat: 'Visibility' },
+  { id: 'show', group: 'animation', args: [{ type: 'bool', label: 'val' }], cat: 'Visibility' },
+
+  { id: 'teleportTo', group: 'animation', args: [{ type: 'position', label: 'pos' }, { type: 'bool', label: 'relativeToCenter', option: true }], cat: 'Move' },
+
+  //Sound
+  { id: 'file', group: 'sound', args: [{ type: 'sound_file', label: 'file' }], cat: "Required" },
+  { id: 'volume', group: 'sound', args: [{ type: 'int', label: 'min' }, { type: 'int', label: 'max' }], cat: "Generic" },
+
+  { id: 'repeats', group: 'sound', args: [{ type: 'int', label: 'count' }, { type: 'int', label: 'delay min' }, { type: 'int', label: 'delay max' }] },
+  { id: 'delay', group: 'sound', args: [{ type: 'int', label: 'ms' }], cat: 'Generic' },
+  { id: 'waitUntilFinished', group: 'sound', args: [{ type: 'int', label: 'ms' }], cat: 'Generic' },
+  { id: 'async', group: 'sound', args: [], cat: 'Generic' },
+  { id: 'duration', group: 'sound', args: [{ type: 'int', label: 'ms' }], cat: 'Generic' }, //1500, {ease: "easeOutCubic", delay: 500})
+
+  { id: 'fadeInAudio', group: 'sound', args: [{ type: 'int', label: 'ms' }], cat: 'Fade' }, //1500, {ease: "easeOutCubic", delay: 500})
+  { id: 'fadeOutAudio', group: 'sound', args: [{ type: 'int', label: 'ms' }], cat: 'Fade' },
 ];
 
 export const argSpecs = [
@@ -107,6 +158,7 @@ export const argSpecs = [
     ]
   },
   { id: "effect_file" },
+  { id: "sound_file" },
   { id: "int" },
   { id: "float" },
   { id: "macro" },

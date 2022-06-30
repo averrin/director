@@ -47,6 +47,21 @@
         padding: 0.5rem;
         border-radius: none;
     }
+
+    .ui-toggle {
+        flex-shrink: 0 !important;
+        flex-basis: auto !important;
+        width: 3rem !important;
+        height: 1.5rem !important;
+    }
+
+    .ui-input-group span:first-child {
+      min-width: 4rem !important;
+    }
+
+    .ui-btn.ui-loading:before {
+      border-style: solid
+    }
 }
 
 :root {

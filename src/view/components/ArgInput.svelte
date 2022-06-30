@@ -127,15 +127,64 @@
                >
             </button>
          </label>
+      {:else if type == "sound_file"}
+         <label class="ui-input-group">
+            <input
+               on:pointerdown|stopPropagation={() => null}
+               type="text"
+               bind:value
+               placeholder="0"
+               class="ui-input ui-input-lg ui-text-base"
+            />
+            <button class="ui-btn ui-btn-square" on:click={selectFile}>
+               <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="ui-h-6 ui-w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  ><path
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     stroke-width="2"
+                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  /></svg
+               >
+            </button>
+         </label>
       {:else if type == "position" || type == "token"}
          <Select
-            items={argSpecs.find((s) => s.id == "position").options}
+            items={argSpecs.find((s) => s.id == type).options}
             {value}
             on:select={(e) => (value = e.detail.value)}
             on:clear={(_) => (value = "")}
             isCreatable={true}
             listAutoWidth={false}
             isClearable={false}
+         />
+      {:else if type == "bool"}
+         <div class="ui-flex ui-flex-row ui-items-center">
+            <input
+               type="checkbox"
+               class="ui-toggle ui-toggle-accent ui-toggle-lg"
+               bind:checked={value}
+               style="border: 1px solid #ccc; border-radius: 1rem; height: 2rem !important; width: 4rem !important; --handleoffset: 2rem !important; margin-left: 1rem;"
+            />
+         </div>
+      {:else if type == "macro"}
+         <Select
+            items={globalThis.game.macros.map((m) => {
+               //m.data.ref = m;
+               return m.data;
+            })}
+            optionIdentifier="name"
+            labelIdentifier="name"
+            {value}
+            on:select={(e) => {
+               value = e.detail.name;
+            }}
+            on:clear={(_) => (value = "")}
+            listAutoWidth={false}
          />
       {:else}
          <input
