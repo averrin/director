@@ -1,7 +1,8 @@
 import { moduleId, SETTINGS } from "../../constants.js";
-import { logger } from "../../modules/helpers.js";
+import { logger, setting } from "../../modules/helpers.js";
 import { v4 as uuidv4 } from 'uuid';
 import { stepSpecs, modifierSpecs, argSpecs } from "../../constants.js";
+// import ScopedEval from "scoped-eval";
 
 import { classToPlain, plainToClass, serialize, deserialize, Type } from 'class-transformer';
 
@@ -32,6 +33,7 @@ export class DSequence {
     overrides = overrides || {};
     const sequence = await this.prepare(overrides);
     if (sequence) {
+      logger.info("\t.play()");
       const p = sequence.play();
       this.reset();
       return p;
@@ -76,13 +78,13 @@ export class DSequence {
       if ((typeof a === 'string' || a instanceof String) && a.startsWith('@')) {
         const v = this.variables.find(vr => vr.name === a.slice(1));
         if (v) {
-          val = await v.getValue();
+          val = await v.getValue(this);
         }
       }
-      if (val === undefined) {
-        val = await Variable.calculateValue(a);
-      }
       const spec = obj.spec.args[n];
+      if (val === undefined) {
+        val = await Variable.calculateValue(a, spec.type, this);
+      }
       if (spec.option) {
         options[spec.label] = val;
       } else {
@@ -98,6 +100,7 @@ export class DSequence {
 
   async constructSeq(seq) {
     const s = new globalThis.Sequence(moduleId);
+    logger.info(`new Sequence(${moduleId})`);
     try {
       let i = 0;
       for (const step of seq) {
@@ -105,21 +108,31 @@ export class DSequence {
         const args = await this.makeArgs(step);
         let currentStep = s[step.type](...args);
         if (step.type == "effect") {
+          logger.info(`\t.${step.type}()`);
           currentStep = currentStep.origin(this.id);
-          currentStep = currentStep.name(args[0] || `${this.title}-${this.steps.length}`);
+          logger.info(`\t\t.origin("${this.id}")`);
+          const name = args[0] || `${this.title}-${i}`;
+          currentStep = currentStep.name(name);
+          logger.info(`\t\t.name("${name}")`);
+        } else {
+          logger.info(`\t.${step.type}(${args.join(", ")})`);
         }
         let currentModifier;
         for (const m of step.modifiers) {
           const args = await this.makeArgs(m);
           let argsString = args.map(a => {
+            if (a == undefined || a == null) return a;
             if (Object.getPrototypeOf(a) == null || Object.getPrototypeOf(a) === Object.getPrototypeOf({})) {
-              return JSON.stringify(a).substring(0, 25);
+              return JSON.stringify(a).substring(0, 50);
             } else {
+              if (typeof a === 'string' || a instanceof String) {
+                return JSON.stringify(a);
+              }
               return a;
             }
           });
           argsString = argsString.join(', ');
-          logger.info(`.${m.type}(${argsString})`);
+          logger.info(`\t\t.${m.type}(${argsString})`);
           if (currentModifier) {
             currentModifier = currentModifier[m.type](...args);
           } else {
@@ -182,33 +195,60 @@ export class Variable {
     return s;
   }
 
-  static async calculateValue(val) {
+  static async calculateValue(val, type, seq) {
     if (typeof val === 'string' || val instanceof String) {
       if (val === "#manual") {
         const controlled = globalThis.canvas.tokens.controlled;
-        const t = await globalThis.warpgate.crosshairs.show({ drawIcon: true, label: 'Choose position' });
-        controlled.forEach(t => t.control());
+        let t = await globalThis.warpgate.crosshairs.show({
+          drawIcon: true,
+          icon: "modules/director/assets/crosshair.png",
+          label: `@${this.name}: position`,
+          interval: setting(SETTINGS.MANUAL_MODE)
+        });
+        t = { x: t.x, y: t.y };
+        controlled.forEach(c => c.control());
         return t;
       } else if (val.startsWith("#controlled")) {
+        const ret = globalThis.canvas.tokens.controlled;
         if (val.endsWith(".first")) {
-          return globalThis.canvas.tokens.controlled[0];
+          return ret[0];
+        } else if (val.endsWith(".last")) {
+          return ret[ret.length - 1];
         } else {
-          return globalThis.canvas.tokens.controlled[globalThis.canvas.tokens.controlled.length - 1];
+          return ret;
         }
       } else if (val.startsWith("#target")) {
+        const ret = Array.from(globalThis.game.user.targets);
         if (val.endsWith(".first")) {
-          return Array.from(globalThis.game.user.targets)[0];
+          return ret[0];
+        } else if (val.endsWith(".last")) {
+          return ret[ret.length - 1];
         } else {
-          return Array.from(globalThis.game.user.targets)[globalThis.game.user.targets.size - 1];
+          return ret;
         }
+      } else if (type == "expression") {
+        const vars = {};
+        seq.variables.forEach(v => vars[v.name] = v.calcValue);
+        let code = `'use strict'; try {return ${val}} catch(e) {return false}`;
+        const f = new Function(...Object.keys(vars), code)
+        return f(...Object.values(vars));
+      } else if (type == "code") {
+        const vars = {};
+        seq.variables.forEach(v => vars[v.name] = v.calcValue);
+        let code = `'use strict'; try {${val}} catch(e) {}`;
+        const f = new Function(...Object.keys(vars), code)
+        return () => f(...Object.values(vars));
       }
+    } else if (Array.isArray(val)) {
+      val = globalThis.Tagger.getByTag(val);
+      if (val.length > 0) val = val[0];
     }
     return val;
   }
 
-  async getValue() {
+  async getValue(seq) {
     if (!this.calcValue) {
-      this.calcValue = await Variable.calculateValue(this.value);
+      this.calcValue = await Variable.calculateValue.bind(this)(this.value, this.type, seq);
     }
     return this.calcValue;
   }
@@ -232,6 +272,7 @@ export class Step {
   static fromPlain(plain) {
     const s = plainToClass(Step, plain);
     s.modifiers = s.modifiers?.map(m => Modifier.fromPlain(m));
+    s.spec = stepSpecs.find(spec => spec.id == s.type);
     return s;
   }
 }
@@ -249,7 +290,7 @@ export class Modifier {
   }
 
   static fromPlain(plain) {
-    const s = plainToClass(Modifier, plain);
-    return s;
+    const m = plainToClass(Modifier, plain);
+    return m;
   }
 }

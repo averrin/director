@@ -76,4 +76,33 @@ export function initSettings(app) {
     type: Number,
     onChange: debouncedReload
   });
+
+  game.settings.register(moduleId, SETTINGS.DEFAULT_TAB, {
+    name: "Default tab",
+    hint: "it will be selected on start",
+    scope: "client",
+    config: true,
+    choices: {
+      actions: 'Actions',
+      selection: 'Selection',
+      sequencer: 'Sequencer'
+    },
+    default: 'actions',
+    type: String,
+  });
+
+  game.settings.register(moduleId, SETTINGS.MANUAL_MODE, {
+    name: "Position picker snapping mode",
+    hint: "",
+    scope: "client",
+    config: true,
+    choices: {
+      '-1': "Grid centers",
+      '0': "No snapping",
+      '1': "Intersections",
+      '2': "Intersections and centers"
+    },
+    default: 2,
+    type: Number,
+  });
 }

@@ -11,9 +11,10 @@
     }
 
     .svelte-select {
-        min-width: 200px;
+        min-width: 150px;
+        width: fit-content;
         max-width: 600px;
-        border-radius: var(--rounded-btn, 0.5rem) !important;
+        border-radius: var(--rounded-btn, 0.5rem);
         background: #fff !important;
 
         input, .selection {
@@ -21,9 +22,24 @@
         }
     }
 
+    .ui-input-group .svelte-select:first-child,
+    .ui-input-group .svelte-tags-input-layout:first-child {
+        border-top-left-radius: var(--rounded-btn, 0.5rem);
+        border-top-right-radius: 0;
+        border-bottom-left-radius: var(--rounded-btn, 0.5rem);
+        border-bottom-right-radius: 0;
+    }
+
+    .ui-input-group .svelte-select:last-child,
+    .ui-input-group .svelte-tags-input-layout:last-child  {
+        border-top-left-radius: 0;
+        border-top-right-radius: var(--rounded-btn, 0.5rem);
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: var(--rounded-btn, 0.5rem);
+    }
     .ui-input-lg {
         border-color: #ddd !important;
-        height: 40px !important;
+        height: 42px !important;
     }
 
     .ui-text-base {
@@ -36,6 +52,7 @@
 
     .ui-input {
       padding-left: 1rem !important;
+      /* width: fit-content !important; */
     }
 
     .ui-drawer-side ul {

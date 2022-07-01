@@ -11,6 +11,7 @@
    import { XIcon } from "@rgossiaux/svelte-heroicons/solid";
    import VariableComponent from "./Variable.svelte";
    import ArgInput from "./ArgInput.svelte";
+
    import FaArrowsAlt from "svelte-icons/fa/FaArrowsAlt.svelte";
    import FaPlay from "svelte-icons/fa/FaPlay.svelte";
    import FaExpandArrowsAlt from "svelte-icons/fa/FaExpandArrowsAlt.svelte";
@@ -46,17 +47,9 @@
       objDiv.scrollTop = objDiv.scrollHeight;
    }
 
-   function addVariable() {
-      const e = new Variable(uuidv4(), `var${seq.variables.length}`, "position");
-      seq.variables.push(e);
-      updateSequences();
-   }
-
-   function timeout(ms) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
-   }
    async function updateSequences() {
       sequences.update((seqs) => {
+         seq = DSequence.fromPlain(seq);
          const i = seqs.indexOf(seqs.find((s) => s.id == seq.id));
          if (i >= 0) {
             seqs[i] = seq;
@@ -103,9 +96,12 @@
 
    function setModArg(e, step, mod, i) {
       const m = seq.steps.find((s) => s.id == step.id).modifiers.find((m) => m.id == mod.id);
-      if (e.detail != undefined && e.detail != null && typeof e.detail === "object") {
+      const spec = m.spec.args[i];
+      if (e.detail != undefined && e.detail != null && typeof e.detail === "object" && !Array.isArray(e.detail)) {
+         if (m.args[i] == e.detail.value) return;
          m.args[i] = e.detail.value;
       } else {
+         if (m.args[i] == e.detail) return;
          m.args[i] = e.detail;
       }
       if (m.args[i] != null && e.detail != undefined) {
@@ -139,9 +135,7 @@
    {#each seq.variables as variable (variable.id)}
       <VariableComponent {variable} on:remove={deleteVariable} on:change={updateVariable} />
    {/each}
-   <div>
-      <button class="ui-my-2 ui-btn ui-btn-outline ui-btn-primary" on:click={(e) => addVariable()}>Add variable</button>
-   </div>
+   <div />
 
    <div class="ui-overflow-auto ui-max-h-[600px]" id="sequencer-content">
       <Sortable items={seq.steps} let:item let:index on:change={sortSteps} options={{ handle: ".handle" }}>
@@ -204,22 +198,26 @@
             </div>
 
             {#if !item.collapsed}
+               {#if item.modifiers.length > 0}
+                  <div class="ui-divider">Modifiers</div>
+               {/if}
                {#each item.modifiers as mod (mod.id)}
                   <div
                      class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-py-2 ui-px-4 ui-gap-2 ui-my-1"
                   >
                      <Select
                         items={modifierSpecs.filter((m) => item.type == m.group)}
-                        {groupByCat}
+                        groupBy={groupByCat}
                         optionIdentifier="id"
                         labelIdentifier="id"
                         on:select={(e) => setModType(e, item, mod)}
                         value={mod.type}
+                        listAutoWidth={false}
                      />
                      {#if mod.spec?.args}
                         {#each mod.spec.args as arg, i}
                            <ArgInput
-                              vars={seq.variables}
+                              vars={seq.variables.filter((v) => v.type == arg.type)}
                               label={arg.label}
                               variables={true}
                               type={arg.type}

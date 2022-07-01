@@ -6,7 +6,7 @@
    import { v4 as uuidv4 } from "uuid";
 
    import { setting } from "../modules/helpers.js";
-   import { moduleId, SETTINGS } from "../constants.js";
+   import { moduleId, SETTINGS, tabs } from "../constants.js";
    import { ApplicationShell } from "@typhonjs-fvtt/runtime/svelte/component/core";
    import ActionsTab from "./components/ActionsTab.svelte";
    import TagsBar from "./components/TagsBar.svelte";
@@ -58,19 +58,7 @@
       }
    }
 
-   let tabs = [
-      { mode: "actions", title: "Actions" },
-      { mode: "selection", title: "Selection" },
-   ];
-   if (setting(SETTINGS.SHOW_SEQUENCER)) {
-      tabs.push({
-         mode: "sequencer",
-         title: "Sequencer",
-         default: true,
-         badge: "<span class='ui-badge ui-mx-1' style='background-color: indianred'>beta</span>",
-      });
-   }
-   let mode = tabs.find((t) => t.default).mode;
+   let mode = setting(SETTINGS.DEFAULT_TAB);
 
    let startColor = editTag && editTag in tagColors ? tagColors[editTag] : "#232323";
 </script>

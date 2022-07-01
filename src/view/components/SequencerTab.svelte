@@ -3,8 +3,10 @@
    import { sequences } from "../../modules/stores";
    import { onDestroy } from "svelte";
    import Select from "svelte-select";
-   import { DSequence } from "./SequencerTab.js";
+   import { DSequence, Variable } from "./SequencerTab.js";
    import { v4 as uuidv4 } from "uuid";
+   import CopyToClipboard from "svelte-copy-to-clipboard";
+   import FaRegCopy from "svelte-icons/fa/FaRegCopy.svelte";
 
    let seq;
    const unsubscribe = sequences.subscribe((seqs) => {
@@ -40,8 +42,15 @@
       });
    }
 
+   function addVariable() {
+      const e = new Variable(uuidv4(), `var${seq.variables.length}`, "position");
+      seq.variables.push(e);
+      updateSequences();
+   }
+
    function updateSequences() {
       sequences.update((seqs) => {
+         seq = DSequence.fromPlain(seq);
          const i = seqs.indexOf(seqs.find((s) => s.id == seq.id));
          if (i >= 0) {
             seqs[i] = seq;
@@ -77,12 +86,33 @@
 </div>
 
 <div class="ui-p-2">
-   <div class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-space-x-4 ui-my-1 ui-items-center">
-      <Select items={$sequences} optionIdentifier="id" labelIdentifier="title" isClearable={false} bind:value={seq} />
-      <label for="seq-modal" class="ui-btn ui-modal-button">Edit</label>
-      <button class="ui-m-2 ui-btn ui-btn-outline ui-btn-primary ui-w-36" on:click={(_) => addSeq()}
-         >Add Sequence</button
-      >
+   <div class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-my-1 ui-items-center ui-gap-1">
+      <label class="ui-input-group ui-flex-1" for="">
+         <Select
+            items={$sequences}
+            optionIdentifier="id"
+            labelIdentifier="title"
+            isClearable={false}
+            bind:value={seq}
+         />
+         <CopyToClipboard
+            text={`await Director.playSequence("${seq.title}")`}
+            on:copy={(_) => globalThis.ui.notifications.info("Macro call copied!")}
+            let:copy
+         >
+            <button class="ui-btn ui-btn-outline ui-btn-square ui-p-2" on:click={copy}>
+               <FaRegCopy />
+            </button>
+         </CopyToClipboard>
+         <label for="seq-modal" class="ui-btn ui-modal-button">Edit</label>
+      </label>
+
+      <div class="ui-btn-group ui-flex-none">
+         <button class="ui-btn ui-btn-outline ui-w-32 ui-btn-accent" on:click={(e) => addVariable()}
+            >Add variable</button
+         >
+         <button class="ui-btn ui-btn-outline ui-btn-primary ui-w-36" on:click={(_) => addSeq()}> Add Sequence </button>
+      </div>
    </div>
 
    <SequenceEditor {seq} />

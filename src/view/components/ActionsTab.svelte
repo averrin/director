@@ -4,6 +4,7 @@
    import { currentScene, globalTags, tagColors } from "../../modules/stores.js";
    import { onDestroy } from "svelte";
    import { v4 as uuidv4 } from "uuid";
+   import { Variable } from "./SequencerTab";
 
    export let onTagClick;
    export let onSelect;
@@ -51,9 +52,17 @@
       selectByTags(action.tags);
    }
 
-   function execAction(event, id) {
+   async function execAction(event, id) {
       const action = actions.find((a) => a.id === id);
-      const objects = Tagger.getByTag(action.tags);
+      let objects;
+      if (Array.isArray(action.tags)) {
+         if (action.tags.length == 0) return;
+         objects = globalThis.Tagger.getByTag(action.tags);
+      } else {
+         objects = await Variable.calculateValue(action.tags);
+         if (!Array.isArray(objects)) objects = [objects];
+         objects = objects.map((o) => o.document);
+      }
       switch (action.type) {
          case "toggle":
             objects.forEach((o) => o.update({ hidden: !o.data.hidden }));
@@ -86,25 +95,30 @@
                }
             });
             break;
+         default:
+            const overrides = {};
+            overrides[action.value.name] = objects[0];
+            globalThis.Director.playSequence(action.type.id, overrides);
       }
    }
    async function actionTags(event, id) {
-      const tags = event.detail.tags.filter((t) => t.trim() != "");
-      const action = actions.find((a) => a.id === id);
-      action.tags = tags;
+      if (event.detail.tags) {
+         const tags = event.detail.tags.filter((t) => t.trim() != "");
+         const action = actions.find((a) => a.id === id);
+         action.tags = tags;
+      } else if (event.detail.value) {
+         const action = actions.find((a) => a.id === id);
+         action.tags = event.detail.value;
+      }
       await canvas.scene.update({ "flags.director-actions": actions });
    }
 
-   function handleSelect(event, id) {
-      const type = event.detail.value;
-      const action = actions.find((a) => a.id === id);
-      action.type = type;
+   function onChange(event) {
+      const i = actions.findIndex((a) => a.id === event.detail.id);
+      // if (JSON.stringify(actions[i]) != JSON.stringify(event.detail)) {
+      actions[i] = event.detail;
       canvas.scene.update({ "flags.director-actions": actions });
-   }
-   function handleClear(event, id) {
-      const action = actions.find((a) => a.id === id);
-      action.type = "";
-      canvas.scene.update({ "flags.director-actions": actions });
+      // }
    }
 </script>
 
@@ -117,14 +131,12 @@
          <ActionItem
             {item}
             {selectAction}
-            {handleSelect}
-            {handleClear}
             {deleteAction}
             {execAction}
             {onTagClick}
             {actionTags}
             {$tagColors}
-            autoComplete={$globalTags}
+            on:change={onChange}
          />
       </SortableList>
    </div>

@@ -67,6 +67,15 @@ export default class MainApplication extends SvelteApplication {
       }
     };
 
+    API.findSequence = (name) => {
+      let seq;
+      sequences.update(seqs => {
+        seq = seqs.find(s => s.title == name);
+        return seqs;
+      });
+      return seq;
+    }
+
     API.playSequence = (name, overrides) => {
       let seq;
       sequences.update(seqs => {

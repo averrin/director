@@ -2,12 +2,17 @@
    import Select from "svelte-select";
    import { argSpecs } from "../../constants.js";
    import { logger } from "../../modules/helpers.js";
+   import Tags from "./Tags.svelte";
+   import { tagColors, globalTags } from "../../modules/stores.js";
+   import { XIcon } from "@rgossiaux/svelte-heroicons/solid";
 
    export let value;
    export let type;
    export let variables = false;
    export let label = "";
    export let vars = [];
+   export let selectFull = false;
+   export let onTagClick;
 
    function selectFile() {
       const fp = new FilePicker();
@@ -23,7 +28,11 @@
             files = globalThis.Sequencer.Database.getPathsUnder(value).map((o) => value + "." + o);
          } else {
             if (!value || (value && value.indexOf("/") == -1)) {
-               files = globalThis.Sequencer.Database.getPathsUnder("jb2a").map((o) => "jb2a." + o);
+               try {
+                  files = globalThis.Sequencer.Database.getPathsUnder("jb2a").map((o) => "jb2a." + o);
+               } catch (error) {
+                  files = [];
+               }
             }
          }
       } catch (e) {
@@ -64,24 +73,24 @@
       <span class="">{label}</span>
    {/if}
    {#if mode == "direct"}
-      {#if variables && vars.length > 0}
-         <button
-            class="ui-btn ui-btn-square ui-m-0"
-            style="background-color: darkcyan;"
-            on:click={(e) => setMode(e, "variable")}
+      <button
+         class="ui-btn ui-btn-square ui-m-0"
+         class:ui-btn-disabled={!(variables && vars.length > 0)}
+         style:background-color={variables && vars.length > 0 ? "#316060" : "#c7e1e1"}
+         style:color={variables && vars.length > 0 ? "white" : "#232323"}
+         on:click={(e) => setMode(e, "variable")}
+      >
+         <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="ui-h-6 ui-w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
          >
-            <svg
-               xmlns="http://www.w3.org/2000/svg"
-               class="ui-h-6 ui-w-6"
-               fill="none"
-               viewBox="0 0 24 24"
-               stroke="currentColor"
-               stroke-width="2"
-            >
-               <path stroke-linecap="round" stroke-linejoin="round" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-            </svg>
-         </button>
-      {/if}
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+         </svg>
+      </button>
 
       {#if type == "int"}
          <input
@@ -130,7 +139,8 @@
             <input
                on:pointerdown|stopPropagation={() => null}
                type="text"
-               bind:value
+               value={value && value.split("/")[value.split("/").length - 1]}
+               on:change={(e) => (value = e.detail)}
                class="ui-input ui-input-lg ui-text-base"
             />
             <button class="ui-btn ui-btn-square" on:click={selectFile}>
@@ -149,16 +159,40 @@
                >
             </button>
          </label>
-      {:else if type == "position" || type == "token"}
-         <Select
-            items={argSpecs.find((s) => s.id == type).options}
-            {value}
-            on:select={(e) => (value = e.detail.value)}
-            on:clear={(_) => (value = "")}
-            isCreatable={true}
-            listAutoWidth={false}
-            isClearable={false}
-         />
+      {:else if type == "position" || type == "token" || type == "ease" || type == "targets"}
+         {#if Array.isArray(value)}
+            <div class:ui-w-full={selectFull}>
+               <Tags
+                  allowPaste={true}
+                  allowDrop={true}
+                  onlyUnique={true}
+                  splitWith={","}
+                  placeholder="Tag"
+                  autoComplete={$globalTags}
+                  {onTagClick}
+                  minChars="1"
+                  colors={$tagColors}
+                  on:tags={(e) => (value = e.detail.tags)}
+                  tags={value}
+               />
+            </div>
+            <button
+               class="ui-btn ui-btn-square"
+               on:click={(e) => (value = argSpecs.find((s) => s.id == type).options[0])}
+            >
+               <XIcon class="ui-h-8 ui-w-8" />
+            </button>
+         {:else}
+            <Select
+               items={argSpecs.find((s) => s.id == type).options}
+               {value}
+               on:select={(e) => (value = e.detail.value)}
+               on:clear={(_) => (value = "")}
+               isCreatable={true}
+               listAutoWidth={false}
+               isClearable={false}
+            />
+         {/if}
       {:else if type == "bool"}
          <div class="ui-flex ui-flex-row ui-items-center">
             <input
@@ -182,6 +216,13 @@
             }}
             on:clear={(_) => (value = "")}
             listAutoWidth={false}
+         />
+      {:else if type == "code" || type == "expression"}
+         <input
+            on:pointerdown|stopPropagation={() => null}
+            type="text"
+            bind:value
+            class="ui-input ui-input-lg ui-text-base"
          />
       {:else}
          <input
