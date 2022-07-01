@@ -201,7 +201,7 @@ export class Variable {
         const controlled = globalThis.canvas.tokens.controlled;
         let t = await globalThis.warpgate.crosshairs.show({
           drawIcon: true,
-          icon: "modules/director/assets/crosshair.png",
+          icon: "modules/director/icons/crosshair.png",
           label: `@${this.name}: position`,
           interval: setting(SETTINGS.MANUAL_MODE)
         });
