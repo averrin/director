@@ -131,6 +131,11 @@
       item.collapsed = !item.collapsed;
       updateSequences();
    }
+
+   let specs = stepSpecs;
+   if (!globalThis.TokenMagic) {
+      specs = stepSpecs.filter((s) => s.require != "TokenMagic");
+   }
 </script>
 
 {#if seq}
@@ -151,11 +156,12 @@
                      <FaArrowsAlt />
                   </button>
                   <Select
-                     items={stepSpecs}
+                     items={specs}
                      {groupBy}
                      optionIdentifier="id"
                      on:select={(e) => setStepType(e, item)}
                      value={item.type}
+                     listAutoWidth={false}
                   />
                   {#if item.spec?.args}
                      {#each item.spec.args as arg, i}

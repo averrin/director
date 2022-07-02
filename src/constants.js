@@ -55,6 +55,9 @@ export const stepSpecs = [
   { id: 'wait', label: 'Wait', args: [{ type: 'int', label: 'ms' }] },
   { id: 'macro', label: 'Macro', args: [{ type: 'macro', label: 'name' }] },
   { id: 'thenDo', label: 'thenDo', args: [{ type: 'code', label: 'func' }] },
+
+  { id: 'tmAdd', label: 'Token Magic Add', require: "TokenMagic", args: [{ type: 'token', label: 'target' }, { type: 'token-magic', label: 'filter' }] },
+  { id: 'tmDel', label: 'Token Magic Remove', require: "TokenMagic", args: [{ type: 'token', label: 'target' }, { type: 'token-magic', label: 'filter' }] },
 ];
 
 export const modifierSpecs = [
@@ -191,6 +194,7 @@ export const argSpecs = [
   { id: "macro" },
   { id: "code" },
   { id: "expression" },
+  { id: "token-magic" },
   {
     id: "ease", options: [
       { value: "linear", label: "linear" },

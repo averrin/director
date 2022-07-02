@@ -193,6 +193,14 @@
                isClearable={false}
             />
          {/if}
+      {:else if type == "token-magic" && globalThis.TokenMagic}
+         <Select
+            items={globalThis.TokenMagic.getPresets().map((p) => p.name)}
+            {value}
+            on:select={(e) => (value = e.detail.value)}
+            on:clear={(_) => (value = "")}
+            listAutoWidth={false}
+         />
       {:else if type == "bool"}
          <div class="ui-flex ui-flex-row ui-items-center">
             <input

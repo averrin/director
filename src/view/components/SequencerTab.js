@@ -33,7 +33,6 @@ export class DSequence {
 
   async play(overrides) {
     overrides = overrides || {};
-    logger.info(`Starting sequence '${this.title}' with overriden ${Object.keys(overrides)}`);
     const sequence = await this.prepare(overrides);
     if (sequence) {
       logger.info("\t.play()");
@@ -108,17 +107,43 @@ export class DSequence {
       let i = 0;
       for (const step of seq) {
         if (this.onlySection != undefined && step.id != this.onlySection) continue;
-        const args = await this.makeArgs(step);
-        let currentStep = s[step.type](...args);
+        let args = await this.makeArgs(step);
+
+        let sectionName = step.type;
+        if (step.type.startsWith("tm")) {
+          sectionName = "thenDo";
+          let f;
+          let filter;
+          const AsyncFunction = Object.getPrototypeOf(async function() { }).constructor;
+          switch (step.type) {
+            case "tmAdd":
+              f = new AsyncFunction('target', 'filter', 'await TokenMagic.addUpdateFilters(target, filter);');
+              filter = TokenMagic.getPresets().find(p => p.name == args[1])?.params;
+              break;
+            case "tmDel":
+              f = new AsyncFunction('target', 'filter', 'await TokenMagic.deleteFilters(target, filter);');
+              filter = args[1];
+              if (filter == '') filter = null;
+              break;
+            default:
+              break;
+          }
+          console.log(f);
+          window.ff = f;
+          const target = args[0];
+          console.log(target, filter);
+          args = [async () => await f(target, filter)];
+        }
+        let currentStep = s[sectionName](...args);
         if (step.type == "effect") {
-          // logger.info(`\t.${step.type}()`);
-          // currentStep = currentStep.origin(this.id);
-          // logger.info(`\t\t.origin("${this.id}")`);
-          // const name = args[0] || `${this.title}-${i}`;
-          // currentStep = currentStep.name(name);
-          // logger.info(`\t\t.name("${name}")`);
+          logger.info(`\t.${step.type}()`);
+          currentStep = currentStep.origin(this.id);
+          logger.info(`\t\t.origin("${this.id}")`);
+          const name = args[0] || `${this.title}-${i}`;
+          currentStep = currentStep.name(name);
+          logger.info(`\t\t.name("${name}")`);
         } else {
-          logger.info(`\t.${step.type}(${args.join(", ")})`);
+          logger.info(`\t.${sectionName}(${args.join(", ")})`);
         }
         let currentModifier;
         for (const m of step.modifiers) {
@@ -135,11 +160,12 @@ export class DSequence {
             }
           });
           argsString = argsString.join(', ');
-          logger.info(`\t\t.${m.type}(${argsString})`);
+          let modName = m.type;
+          logger.info(`\t\t.${modName}(${argsString})`);
           if (currentModifier) {
-            currentModifier = currentModifier[m.type](...args);
+            currentModifier = currentModifier[modName](...args);
           } else {
-            currentModifier = currentStep[m.type](...args);
+            currentModifier = currentStep[modName](...args);
           }
         }
         i++;

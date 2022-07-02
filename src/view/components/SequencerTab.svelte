@@ -95,6 +95,7 @@
             labelIdentifier="title"
             isClearable={false}
             bind:value={seq}
+            listAutoWidth={false}
          />
          <CopyToClipboard
             text={`await Director.playSequence("${seq.title}")`}
