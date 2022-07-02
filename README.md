@@ -23,6 +23,7 @@ It's not going to be MATT's alternative, so actions are pretty basic
 * Tagger [required]
 * Monk's Active Tiles Triggers
 * Sequencer [BETA, required]
+* Token Magic FX [Virtual Sequencer's section]
 
 ## Plans
 - [ ] [Alpha HUD](https://github.com/averrin/alpha-hud) integrations. A scene widget with something like the hotbar.
