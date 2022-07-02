@@ -74,7 +74,7 @@
    <main class="director-ui">
       <TagsBar {onTagClick} />
       <div class="ui-tabs ui-tabs-boxed">
-         {#each tabs as t}
+         {#each tabs as t (t.title)}
             <a class="ui-tab ui-tab-lg" on:click={() => (mode = t.mode)} class:ui-tab-active={t.mode == mode}>
                {t.title}
                {#if t.badge}
@@ -91,7 +91,7 @@
          <ActionsTab {onTagClick} onSelect={() => (mode = "selection")} />
       {/if}
       {#if mode == "sequencer"}
-         <SequencerTab />
+         <SequencerTab {onTagClick} />
       {/if}
    </main>
 </ApplicationShell>

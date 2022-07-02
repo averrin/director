@@ -33,6 +33,17 @@
    export let labelShow;
    export let colors = {};
 
+   function contrastColor(color) {
+      if (!color || color == "") return "#eeeeeeff";
+      const pRed = 0.299;
+      const pGreen = 0.587;
+      const pBlue = 0.114;
+      const rgb = foundry.utils.hexToRGB(parseInt(color.slice(1).substring(0, 6), 16));
+
+      const contrast = Math.sqrt(pRed * rgb[0] ** 2 + pGreen * rgb[1] ** 2 + pBlue * rgb[2] ** 2);
+      return contrast > 0.5 ? "#232323ff" : "#eeeeeeff";
+   }
+
    let layoutElement;
 
    $: tags = tags || [];
@@ -368,7 +379,8 @@
             draggable={true}
             on:dragstart={onDragStart}
             on:pointerdown={(e) => onTagClickHandler(e, tag)}
-            style="background-color: {colors[tag]}"
+            style:background-color={colors[tag]}
+            style:color={contrastColor(colors[tag])}
          >
             {#if typeof tag === "string"}
                {tag}

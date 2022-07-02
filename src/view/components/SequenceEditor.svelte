@@ -17,6 +17,8 @@
    import FaExpandArrowsAlt from "svelte-icons/fa/FaExpandArrowsAlt.svelte";
    import FaCompressArrowsAlt from "svelte-icons/fa/FaCompressArrowsAlt.svelte";
 
+   export let onTagClick;
+
    const groupBy = (i) => i.group;
    const groupByCat = (i) => i.cat;
    async function stop() {
@@ -133,7 +135,7 @@
 
 {#if seq}
    {#each seq.variables as variable (variable.id)}
-      <VariableComponent {variable} on:remove={deleteVariable} on:change={updateVariable} />
+      <VariableComponent {variable} {onTagClick} on:remove={deleteVariable} on:change={updateVariable} />
    {/each}
    <div />
 
@@ -164,6 +166,7 @@
                            type={arg.type}
                            bind:value={seq.steps[index].args[i]}
                            on:change={(e) => setStepArg(e, item, i)}
+                           {onTagClick}
                         />
                      {/each}
                   {/if}
@@ -223,6 +226,7 @@
                               type={arg.type}
                               value={mod.args[i]}
                               on:change={(e) => setModArg(e, seq.steps[index], mod, i)}
+                              {onTagClick}
                            />
                         {/each}
                      {/if}

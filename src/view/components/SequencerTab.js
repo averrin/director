@@ -13,6 +13,7 @@ export class DSequence {
     this.steps = [];
     this.variables = [];
   }
+
   async prepare(overrides) {
     overrides = overrides || {};
     for (const v of this.variables) {
@@ -22,6 +23,7 @@ export class DSequence {
     }
     return await this.constructSeq(this.steps);
   }
+
   reset() {
     this.onlySection = undefined;
     for (const v of this.variables) {
@@ -31,6 +33,7 @@ export class DSequence {
 
   async play(overrides) {
     overrides = overrides || {};
+    logger.info(`Starting sequence '${this.title}' with overriden ${Object.keys(overrides)}`);
     const sequence = await this.prepare(overrides);
     if (sequence) {
       logger.info("\t.play()");
@@ -108,12 +111,12 @@ export class DSequence {
         const args = await this.makeArgs(step);
         let currentStep = s[step.type](...args);
         if (step.type == "effect") {
-          logger.info(`\t.${step.type}()`);
-          currentStep = currentStep.origin(this.id);
-          logger.info(`\t\t.origin("${this.id}")`);
-          const name = args[0] || `${this.title}-${i}`;
-          currentStep = currentStep.name(name);
-          logger.info(`\t\t.name("${name}")`);
+          // logger.info(`\t.${step.type}()`);
+          // currentStep = currentStep.origin(this.id);
+          // logger.info(`\t\t.origin("${this.id}")`);
+          // const name = args[0] || `${this.title}-${i}`;
+          // currentStep = currentStep.name(name);
+          // logger.info(`\t\t.name("${name}")`);
         } else {
           logger.info(`\t.${step.type}(${args.join(", ")})`);
         }
@@ -150,6 +153,7 @@ export class DSequence {
   }
 
   toJSON() {
+    this.reset();
     return serialize(this);
   }
   static fromPlain(plain) {
@@ -172,6 +176,7 @@ export class Variable {
   }
 
   override(val) {
+    this.value = val;
     this.calcValue = val;
   }
 

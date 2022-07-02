@@ -8,6 +8,7 @@
    const dispatch = createEventDispatcher();
 
    export let variable;
+   export let onTagClick;
    function remove() {
       dispatch("remove", variable);
    }
@@ -44,7 +45,7 @@
    </label>
 
    <Select items={argSpecs} optionIdentifier="id" labelIdentifier="id" value={variable.type} on:select={updateType} />
-   <ArgInput type={variable.type} bind:value={variable.value} on:change={emitChange} />
+   <ArgInput {onTagClick} type={variable.type} bind:value={variable.value} on:change={emitChange} />
    <button class="ui-btn ui-btn-outline ui-btn-error ui-btn-square ui-justify-self-end" on:click={remove}>
       <XIcon class="ui-h-8 ui-w-8" />
    </button>

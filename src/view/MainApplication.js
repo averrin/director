@@ -4,6 +4,7 @@ import { moduleId, SETTINGS } from "../constants.js";
 // import { logger } from "../modules/helpers.js";
 import { setting } from "../modules/settings.js";
 import { tilesStore, tokensStore, currentScene, initStores, sequences } from "../modules/stores.js";
+import { DSequence } from "./components/SequencerTab.js";
 
 import MainUI from "./MainUI.svelte";
 
@@ -52,7 +53,7 @@ export default class MainApplication extends SvelteApplication {
     initStores();
     window.Director = API;
 
-    API.getSequence = (name, overrides) => {
+    API.getSequence = async (name, overrides) => {
       let seq;
       sequences.update(seqs => {
         seq = seqs.find(s => s.title == name);
@@ -62,7 +63,8 @@ export default class MainApplication extends SvelteApplication {
         logger.error(`Sequence ${name} not found`);
         return null;
       } else {
-        const s_seq = seq.prepare(overrides);
+        const s_seq = await seq.prepare(overrides);
+        seq.reset();
         return s_seq;
       }
     };
@@ -85,6 +87,7 @@ export default class MainApplication extends SvelteApplication {
       if (!seq) {
         logger.error(`Sequence ${name} not found`);
       } else {
+        seq = DSequence.fromPlain(seq);
         return seq.play(overrides);
       }
     };

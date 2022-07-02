@@ -8,6 +8,7 @@
    import CopyToClipboard from "svelte-copy-to-clipboard";
    import FaRegCopy from "svelte-icons/fa/FaRegCopy.svelte";
 
+   export let onTagClick;
    let seq;
    const unsubscribe = sequences.subscribe((seqs) => {
       if (!seq) {
@@ -115,5 +116,5 @@
       </div>
    </div>
 
-   <SequenceEditor {seq} />
+   <SequenceEditor {seq} {onTagClick} />
 </div>

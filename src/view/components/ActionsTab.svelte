@@ -96,9 +96,11 @@
             });
             break;
          default:
-            const overrides = {};
-            overrides[action.value.name] = objects[0];
-            globalThis.Director.playSequence(action.type.id, overrides);
+            objects.map(async (o) => {
+               const overrides = {};
+               overrides[action.value.name] = o;
+               globalThis.Director.playSequence(action.type.id, overrides);
+            });
       }
    }
    async function actionTags(event, id) {
