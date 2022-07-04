@@ -115,9 +115,9 @@ It's not going to be MATT's alternative, so actions are pretty basic
 - [x] Fade In
 - [x] Fade Out
 - [x] Duration
-- [ ] Volume ???
-- [ ] Fade In Audio ???
-- [ ] Audio Out Audio ???
+- [x] Volume
+- [x] Fade In Audio
+- [x] Audio Out Audio
 ### Animation Methods
 - [x] On
 - [x] Move Towards
@@ -163,6 +163,8 @@ It's not going to be MATT's alternative, so actions are pretty basic
 </details>
 
 ## Plans
+- [ ] Better support of Sequencer's functions and types
+- [ ] Better support for Token Magic FX
 - [ ] [Alpha HUD](https://github.com/averrin/alpha-hud) integrations. A scene widget with something like the hotbar.
 
 ## Images
