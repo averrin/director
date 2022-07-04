@@ -146,6 +146,7 @@ export const modifierSpecs = [
   { id: 'fade', group: 'animation', args: [{ type: 'int', label: 'ms' }], cat: 'Fade' }, //1500, {ease: "easeOutCubic", delay: 500})
   { id: 'fadeIn', group: 'animation', args: [{ type: 'int', label: 'ms' }], cat: 'Fade' }, //1500, {ease: "easeOutCubic", delay: 500})
   { id: 'fadeOut', group: 'animation', args: [{ type: 'int', label: 'ms' }], cat: 'Fade' },
+  { id: 'opacity', group: 'animation', args: [{ type: 'float', label: 'val' }], cat: 'Fade' },
 
   { id: 'moveTowards', group: 'animation', args: [{ type: 'position', label: 'pos' }, { type: "ease", label: "ease", option: true }], cat: 'Move' },
   { id: 'moveSpeed', group: 'animation', args: [{ type: 'int', label: 'speed' }], cat: 'Move' },
@@ -157,6 +158,7 @@ export const modifierSpecs = [
   { id: 'rotateIn', group: 'animation', args: [{ type: 'int', label: 'deg' }, { type: 'int', label: 'ms' }, { type: "ease", label: "ease", option: true }], cat: 'Rotate' }, // {ease: "easeInOutCubic"})
   { id: 'rotateOut', group: 'animation', args: [{ type: 'int', label: 'deg' }, { type: 'int', label: 'ms' }, { type: "ease", label: "ease", option: true }], cat: 'Rotate' }, //  {ease: "easeInCubic"})
 
+  { id: 'tint', group: 'animation', args: [{ type: 'color', label: 'color' }], cat: 'Generic' },
   { id: 'hide', group: 'animation', args: [{ type: 'bool', label: 'val' }], cat: 'Visibility' },
   { id: 'show', group: 'animation', args: [{ type: 'bool', label: 'val' }], cat: 'Visibility' },
 
@@ -175,6 +177,12 @@ export const modifierSpecs = [
 
   { id: 'fadeInAudio', group: 'sound', args: [{ type: 'int', label: 'ms' }, { type: "ease", label: "ease", option: true }], cat: 'Fade' }, //1500, {ease: "easeOutCubic", delay: 500})
   { id: 'fadeOutAudio', group: 'sound', args: [{ type: 'int', label: 'ms' }, { type: "ease", label: "ease", option: true }], cat: 'Fade' },
+
+  { id: 'startTime', group: 'sound', args: [{ type: 'int', label: 'ms' }], cat: "Time" },
+  { id: 'startTimePerc', group: 'sound', args: [{ type: 'float', label: 'val' }], cat: "Time" },
+  { id: 'endTime', group: 'sound', args: [{ type: 'int', label: 'ms' }], cat: "Time" },
+  { id: 'endTimePerc', group: 'sound', args: [{ type: 'float', label: 'val' }], cat: "Time" },
+  { id: 'locally', group: 'sound', args: [], cat: "Generic" },
 ];
 
 export const argSpecs = [
