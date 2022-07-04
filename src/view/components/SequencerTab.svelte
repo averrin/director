@@ -18,6 +18,7 @@
       }
       fullCode = getCode();
    });
+   $: debounce(() => (fullCode = getCode()), 200);
    onDestroy(unsubscribe);
 
    function getCode() {

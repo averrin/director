@@ -153,7 +153,9 @@ controlled.forEach(c => c.control());`;
         for (const a of pre_args) {
           const spec = m.spec.args[n];
           if (spec.option) {
-            options[spec.label] = a.replaceAll('"', '');
+            if (typeof a === 'string' || a instanceof String) {
+              options[spec.label] = a.replaceAll('"', '');
+            }
           } else {
             args.push(a);
           }
