@@ -7,15 +7,23 @@
    import { v4 as uuidv4 } from "uuid";
    import CopyToClipboard from "svelte-copy-to-clipboard";
    import FaRegCopy from "svelte-icons/fa/FaRegCopy.svelte";
+   import FaCode from "svelte-icons/fa/FaCode.svelte";
 
    export let onTagClick;
    let seq;
+   let fullCode = "";
    const unsubscribe = sequences.subscribe((seqs) => {
       if (!seq) {
          seq = seqs[0] || new DSequence(uuidv4(), "New Sequence");
       }
+      fullCode = getCode();
    });
    onDestroy(unsubscribe);
+
+   function getCode() {
+      seq = DSequence.fromPlain(seq);
+      return seq.convertToCode();
+   }
 
    function addSeq() {
       sequences.update((seqs) => {
@@ -99,11 +107,20 @@
          />
          <CopyToClipboard
             text={`await Director.playSequence("${seq.title}")`}
-            on:copy={(_) => globalThis.ui.notifications.info("Macro call copied!")}
+            on:copy={(_) => globalThis.ui.notifications.info("Oneliner copied!")}
             let:copy
          >
-            <button class="ui-btn ui-btn-outline ui-btn-square ui-p-2" on:click={copy}>
+            <button class="ui-btn ui-btn-square ui-p-2 ui-btn-outline ui-m-0" on:click|preventDefault={copy}>
                <FaRegCopy />
+            </button>
+         </CopyToClipboard>
+         <CopyToClipboard
+            text={fullCode}
+            on:copy={(_) => globalThis.ui.notifications.info("Full code copied!")}
+            let:copy
+         >
+            <button class="ui-btn ui-btn-square ui-p-2 ui-btn-outline ui-m-0" on:click|preventDefault={copy}>
+               <FaCode />
             </button>
          </CopyToClipboard>
          <label for="seq-modal" class="ui-btn ui-modal-button">Edit</label>

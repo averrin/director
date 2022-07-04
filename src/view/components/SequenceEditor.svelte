@@ -166,7 +166,9 @@
                   {#if item.spec?.args}
                      {#each item.spec.args as arg, i}
                         <ArgInput
-                           vars={seq.variables.filter((v) => v.type == arg.type)}
+                           vars={seq.variables.filter((v) =>
+                              argSpecs.find((s) => s.id == arg.type).var_types.includes(v.type)
+                           )}
                            label={arg.label}
                            variables={true}
                            type={arg.type}
@@ -226,7 +228,9 @@
                      {#if mod.spec?.args}
                         {#each mod.spec.args as arg, i}
                            <ArgInput
-                              vars={seq.variables.filter((v) => v.type == arg.type)}
+                              vars={seq.variables.filter((v) =>
+                                 argSpecs.find((s) => s.id == arg.type).var_types.includes(v.type)
+                              )}
                               label={arg.label}
                               variables={true}
                               type={arg.type}
