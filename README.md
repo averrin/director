@@ -25,7 +25,7 @@ It's not going to be MATT's alternative, so actions are pretty basic
 * Sequencer [BETA, required]
 * Token Magic FX [Virtual Sequencer's section]
 
-## Sequencer progress
+## Sequencer support progress
 <details>
   <summary>Effects</summary>
 
@@ -100,6 +100,66 @@ It's not going to be MATT's alternative, so actions are pretty basic
 - [ ] Text
 - [ ] XRay
 - [ ] Mask
+</details>
+
+<details>
+  <summary>Animation</summary>
+
+### Generic Methods
+- [x] Wait Until Finished
+- [x] Async
+- [x] Repeats
+- [x] Play if
+- [x] Delay
+- [x] Opacity
+- [x] Fade In
+- [x] Fade Out
+- [x] Duration
+- [ ] Volume ???
+- [ ] Fade In Audio ???
+- [ ] Audio Out Audio ???
+### Animation Methods
+- [x] On
+- [x] Move Towards
+- [x] Move Speed
+- [x] Rotate Towards
+- [x] Teleport To
+- [ ] Offset
+- [x] Closest Square
+- [x] Snap to Grid
+- [x] Rotate
+- [x] Rotate In
+- [x] Rotate Out
+- [x] Tint
+- [x] Hide
+- [x] Show
+</details>
+
+<details>
+  <summary>Sound</summary>
+
+### Generic Methods
+- [x] Wait Until Finished
+- [x] Async
+- [x] Repeats
+- [x] Play if
+- [x] Delay
+- [x] Duration
+- [x] Volume
+- [x] Fade In Audio
+- [x] Audio Out Audio
+- [x] Start Time
+- [x] Start Time Percentage
+- [x] End Time
+- [x] End Time Percentage
+- [x] Time Range
+- [x] Locally
+- [ ] For Users
+### Sound methods
+- [ ] Base folder
+- [x] File
+- [ ] Add override
+- [ ] Set mustache
 </details>
 
 ## Plans
