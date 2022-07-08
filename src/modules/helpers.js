@@ -127,13 +127,14 @@ export function calculateValueSync(val, type, seq) {
 }
 
 export async function calculateValue(val, type, seq) {
+  const varName = this ? this.name : "inline";
   if (typeof val === 'string' || val instanceof String) {
     if (val === "#manual") {
       const controlled = [globalThis.canvas.background.controlled, ...globalThis.canvas.tokens.controlled].flat();
       let t = await globalThis.warpgate.crosshairs.show({
         drawIcon: true,
         icon: "modules/director/icons/crosshair.png",
-        label: `@${this.name}: position`,
+        label: `@${varName}: position`,
         interval: setting(SETTINGS.MANUAL_MODE)
       });
       t = { x: t.x, y: t.y };

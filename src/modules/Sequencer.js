@@ -98,6 +98,8 @@ controlled.forEach(c => c.control());`;
       }
     } else if (Array.isArray(val)) {
       val = `Tagger.getByTag(${JSON.stringify(val)})[0]`;
+    } else if (val != null && typeof val === "object" && "x" in val && "y" in val) {
+      val = JSON.stringify(val);
     } else {
       // val = JSON.stringify(val);
     }

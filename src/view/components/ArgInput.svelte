@@ -19,6 +19,10 @@
    export let hideSign = false;
    export let widthAuto = false;
    export let onTagClick;
+   let spec = argSpecs.find((s) => s.id == type);
+   if (value === undefined || value == null || (value == "" && spec.default && value != spec.default)) {
+      resetValue();
+   }
 
    function selectFile() {
       const fp = new FilePicker();
@@ -28,7 +32,6 @@
 
    function colorChange(e) {
       value = rgb2hex(e.detail).hex;
-      logger.info(value);
    }
 
    let effect_files;
@@ -57,6 +60,9 @@
    const dispatch = createEventDispatcher();
 
    $: {
+      if (value === undefined || value == null || (value == "" && spec.default && value != spec.default)) {
+         resetValue();
+      }
       debounce(dispatch("change", value), 200);
       effect_files = getEffectFiles();
    }
@@ -77,13 +83,24 @@
    function selectVar(e) {
       value = "@" + e.detail.name;
    }
+   // function changeFixed(e) {}
    function changeId(e) {
       value = "#id:" + e.target.value;
    }
    function resetValue() {
-      value = argSpecs.find((s) => s.id == type).options[0];
+      if (spec.options) {
+         value = spec.options[0];
+      } else if (spec.default) {
+         value = spec.default;
+      } else {
+         value = "";
+      }
    }
    const groupBy = (a) => a.group;
+
+   function convertFixed(e) {
+      value = { x: Number.parseFloat(value.x), y: Number.parseFloat(value.y) };
+   }
 </script>
 
 {#if type == "color"}
@@ -201,9 +218,25 @@
             <button class="ui-btn ui-btn-square" on:click={resetValue}>
                <XIcon class="ui-h-8 ui-w-8" />
             </button>
+         {:else if (typeof value === "object" && "x" in value && "y" in value) || type == "offset" || type == "size"}
+            <input
+               type="float"
+               bind:value={value.x}
+               on:change={convertFixed}
+               class="ui-input ui-input-lg ui-text-base"
+            />
+            <input
+               type="float"
+               bind:value={value.y}
+               on:change={convertFixed}
+               class="ui-input ui-input-lg ui-text-base"
+            />
+            <button class="ui-btn ui-btn-square" on:click={resetValue}>
+               <XIcon class="ui-h-8 ui-w-8" />
+            </button>
          {:else}
             <Select
-               items={[...argSpecs.find((s) => s.id == type).options, ...additionalItems]}
+               items={[...spec.options, ...additionalItems]}
                {value}
                {groupBy}
                on:select={(e) => (value = e.detail.value)}
@@ -213,6 +246,12 @@
                isClearable={false}
             />
          {/if}
+      {:else if type == "offset" || type == "size"}
+         <input type="float" bind:value={value.x} on:change={convertFixed} class="ui-input ui-input-lg ui-text-base" />
+         <input type="float" bind:value={value.y} on:change={convertFixed} class="ui-input ui-input-lg ui-text-base" />
+         <button class="ui-btn ui-btn-square" on:click={resetValue}>
+            <XIcon class="ui-h-8 ui-w-8" />
+         </button>
       {:else if type == "token-magic" && globalThis.TokenMagic}
          <Select
             items={globalThis.TokenMagic.getPresets().map((p) => p.name)}

@@ -61,8 +61,8 @@ It's not going to be MATT's alternative, so actions are pretty basic
 - [x] Move Towards
 - [x] Move Speed
 - [x] Snap to Grid
-- [ ] Offset
-- [ ] Sprite Offset
+- [x] Offset
+- [x] Sprite Offset
 - [x] Zero Sprite Rotation
 - [x] Persist
 - [x] No Loop
@@ -98,12 +98,12 @@ It's not going to be MATT's alternative, so actions are pretty basic
 - [x] Tint (without picker)
 - [x] Screen Space
 - [x] Screen Space Above UI
-- [ ] Screen Space Position
+- [x] Screen Space Position
 - [x] Screen Space Anchor
 - [ ] Screen Space Scale
-- [ ] Text
-- [ ] XRay
-- [ ] Mask
+- [x] Text (fill + fontSize)
+- [x] XRay
+- [x] Mask
 </details>
 
 <details>

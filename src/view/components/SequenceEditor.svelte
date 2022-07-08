@@ -100,10 +100,15 @@
       const m = seq.sections.find((s) => s.id == section.id).modifiers.find((m) => m.id == mod.id);
       const spec = m.spec.args[i];
       if (e.detail != undefined && e.detail != null && typeof e.detail === "object" && !Array.isArray(e.detail)) {
-         if (m.args[i] == e.detail.value) return;
-         m.args[i] = e.detail.value;
+         if (e.detail.value) {
+            if (m.args[i] == e.detail.value) return;
+            m.args[i] = e.detail.value;
+         } else {
+            if (JSON.stringify(m.args[i]) == JSON.stringify(e.detail)) return;
+            m.args[i] = e.detail;
+         }
       } else {
-         if (m.args[i] == e.detail) return;
+         if (JSON.stringify(m.args[i]) == JSON.stringify(e.detail)) return;
          m.args[i] = e.detail;
       }
       if (m.args[i] != null && e.detail != undefined) {

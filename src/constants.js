@@ -76,16 +76,18 @@ export const modifierSpecs = [
   { id: 'scale', group: 'effect', args: [{ type: 'float', label: 'scale' }], cat: "Scale" },
   { id: 'scaleIn', group: 'effect', args: [{ type: 'float', label: 'scale' }, { type: 'int', label: 'ms' }], cat: "Scale" }, // {ease: "easeInOutCubic"})
   { id: 'scaleOut', group: 'effect', args: [{ type: 'float', label: 'scale' }, { type: 'int', label: 'ms' }], cat: "Scale" }, // {ease: "easeInCubic"})
-  { id: 'size', group: 'effect', args: [{ type: 'int', label: 'size' }], cat: "Scale" },
+  { id: 'size', group: 'effect', args: [{ type: 'size', label: 'size' }], cat: "Scale" },
 
   { id: 'stretchTo', group: 'effect', args: [{ type: 'position', label: 'pos' }, { type: "bool", label: "attachTo", option: true }, { type: "bool", label: "cacheLocation", option: true }], cat: 'Move' },
   { id: 'attachTo', group: 'effect', args: [{ type: 'token', label: 'token' }], cat: 'Move' },
   { id: 'moveTowards', group: 'effect', args: [{ type: 'position', label: 'pos' }, { type: "ease", label: "ease", option: true }], cat: 'Move' },
   { id: 'moveSpeed', group: 'effect', args: [{ type: 'int', label: 'speed' }], cat: 'Move' },
   { id: 'snapToGrid', group: 'effect', args: [{ type: 'bool', label: 'val' }], cat: 'Move' },
-  { id: 'anchor', group: 'effect', args: [{ type: 'float', label: 'val' }], cat: 'Move' },
+  { id: 'anchor', group: 'effect', args: [{ type: 'size', label: 'val' }], cat: 'Move' },
   { id: 'spriteAnchor', group: 'effect', args: [{ type: 'float', label: 'val' }], cat: 'Move' },
   { id: 'center', group: 'effect', args: [], cat: 'Move' },
+  { id: 'offset', group: 'effect', args: [{ type: 'offset', label: 'offset' }, { type: 'bool', label: 'local', option: true }], cat: 'Move' },
+  { id: 'spriteOffset', group: 'effect', args: [{ type: 'offset', label: 'offset' }], cat: 'Move' },
 
   { id: 'from', group: 'effect', args: [{ type: 'placeable', label: 'placeable' }], cat: 'Generic' },
 
@@ -114,6 +116,7 @@ export const modifierSpecs = [
 
   { id: 'xray', group: 'effect', args: [{ type: 'bool', label: 'val' }], cat: 'Generic' },
   { id: 'mask', group: 'effect', args: [{ type: 'token', label: 'token' }], cat: 'Generic' },
+  { id: 'text', group: 'effect', args: [{ type: 'string', label: 'text' }, { type: "color", label: "fill", option: true }, { type: "int", label: "fontSize", option: true }], cat: 'Generic' },
 
   { id: 'mirrorY', group: 'effect', args: [{ type: 'bool', label: 'val' }], cat: "Mirror" },
   { id: 'mirrorX', group: 'effect', args: [{ type: 'bool', label: 'val' }], cat: "Mirror" },
@@ -122,7 +125,8 @@ export const modifierSpecs = [
 
   { id: 'screenSpace', group: 'effect', args: [{ type: 'bool', label: 'val' }], cat: "Screen space" },
   { id: 'screenSpaceAboveUI', group: 'effect', args: [{ type: 'bool', label: 'val' }], cat: "Screen space" },
-  { id: 'screenSpaceAnchor', group: 'effect', args: [{ type: 'float', label: 'val' }], cat: "Screen space" },
+  { id: 'screenSpaceAnchor', group: 'effect', args: [{ type: 'offset', label: 'val' }], cat: "Screen space" },
+  { id: 'screenSpacePosition', group: 'effect', args: [{ type: 'offset', label: 'val' }], cat: "Screen space" },
 
   { id: 'belowTokens', group: 'effect', args: [{ type: 'bool', label: 'val' }], cat: "Generic" },
   { id: 'belowTiles', group: 'effect', args: [{ type: 'bool', label: 'val' }], cat: "Generic" },
@@ -199,7 +203,7 @@ export const hookSpecs = [
   { id: "#onHit", parents: ["updateActor"], test: (actor, updates) => actor.data.data.attributes.hp.value < updates.prevHp },
   { id: "#onHeal", parents: ["updateActor"], test: (actor, updates) => actor.data.data.attributes.hp.value > updates.prevHp },
   { id: "#onDeath", parents: ["updateActor"], test: (actor, _) => actor.data.data.attributes.hp.value <= 0 },
-  { id: "#onMove", parents: ["updateToken"], test: (token, updates) => "x" in updates || "y" in updates || "elevation" in updates },
+  { id: "#onMove", parents: ["updateToken"], test: (token, updates, _) => "x" in updates || "y" in updates || "elevation" in updates },
 ];
 
 export const argSpecs = [
@@ -210,8 +214,15 @@ export const argSpecs = [
       { value: "#target.first", label: "First Target", group: "Targets" },
       { value: "#target.last", label: "Last Target", group: "Targets" },
       { value: "#manual", label: "Manual", group: "Other" },
+      { value: { x: 0, y: 0 }, label: "Fixed", group: "Other" },
       { value: [], label: "Tagger", group: "Other" },
-    ], var_types: ["position", "token", "tile", "expression"]
+    ], var_types: ["position", "token", "tile", "expression"], default: { x: 0, y: 0 }
+  },
+  {
+    id: "offset", var_types: ["offset", "size", "position", "expression"], default: { x: 0, y: 0 }
+  },
+  {
+    id: "size", var_types: ["offset", "size", "position", "expression"], default: { x: 0, y: 0 }
   },
   {
     id: "placeable", options: [
@@ -253,10 +264,7 @@ export const argSpecs = [
     ]
   },
   {
-    id: "bool", options: [
-      { value: true, label: "True" },
-      { value: false, label: "False" },
-    ], var_types: ["bool", "expression"]
+    id: "bool", var_types: ["bool", "expression"], default: false,
   },
   { id: "effect_file", var_types: ["effect_file", "expression"] },
   { id: "sound_file", var_types: ["sound_file", "expression"] },

@@ -8,7 +8,7 @@ class HookManager {
 
   constructor() {
     Hooks.on("preUpdateActor", (actor, updates) => { updates.prevHp = actor.data.data.attributes.hp.value });
-    Hooks.on("preUpdateToken", (token, updates) => {
+    Hooks.on("preUpdateToken", (token, _, updates) => {
       updates.prevPos = token.position;
       updates.prevX = token.data.x;
       updates.prevY = token.data.y;
@@ -16,8 +16,7 @@ class HookManager {
   }
 
   getHandler(parent) {
-    return (arg1, arg2) => {
-      // logger.info(`${parent}:`, arg1, arg2);
+    return (...args) => {
       logger.info(this.#hooks);
       for (const hook of this.#hooks) {
         if (!hook.enabled || !hook.event || !hook.target) continue;
@@ -26,17 +25,16 @@ class HookManager {
         if (!Array.isArray(targets)) targets = [targets];
         const spec = hookSpecs.find(s => s.id == hook.event);
         if (parent == "updateActor") {
-          const token = globalThis.canvas.scene.tokens.find(t => t.actor.id == arg1.id);
+          const token = globalThis.canvas.scene.tokens.find(t => t.actor.id == args[0].id);
           for (const target of targets) {
-            if ([arg1.id, token.id].includes(target.id) && spec.test(arg1, arg2)) {
-              hook.call(target, arg1, arg2);
+            if ([args[0].id, token.id].includes(target.id) && spec.test(...args)) {
+              hook.call(target, ...args);
             }
           }
         } else if (parent == "updateToken") {
           for (const target of targets) {
-            if ([arg1.id].includes(target.id) && spec.test(arg1.actor, arg2)) {
-              logger.info(arg2.prevPos);
-              hook.call(target, arg1, arg2);
+            if ([args[0].id].includes(target.id) && spec.test(...args)) {
+              hook.call(target, ...args);
             }
           }
         }
