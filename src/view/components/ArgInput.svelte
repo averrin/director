@@ -11,7 +11,10 @@
    export let variables = false;
    export let label = "";
    export let vars = [];
+   export let additionalItems = [];
    export let selectFull = false;
+   export let hideSign = false;
+   export let widthAuto = false;
    export let onTagClick;
 
    function selectFile() {
@@ -66,31 +69,40 @@
    function selectVar(e) {
       value = "@" + e.detail.name;
    }
+   function changeId(e) {
+      value = "#id:" + e.target.value;
+   }
+   function resetValue() {
+      value = argSpecs.find((s) => s.id == type).options[0];
+   }
+   const groupBy = (a) => a.group;
 </script>
 
-<label class="ui-input-group" for="">
+<label class="arg-input ui-input-group" for="" class:!ui-w-auto={widthAuto} class:ui-mr-3={widthAuto}>
    {#if label != ""}
       <span class="">{label}</span>
    {/if}
    {#if mode == "direct"}
-      <button
-         class="ui-btn ui-btn-square ui-m-0"
-         class:ui-btn-disabled={!(variables && vars.length > 0)}
-         style:background-color={variables && vars.length > 0 ? "#316060" : "#c7e1e1"}
-         style:color={variables && vars.length > 0 ? "white" : "#232323"}
-         on:click={(e) => setMode(e, "variable")}
-      >
-         <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="ui-h-6 ui-w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2"
+      {#if !hideSign}
+         <button
+            class="ui-btn ui-btn-square ui-m-0"
+            class:ui-btn-disabled={!(variables && vars.length > 0)}
+            style:background-color={variables && vars.length > 0 ? "#316060" : "#c7e1e1"}
+            style:color={variables && vars.length > 0 ? "white" : "#232323"}
+            on:click={(e) => setMode(e, "variable")}
          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-         </svg>
-      </button>
+            <svg
+               xmlns="http://www.w3.org/2000/svg"
+               class="ui-h-6 ui-w-6"
+               fill="none"
+               viewBox="0 0 24 24"
+               stroke="currentColor"
+               stroke-width="2"
+            >
+               <path stroke-linecap="round" stroke-linejoin="round" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+            </svg>
+         </button>
+      {/if}
 
       {#if type == "int"}
          <input
@@ -159,7 +171,7 @@
                >
             </button>
          </label>
-      {:else if type == "position" || type == "token" || type == "ease" || type == "targets"}
+      {:else if type == "position" || type == "token" || type == "ease" || type == "targets" || type == "hook"}
          {#if Array.isArray(value)}
             <div class:ui-w-full={selectFull}>
                <Tags
@@ -176,16 +188,25 @@
                   tags={value}
                />
             </div>
-            <button
-               class="ui-btn ui-btn-square"
-               on:click={(e) => (value = argSpecs.find((s) => s.id == type).options[0])}
-            >
+            <button class="ui-btn ui-btn-square" on:click={resetValue}>
+               <XIcon class="ui-h-8 ui-w-8" />
+            </button>
+         {:else if value && typeof value === "string" && value.startsWith("#id:")}
+            <input
+               on:pointerdown|stopPropagation={() => null}
+               type="text"
+               value={value.slice(4)}
+               on:change={changeId}
+               class="ui-input ui-input-lg ui-text-base"
+            />
+            <button class="ui-btn ui-btn-square" on:click={resetValue}>
                <XIcon class="ui-h-8 ui-w-8" />
             </button>
          {:else}
             <Select
-               items={argSpecs.find((s) => s.id == type).options}
+               items={[...argSpecs.find((s) => s.id == type).options, ...additionalItems]}
                {value}
+               {groupBy}
                on:select={(e) => (value = e.detail.value)}
                on:clear={(_) => (value = "")}
                isCreatable={true}
@@ -265,7 +286,7 @@
          optionIdentifier="name"
          labelIdentifier="name"
          items={vars}
-         value={value != "" ? value.slice(1) : vars[0]}
+         value={value && value != "" ? value.slice(1) : vars[0]}
          on:select={selectVar}
          listAutoWidth={false}
          isClearable={false}

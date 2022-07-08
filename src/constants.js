@@ -31,12 +31,17 @@ export const HOOKS = [
 
 export const tabs = [
   { mode: "actions", title: "Actions" },
+  {
+    mode: "hooks",
+    title: "Hooks",
+    badge: "<span class='ui-badge ui-mx-1' style='background-color: indianred'>𝛼</span>",
+  },
   { mode: "selection", title: "Selection" },
   {
     mode: "sequencer",
     title: "Sequencer",
-    badge: "<span class='ui-badge ui-mx-1' style='background-color: indianred'>beta</span>",
-  }
+    badge: "<span class='ui-badge ui-mx-1' style='background-color: darkorange'>𝛽</span>",
+  },
 ];
 
 export const actionTypes = [
@@ -46,9 +51,10 @@ export const actionTypes = [
   { id: 'show', label: 'Show', group: 'Common' },
   { id: 'kill', label: 'Kill', group: 'Tokens' },
   { id: 'revive', label: 'Revive', group: 'Tokens' },
+  { id: 'endEffect', label: 'End Effects', group: 'Sequences', valueType: 'effectSource' },
 ];
 
-export const stepSpecs = [
+export const sectionSpecs = [
   { id: 'effect', label: 'Effect', args: [{ type: 'string', label: 'name' }] },
   { id: 'animation', label: 'Animation' },
   { id: 'sound', label: 'Sound' },
@@ -72,7 +78,7 @@ export const modifierSpecs = [
   { id: 'scaleOut', group: 'effect', args: [{ type: 'float', label: 'scale' }, { type: 'int', label: 'ms' }], cat: "Scale" }, // {ease: "easeInCubic"})
   { id: 'size', group: 'effect', args: [{ type: 'int', label: 'size' }], cat: "Scale" },
 
-  { id: 'stretchTo', group: 'effect', args: [{ type: 'position', label: 'pos' }], cat: 'Move' },
+  { id: 'stretchTo', group: 'effect', args: [{ type: 'position', label: 'pos' }, { type: "bool", label: "attachTo", option: true }, { type: "bool", label: "cacheLocation", option: true }], cat: 'Move' },
   { id: 'attachTo', group: 'effect', args: [{ type: 'token', label: 'token' }], cat: 'Move' },
   { id: 'moveTowards', group: 'effect', args: [{ type: 'position', label: 'pos' }, { type: "ease", label: "ease", option: true }], cat: 'Move' },
   { id: 'moveSpeed', group: 'effect', args: [{ type: 'int', label: 'speed' }], cat: 'Move' },
@@ -81,7 +87,7 @@ export const modifierSpecs = [
   { id: 'spriteAnchor', group: 'effect', args: [{ type: 'float', label: 'val' }], cat: 'Move' },
   { id: 'center', group: 'effect', args: [], cat: 'Move' },
 
-  { id: 'from', group: 'effect', args: [{ type: 'token', label: 'token' }], cat: 'Generic' },
+  { id: 'from', group: 'effect', args: [{ type: 'placeable', label: 'placeable' }], cat: 'Generic' },
 
   { id: 'rotateTowards', group: 'effect', args: [{ type: 'position', label: 'pos' }, { type: 'int', label: 'duration', option: true }, { type: "ease", label: "ease", option: true }], cat: 'Rotate' },
   { id: 'rotate', group: 'effect', args: [{ type: 'int', label: 'deg' }, { type: 'int', label: 'ms' }, { type: "ease", label: "ease", option: true }], cat: 'Rotate' }, // {ease: "easeInOutCubic"})
@@ -134,7 +140,7 @@ export const modifierSpecs = [
   { id: 'timeRange', group: 'effect', args: [{ type: 'int', label: 'ms' }, { type: 'int', label: 'ms' }], cat: "Time" },
 
   //Animation
-  { id: 'on', group: 'animation', args: [{ type: 'token', label: 'token' }], cat: 'Required' },
+  { id: 'on', group: 'animation', args: [{ type: 'placeable', label: 'placeable' }], cat: 'Required' },
 
   { id: 'repeats', group: 'animation', args: [{ type: 'int', label: 'count' }, { type: 'int', label: 'delay min' }, { type: 'int', label: 'delay max' }], cat: "Generic" },
   { id: 'delay', group: 'animation', args: [{ type: 'int', label: 'ms' }], cat: 'Generic' },
@@ -189,16 +195,28 @@ export const modifierSpecs = [
   { id: 'locally', group: 'sound', args: [], cat: "Generic" },
 ];
 
+export const hookSpecs = [
+  { id: "#onHit", parents: ["updateActor"], test: (actor, updates) => actor.data.data.attributes.hp.value < updates.prevHp },
+  { id: "#onHeal", parents: ["updateActor"], test: (actor, updates) => actor.data.data.attributes.hp.value > updates.prevHp },
+  { id: "#onDeath", parents: ["updateActor"], test: (actor, _) => actor.data.data.attributes.hp.value <= 0 },
+  { id: "#onMove", parents: ["updateToken"], test: (token, updates) => "x" in updates || "y" in updates },
+];
+
 export const argSpecs = [
   {
     id: "position", options: [
-      { value: "#controlled.first", label: "First Controlled" },
-      { value: "#controlled.last", label: "Last Controlled" },
-      { value: "#target.first", label: "First Target" },
-      { value: "#target.last", label: "Last Target" },
-      { value: "#manual", label: "Manual" },
-      { value: [], label: "Tagger" },
-    ], var_types: ["position", "token", "expression"]
+      { value: "#controlled.first", label: "First Controlled", group: "Controlled" },
+      { value: "#controlled.last", label: "Last Controlled", group: "Controlled" },
+      { value: "#target.first", label: "First Target", group: "Targets" },
+      { value: "#target.last", label: "Last Target", group: "Targets" },
+      { value: "#manual", label: "Manual", group: "Other" },
+      { value: [], label: "Tagger", group: "Other" },
+    ], var_types: ["position", "token", "tile", "expression"]
+  },
+  {
+    id: "placeable", options: [
+      { value: "#id:", label: "Id or Name" },
+    ], var_types: ["placeable", "token", "tile", "expression"]
   },
   {
     id: "token", options: [
@@ -207,17 +225,31 @@ export const argSpecs = [
       { value: "#target.first", label: "First Target" },
       { value: "#target.last", label: "Last Target" },
       { value: [], label: "Tagger" },
+      { value: "#id:", label: "Id or Name" },
     ], var_types: ["token", "expression"]
   },
   {
-    id: "targets", options: [
-      { value: "#controlled.all", label: "All Controlled" },
+    id: "tile", options: [
       { value: "#controlled.first", label: "First Controlled" },
       { value: "#controlled.last", label: "Last Controlled" },
-      { value: "#target.all", label: "All Targets" },
-      { value: "#target.first", label: "First Target" },
-      { value: "#target.last", label: "Last Target" },
       { value: [], label: "Tagger" },
+      { value: "#id:", label: "Id or Name" },
+    ], var_types: ["tile", "expression"]
+  },
+  {
+    id: "targets", options: [
+      { value: "#controlled.all", label: "All Controlled", group: "Controlled" },
+      { value: "#controlled.random", label: "Random Controlled", group: "Controlled" },
+      { value: "#controlled.first", label: "First Controlled", group: "Controlled" },
+      { value: "#controlled.last", label: "Last Controlled", group: "Controlled" },
+      { value: "#target.all", label: "All Targets", group: "Targets" },
+      { value: "#target.random", label: "Random Target", group: "Targets" },
+      { value: "#target.first", label: "First Target", group: "Targets" },
+      { value: "#target.last", label: "Last Target", group: "Targets" },
+      { value: "#id:", label: "Id or Name", group: "Other" },
+      { value: "#tokens.all", label: "All Tokens", group: "Other" },
+      { value: "#tiles.all", label: "All Tiles", group: "Other" },
+      { value: [], label: "Tagger", group: "Other" },
     ]
   },
   {
@@ -236,6 +268,24 @@ export const argSpecs = [
   { id: "code", var_types: ["code", "string", "expression"] },
   { id: "expression", var_types: ["expression"] },
   { id: "token-magic", var_types: ["token-magic", "string", "expression"] },
+  {
+    id: "hook", var_types: ["hook"], options: [
+      { value: "#onHit", label: "On Hit" },
+      { value: "#onHeal", label: "On Heal" },
+      { value: "#onDeath", label: "On Death" },
+      { value: "#onMove", label: "On Move" },
+    ]
+  },
+  {
+    id: "effectSource", var_types: ["effect"], options: [
+      { value: "#sceneId", label: "All on the scene" },
+      { value: "#origin", label: "From sequence" },
+      { value: "#name", label: "By name" },
+      { value: "#object", label: "By object" },
+      { value: "#target", label: "By target" },
+      { value: "#source", label: "By source" },
+    ]
+  },
   {
     id: "ease", var_types: ["ease", "expression"], options: [
       { value: "linear", label: "linear" },

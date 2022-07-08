@@ -1,16 +1,15 @@
-import { moduleId, SETTINGS } from "../../constants.js";
-import { logger, setting } from "../../modules/helpers.js";
-import { v4 as uuidv4 } from 'uuid';
-import { stepSpecs, modifierSpecs, argSpecs } from "../../constants.js";
-// import ScopedEval from "scoped-eval";
+import { v4 as uuidv4 } from "uuid";
+import { logger, setting } from "./helpers.js";
+import { sectionSpecs, modifierSpecs, SETTINGS, moduleId } from "../constants.js";
+import { calculateValue } from "./helpers.js"
 
-import { classToPlain, plainToClass, serialize, deserialize, Type } from 'class-transformer';
+import { plainToClass, serialize, deserialize, classToPlain } from 'class-transformer';
 
 export class DSequence {
   constructor(id, title) {
     this.id = id;
     this.title = title;
-    this.steps = [];
+    this.sections = [];
     this.variables = [];
 
     this.export = {
@@ -21,12 +20,17 @@ export class DSequence {
 
   async prepare(overrides) {
     overrides = overrides || {};
-    for (const v of this.variables) {
-      if (v.name in overrides) {
-        v.override(overrides[v.name]);
+    for (const [name, value] of Object.entries(overrides)) {
+      const v = this.variables.find(v => v.name == name);
+      if (v) {
+        v.override(value)
+      } else {
+        const hd = new Variable(uuidv4(), name, "hookData");
+        hd.override(value);
+        this.variables.push(hd);
       }
     }
-    return await this.constructSeq(this.steps);
+    return await this.constructSeq(this.sections);
   }
 
   reset() {
@@ -44,8 +48,6 @@ export class DSequence {
     overrides = overrides || {};
     const sequence = await this.prepare(overrides);
     if (sequence) {
-      logger.info("\t.play()");
-      logger.info("\n" + this.export.vars.join("\n"));
       const p = sequence.play();
       this.reset();
       return p;
@@ -120,7 +122,7 @@ controlled.forEach(c => c.control());`;
     r += `\n//==== Sequence construction ====\n`;
     r += `const sequence = new Sequence("${moduleId}")\n`;
     let i = 0;
-    for (const section of this.steps) {
+    for (const section of this.sections) {
       const args = section.args.map((a, i) => this.getCodeForVal("", a, section.spec.args[i].type)[0]);
       let sectionName = section.type;
       if (section.type == "effect") {
@@ -162,7 +164,6 @@ controlled.forEach(c => c.control());`;
           n++;
         }
         if (Object.entries(options).length > 0) {
-          logger.info(options, JSON.stringify(options));
           args.push(JSON.stringify(options));
         }
         r += `\t\t.${m.type}(${args.join(", ")})\n`;
@@ -187,7 +188,7 @@ controlled.forEach(c => c.control());`;
   }
 
   async preload() {
-    let m_files = this.steps.map(s => s.modifiers.find(m => m.type == "file")).filter(m => m);
+    let m_files = this.sections.map(s => s.modifiers.find(m => m.type == "file")).filter(m => m);
     const files = [];
     for (const f of m_files) {
       files.push((await this.makeArgs(f))[0]);
@@ -214,7 +215,7 @@ controlled.forEach(c => c.control());`;
       }
       const spec = obj.spec.args[n];
       if (val === undefined) {
-        val = await Variable.calculateValue(a, spec.type, this);
+        val = await calculateValue(a, spec.type, this);
       }
       if (spec.option) {
         options[spec.label] = val;
@@ -231,22 +232,21 @@ controlled.forEach(c => c.control());`;
 
   async constructSeq(seq) {
     const s = new globalThis.Sequence(moduleId);
-    logger.info(`new Sequence(${moduleId})`);
     try {
       let i = 0;
-      for (const step of seq) {
-        if (this.onlySection != undefined && step.id != this.onlySection) continue;
-        if (step.args[1] == "") step.args[1] = null;
-        let args = await this.makeArgs(step);
+      for (const section of seq) {
+        if (this.onlySection != undefined && section.id != this.onlySection) continue;
+        if (section.args[1] == "") section.args[1] = null;
+        let args = await this.makeArgs(section);
 
-        let sectionName = step.type;
-        if (step.type.startsWith("tm")) {
+        let sectionName = section.type;
+        if (section.type.startsWith("tm")) {
           sectionName = "thenDo";
           let f;
           let filter;
           let code;
           const AsyncFunction = Object.getPrototypeOf(async function() { }).constructor;
-          switch (step.type) {
+          switch (section.type) {
             case "tmAdd":
               code = 'await TokenMagic.addUpdateFilters(target, filter);'
               filter = TokenMagic.getPresets().find(p => p.name == args[1])?.params;
@@ -258,26 +258,18 @@ controlled.forEach(c => c.control());`;
             default:
               break;
           }
-          logger.info(`.thenDo(async () => await ((target, filter) => ${code})(${step.args[0].slice(1)}, "${step.args[1]}"})`);
           const target = args[0];
           f = new AsyncFunction('target', 'filter', code);
           args = [async () => await f(target, filter)];
         }
-        let currentStep = s[sectionName](...args);
-        if (step.type == "effect") {
-          logger.info(`\t.${step.type}()`);
-          currentStep = currentStep.origin(this.id);
-          logger.info(`\t\t.origin("${this.id}")`);
+        let currentSection = s[sectionName](...args);
+        if (section.type == "effect") {
+          currentSection = currentSection.origin(this.id);
           const name = args[0] || `${this.title}-${i}`;
-          currentStep = currentStep.name(name);
-          logger.info(`\t\t.name("${name}")`);
-        } else {
-          if (!step.type.startsWith("tm")) {
-            logger.info(`\t.${sectionName}(${args.join(", ")})`);
-          }
+          currentSection = currentSection.name(name);
         }
         let currentModifier;
-        for (const m of step.modifiers) {
+        for (const m of section.modifiers) {
           const args = await this.makeArgs(m);
           let argsString = args.map(a => {
             if (a == undefined || a == null) return a;
@@ -292,11 +284,10 @@ controlled.forEach(c => c.control());`;
           });
           argsString = argsString.join(', ');
           let modName = m.type;
-          logger.info(`\t\t.${modName}(${argsString})`);
           if (currentModifier) {
             currentModifier = currentModifier[modName](...args);
           } else {
-            currentModifier = currentStep[modName](...args);
+            currentModifier = currentSection[modName](...args);
           }
         }
         i++;
@@ -311,14 +302,18 @@ controlled.forEach(c => c.control());`;
 
   toJSON() {
     this.reset();
-    return serialize(this);
+    return classToPlain(this);
   }
   static fromPlain(plain) {
     if (typeof plain === 'string' || plain instanceof String) {
       plain = JSON.parse(plain);
     }
     const s = plainToClass(DSequence, plain);
-    s.steps = s.steps?.map(step => Step.fromPlain(step));
+    if (s.steps && s.steps.length > 0) { //Migration
+      s.sections = s.steps;
+      s.steps = undefined;
+    }
+    s.sections = s.sections?.map(section => Section.fromPlain(section));
     s.variables = s.variables?.map(v => Variable.fromPlain(v));
     return s;
   }
@@ -357,73 +352,15 @@ export class Variable {
     return s;
   }
 
-  static async calculateValue(val, type, seq) {
-    let varName = this?.name || 'inline';
-    if (typeof val === 'string' || val instanceof String) {
-      if (val === "#manual") {
-        const controlled = globalThis.canvas.tokens.controlled;
-        let t = await globalThis.warpgate.crosshairs.show({
-          drawIcon: true,
-          icon: "modules/director/icons/crosshair.png",
-          label: `@${this.name}: position`,
-          interval: setting(SETTINGS.MANUAL_MODE)
-        });
-        t = { x: t.x, y: t.y };
-        controlled.forEach(c => c.control());
-        return t;
-      } else if (val.startsWith("#controlled")) {
-        const ret = globalThis.canvas.tokens.controlled;
-        if (val.endsWith(".first")) {
-          seq?.export.vars.push(`const ${varName} = canvas.tokens.controlled[0];`);
-          return ret[0];
-        } else if (val.endsWith(".last")) {
-          seq?.export.vars.push(`const ${varName} = canvas.tokens.controlled[canvas.tokens.controlled - 1];`);
-          return ret[ret.length - 1];
-        } else {
-          seq?.export.vars.push(`const ${varName} = canvas.tokens.controlled;`);
-          return ret;
-        }
-      } else if (val.startsWith("#target")) {
-        const ret = Array.from(globalThis.game.user.targets);
-        if (val.endsWith(".first")) {
-          seq?.export.vars.push(`const ${varName} = Array.from(game.user.targets)[0];`);
-          return ret[0];
-        } else if (val.endsWith(".last")) {
-          seq?.export.vars.push(`const ${varName} = Array.from(game.user.targets)[game.user.targets.size - 1];`);
-          return ret[ret.length - 1];
-        } else {
-          seq?.export.vars.push(`const ${varName} = Array.from(game.user.targets);`);
-          return ret;
-        }
-      } else if (type == "expression") {
-        const vars = {};
-        seq.variables.forEach(v => vars[v.name] = v.calcValue);
-        let code = `'use strict'; try {return ${val}} catch(e) {return false}`;
-        const f = new Function(...Object.keys(vars), code)
-        return f(...Object.values(vars));
-      } else if (type == "code") {
-        const vars = {};
-        seq.variables.forEach(v => vars[v.name] = v.calcValue);
-        let code = `'use strict'; try {${val}} catch(e) {}`;
-        const f = new Function(...Object.keys(vars), code)
-        return () => f(...Object.values(vars));
-      }
-    } else if (Array.isArray(val)) {
-      val = globalThis.Tagger.getByTag(val);
-      if (val.length > 0) val = val[0];
-    }
-    return val;
-  }
-
   async getValue(seq) {
     if (!this.calcValue) {
-      this.calcValue = await Variable.calculateValue.bind(this)(this.value, this.type, seq);
+      this.calcValue = await calculateValue.bind(this)(this.value, this.type, seq);
     }
     return this.calcValue;
   }
 }
 
-export class Step {
+export class Section {
   constructor(id, type, args) {
     this.id = id;
     this.modifiers = [];
@@ -434,14 +371,14 @@ export class Step {
 
   setType(type) {
     this.type = type;
-    this.spec = stepSpecs.find(s => s.id == this.type);
+    this.spec = sectionSpecs.find(s => s.id == this.type);
     this.args = [];
   }
 
   static fromPlain(plain) {
-    const s = plainToClass(Step, plain);
+    const s = plainToClass(Section, plain);
     s.modifiers = s.modifiers?.map(m => Modifier.fromPlain(m));
-    s.spec = stepSpecs.find(spec => spec.id == s.type);
+    s.spec = sectionSpecs.find(spec => spec.id == s.type);
     return s;
   }
 }
@@ -463,3 +400,4 @@ export class Modifier {
     return m;
   }
 }
+

@@ -84,8 +84,9 @@ export function initSettings(app) {
     config: true,
     choices: {
       actions: 'Actions',
+      hooks: 'Hooks',
       selection: 'Selection',
-      sequencer: 'Sequencer'
+      sequencer: 'Sequencer',
     },
     default: 'actions',
     type: String,

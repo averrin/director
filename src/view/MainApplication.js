@@ -4,7 +4,7 @@ import { moduleId, SETTINGS } from "../constants.js";
 // import { logger } from "../modules/helpers.js";
 import { setting } from "../modules/settings.js";
 import { tilesStore, tokensStore, currentScene, initStores, sequences } from "../modules/stores.js";
-import { DSequence } from "./components/SequencerTab.js";
+import { DSequence } from "../modules/Sequencer.js";
 
 import MainUI from "./MainUI.svelte";
 
@@ -91,6 +91,9 @@ export default class MainApplication extends SvelteApplication {
         return seq.play(overrides);
       }
     };
+    API.getControlled = () => [globalThis.canvas.background.controlled, ...globalThis.canvas.tokens.controlled].flat();
+    API.getPlaceables = () => [Array.from(globalThis.canvas.scene.tokens.values()), ...Array.from(globalThis.canvas.scene.tiles.values())].flat();
+
   }
 
   toggle() {

@@ -2,8 +2,8 @@
    export let seq;
 
    import { sequences } from "../../modules/stores";
-   import { stepSpecs, modifierSpecs, argSpecs } from "../../constants.js";
-   import { Step, Modifier, DSequence, Variable } from "./SequencerTab.js";
+   import { sectionSpecs, modifierSpecs, argSpecs } from "../../constants.js";
+   import { Section, Modifier, DSequence, Variable } from "../../modules/Sequencer.js";
    // import { logger } from "../../modules/helpers.js";
    import { v4 as uuidv4 } from "uuid";
    import Select from "svelte-select";
@@ -36,14 +36,14 @@
       seq.play();
    }
 
-   async function playSection(step) {
+   async function playSection(section) {
       updateSequences();
-      seq.playSection(step.id);
+      seq.playSection(section.id);
    }
 
-   async function addStep() {
-      const e = new Step(uuidv4(), "wait");
-      seq.steps.push(e);
+   async function addSection() {
+      const e = new Section(uuidv4(), "wait");
+      seq.sections.push(e);
       await updateSequences();
       var objDiv = document.getElementById("sequencer-content");
       objDiv.scrollTop = objDiv.scrollHeight;
@@ -63,26 +63,26 @@
       });
    }
 
-   function addModifier(step) {
+   function addModifier(section) {
       const e = new Modifier(uuidv4(), "");
-      e.setType(modifierSpecs.filter((m) => m.group == step.type)[0].id, step.type);
-      seq.steps.find((s) => s.id == step.id).modifiers.push(e);
+      e.setType(modifierSpecs.filter((m) => m.group == section.type)[0].id, section.type);
+      seq.sections.find((s) => s.id == section.id).modifiers.push(e);
       updateSequences();
    }
 
-   function sortSteps(ev) {
-      seq.steps = ev.detail;
+   function sortSections(ev) {
+      seq.sections = ev.detail;
       updateSequences();
       seq = seq;
    }
 
-   function deleteModifier(step, mod) {
-      step.modifiers = step.modifiers.filter((m) => m.id != mod.id);
+   function deleteModifier(section, mod) {
+      section.modifiers = section.modifiers.filter((m) => m.id != mod.id);
       updateSequences();
    }
 
-   function deleteStep(step) {
-      seq.steps = seq.steps.filter((s) => s.id != step.id);
+   function deleteSection(section) {
+      seq.sections = seq.sections.filter((s) => s.id != section.id);
       updateSequences();
    }
 
@@ -91,13 +91,13 @@
       updateSequences();
    }
 
-   function setStepArg(e, step, i) {
-      seq.steps.find((s) => s.id == step.id).args[i] = e.detail || "";
+   function setSectionArg(e, section, i) {
+      seq.sections.find((s) => s.id == section.id).args[i] = e.detail || "";
       updateSequences();
    }
 
-   function setModArg(e, step, mod, i) {
-      const m = seq.steps.find((s) => s.id == step.id).modifiers.find((m) => m.id == mod.id);
+   function setModArg(e, section, mod, i) {
+      const m = seq.sections.find((s) => s.id == section.id).modifiers.find((m) => m.id == mod.id);
       const spec = m.spec.args[i];
       if (e.detail != undefined && e.detail != null && typeof e.detail === "object" && !Array.isArray(e.detail)) {
          if (m.args[i] == e.detail.value) return;
@@ -111,15 +111,15 @@
       }
    }
 
-   function setModType(e, step, mod) {
-      seq.steps
-         .find((s) => s.id == step.id)
+   function setModType(e, section, mod) {
+      seq.sections
+         .find((s) => s.id == section.id)
          .modifiers.find((m) => m.id == mod.id)
-         .setType(e.detail.id, step.type);
+         .setType(e.detail.id, section.type);
       updateSequences();
    }
-   function setStepType(e, step) {
-      seq.steps.find((s) => s.id == step.id).setType(e.detail.id);
+   function setSectionType(e, section) {
+      seq.sections.find((s) => s.id == section.id).setType(e.detail.id);
       updateSequences();
    }
 
@@ -132,9 +132,9 @@
       updateSequences();
    }
 
-   let specs = stepSpecs;
+   let specs = sectionSpecs;
    if (!globalThis.TokenMagic) {
-      specs = stepSpecs.filter((s) => s.require != "TokenMagic");
+      specs = sectionSpecs.filter((s) => s.require != "TokenMagic");
    }
 </script>
 
@@ -145,7 +145,7 @@
    <div />
 
    <div class="ui-overflow-auto ui-max-h-[600px]" id="sequencer-content">
-      <Sortable items={seq.steps} let:item let:index on:change={sortSteps} options={{ handle: ".handle" }}>
+      <Sortable items={seq.sections} let:item let:index on:change={sortSections} options={{ handle: ".handle" }}>
          <div class="ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-space-x-4 ui-my-1">
             <div class="ui-flex ui-flex-row ui-justify-start ui-space-x-2">
                <div class="ui-flex-1 ui-flex ui-flex-row ui-justify-start ui-space-x-2">
@@ -159,7 +159,7 @@
                      items={specs}
                      {groupBy}
                      optionIdentifier="id"
-                     on:select={(e) => setStepType(e, item)}
+                     on:select={(e) => setSectionType(e, item)}
                      value={item.type}
                      listAutoWidth={false}
                   />
@@ -172,8 +172,8 @@
                            label={arg.label}
                            variables={true}
                            type={arg.type}
-                           bind:value={seq.steps[index].args[i]}
-                           on:change={(e) => setStepArg(e, item, i)}
+                           bind:value={seq.sections[index].args[i]}
+                           on:change={(e) => setSectionArg(e, item, i)}
                            {onTagClick}
                         />
                      {/each}
@@ -201,7 +201,7 @@
                   </button>
                   <button
                      class="ui-btn ui-btn-outline ui-btn-error ui-btn-square ui-justify-self-end"
-                     on:click={(e) => deleteStep(item)}
+                     on:click={(e) => deleteSection(item)}
                   >
                      <XIcon class="ui-h-8 ui-w-8" />
                   </button>
@@ -235,7 +235,7 @@
                               variables={true}
                               type={arg.type}
                               value={mod.args[i]}
-                              on:change={(e) => setModArg(e, seq.steps[index], mod, i)}
+                              on:change={(e) => setModArg(e, seq.sections[index], mod, i)}
                               {onTagClick}
                            />
                         {/each}
@@ -262,7 +262,7 @@
    </div>
 
    <div>
-      <button class="ui-my-2 ui-btn ui-btn-outline ui-btn-primary ui-w-full" on:click={(e) => addStep()}
+      <button class="ui-my-2 ui-btn ui-btn-outline ui-btn-primary ui-w-full" on:click={(e) => addSection()}
          >Add section</button
       >
    </div>

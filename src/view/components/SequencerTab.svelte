@@ -3,7 +3,7 @@
    import { sequences } from "../../modules/stores";
    import { onDestroy } from "svelte";
    import Select from "svelte-select";
-   import { DSequence, Variable } from "./SequencerTab.js";
+   import { DSequence, Variable } from "../../modules/Sequencer.js";
    import { v4 as uuidv4 } from "uuid";
    import CopyToClipboard from "svelte-copy-to-clipboard";
    import FaRegCopy from "svelte-icons/fa/FaRegCopy.svelte";
@@ -43,7 +43,7 @@
 
    function duplicateSeq() {
       // seq = new DSequence(uuidv4(), `New Sequence ${seqs.length}`);
-      const copy = DSequence.fromPlain(seq.toJSON());
+      const copy = DSequence.fromPlain(seq);
       copy.id = uuidv4();
       copy.title = seq.title + " (Copy)";
       seq = copy;

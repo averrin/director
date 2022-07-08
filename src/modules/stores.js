@@ -1,6 +1,10 @@
 import { moduleId, SETTINGS } from '../constants.js';
 import { writable } from 'svelte/store';
-import { DSequence } from '../view/components/SequencerTab.js';
+import { DSequence } from "./Sequencer.js";
+import Action from "./Actions.js";
+import Hook from "./Hooks.js";
+import HookManager from './HookManager.js';
+import { classToPlain } from 'class-transformer';
 
 export const tokensStore = writable([]);
 export const tilesStore = writable([]);
@@ -24,14 +28,71 @@ export function initTagColors() {
 
 export const sequences = writable([]);
 export function initSequences() {
-  sequences.set(JSON.parse(game.settings.get(moduleId, SETTINGS.SEQUENCES)).filter(s => s).map(s => DSequence.fromPlain(s)));
+  sequences.set(
+    game.settings.get(moduleId, SETTINGS.SEQUENCES)
+      .filter(s => s).map(s => DSequence.fromPlain(s)));
   sequences.subscribe(async (seqs) => {
-    game.settings.set(moduleId, SETTINGS.SEQUENCES, JSON.stringify(seqs));
+    game.settings.set(moduleId, SETTINGS.SEQUENCES, seqs);
+  });
+}
+
+export const actions = writable([]);
+export const hooks = writable([]);
+let _scene;
+export function initCurrentScene() {
+  currentScene.subscribe(async (result) => {
+    const scene = await result;
+    if (!scene || scene == null || _scene == scene) return;
+    _scene = scene;
+
+    hooks.set("director-hooks" in scene.data.flags
+      ? scene.data.flags["director-hooks"].filter((a) => a).map(a => Hook.fromPlain(a))
+      : []);
+    actions.set("director-actions" in scene.data.flags
+      ? scene.data.flags["director-actions"].filter((a) => a).map(a => Action.fromPlain(a))
+      : []);
+
+    await HookManager.onSceneChange(scene);
+  });
+}
+
+export function initActions() {
+  actions.subscribe(async (result) => {
+    const actions = await result;
+    if (!actions) return;
+    currentScene.update(async (result) => {
+      const scene = await result;
+      if (!scene || scene == null) return scene;
+      if (scene.data.flags["director-actions"]?.filter((a) => a) != actions) {
+        scene.update({ "flags.director-actions": actions.map(classToPlain) });
+        await HookManager.onActionsChange(actions);
+      }
+      return scene;
+    });
+  });
+}
+
+export function initHooks() {
+  hooks.subscribe(async (result) => {
+    const hooks = await result;
+    if (!hooks) return;
+    currentScene.update(async (result) => {
+      const scene = await result;
+      if (!scene || scene == null) return scene;
+      if (scene.data.flags["director-hooks"]?.filter((a) => a) != hooks) {
+        scene.update({ "flags.director-hooks": hooks });
+        await HookManager.onHooksChange(hooks);
+      }
+      return scene;
+    });
   });
 }
 
 export function initStores() {
+  initCurrentScene();
+  initActions();
   initGlobalTags();
   initTagColors();
   initSequences();
+  initHooks();
 }

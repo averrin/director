@@ -22,21 +22,26 @@
         }
     }
 
-    .ui-input-group .svelte-select:first-child,
-    .ui-input-group .svelte-tags-input-layout:first-child {
+    .ui-input-group .svelte-select:first-child:not(:last-child),
+    .ui-input-group .svelte-tags-input-layout:first-child:not(:last-child) {
         border-top-left-radius: var(--rounded-btn, 0.5rem);
         border-top-right-radius: 0;
         border-bottom-left-radius: var(--rounded-btn, 0.5rem);
         border-bottom-right-radius: 0;
     }
 
-    .ui-input-group .svelte-select:last-child,
-    .ui-input-group .svelte-tags-input-layout:last-child  {
+    .ui-input-group .svelte-select:last-child:not(:first-child),
+    .ui-input-group .svelte-tags-input-layout:last-child:not(:first-child)  {
         border-top-left-radius: 0;
         border-top-right-radius: var(--rounded-btn, 0.5rem);
         border-bottom-left-radius: 0;
         border-bottom-right-radius: var(--rounded-btn, 0.5rem);
     }
+
+    .ui-input-group > .svelte-select:not(:last-child):not(:first-child) {
+        border-radius: 0px;
+    }
+
     .ui-input-lg {
         border-color: #ddd !important;
         height: 42px !important;
@@ -125,9 +130,6 @@
 
 .director-icon::before {
     content: "🎬";
-}
-.isPopup {
-    // right: 2px;
 }
 
 .list-container {

@@ -1,4 +1,7 @@
 # Director
+
+Module in active development, even minor versions can (and most likely will) break your saved data (actions / hooks / sequences). Please consider it before updating. If feature marked as `alpha` it means patch versions are dangerous too. Sorry for that, but it's the only way to deliver these features for you.
+
 Are you annoyed with assigning a single tag for a huge bunch of tiles? Or with managing all your MATT-powered switches on a scene? This module is a solution!
 Just select all your tiles (or tokens) and drag&drop the tag to assign it. Choose a color for it (useless but fancy) and create an action: toggle your tiles' visibility or fire the Active Tiles' trigger. 
 Your actions are stored in the scene's data so that you can have many of them. The global tags are global; let's be consistent across the scenes!
@@ -18,6 +21,7 @@ It's not going to be MATT's alternative, so actions are pretty basic
 - Kill [only for tokens]
 - Revive [only for tokens]
 - Play a sequence
+- Stop Sequencer's effects
 
 ## Integrations
 * Tagger [required]

@@ -12,6 +12,7 @@
    import TagsBar from "./components/TagsBar.svelte";
    import SelectionTab from "./components/SelectionTab.svelte";
    import SequencerTab from "./components/SequencerTab.svelte";
+   import HooksTab from "./components/HooksTab.svelte";
 
    import { HsvPicker } from "svelte-color-picker";
 
@@ -92,6 +93,9 @@
       {/if}
       {#if mode == "sequencer"}
          <SequencerTab {onTagClick} />
+      {/if}
+      {#if mode == "hooks"}
+         <HooksTab {onTagClick} />
       {/if}
    </main>
 </ApplicationShell>
