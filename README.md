@@ -128,7 +128,7 @@ It's not going to be MATT's alternative, so actions are pretty basic
 - [x] Move Speed
 - [x] Rotate Towards
 - [x] Teleport To
-- [ ] Offset
+- [x] Offset
 - [x] Closest Square
 - [x] Snap to Grid
 - [x] Rotate
