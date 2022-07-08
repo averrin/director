@@ -56,6 +56,13 @@ export function findItems(token, itemsToFind) {
   return items;
 }
 
+export function rgb2hex({ r, g, b, a = 1 }) {
+  return {
+    hex:
+      "#" + [r, g, b, Math.round(a * 255) | 0].reduce((acc, v) => `${acc}${v.toString(16).padStart(2, "0")}`, ""),
+  };
+}
+
 export function calculateValueSync(val, type, seq) {
   let varName = this?.name || 'inline';
   if (typeof val === 'string' || val instanceof String) {

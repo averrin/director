@@ -28,6 +28,10 @@ export function initTagColors() {
 
 export const sequences = writable([]);
 export function initSequences() {
+  const ss = game.settings.get(moduleId, SETTINGS.SEQUENCES);
+  if (typeof ss === 'string' || ss instanceof String) {
+    game.settings.set(moduleId, SETTINGS.SEQUENCES, JSON.parse(ss)); //Migration
+  }
   sequences.set(
     game.settings.get(moduleId, SETTINGS.SEQUENCES)
       .filter(s => s).map(s => DSequence.fromPlain(s)));

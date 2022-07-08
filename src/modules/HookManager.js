@@ -68,6 +68,7 @@ class HookManager {
     for (const a of this.#actions) {
       if (!a.value || Array.isArray(a.value) || a.value.startsWith("#")) continue;
       const h = this.#hooks.find(h => a.value == h.id);
+      if (!h) continue;
       const hName = h.getHookName();
       if (hName in this.#handlers) continue;
       this.#handlers[hName] = globalThis.Hooks.on(hName, this.getActionHandler(h));

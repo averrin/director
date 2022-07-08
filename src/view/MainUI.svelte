@@ -5,7 +5,7 @@
    import "../styles/main.scss";
    import { v4 as uuidv4 } from "uuid";
 
-   import { setting } from "../modules/helpers.js";
+   import { setting, rgb2hex } from "../modules/helpers.js";
    import { moduleId, SETTINGS, tabs } from "../constants.js";
    import { ApplicationShell } from "@typhonjs-fvtt/runtime/svelte/component/core";
    import ActionsTab from "./components/ActionsTab.svelte";
@@ -43,12 +43,6 @@
       mode = "actions";
    }
 
-   function rgb2hex({ r, g, b, a = 1 }) {
-      return {
-         hex:
-            "#" + [r, g, b, Math.round(a * 255) | 0].reduce((acc, v) => `${acc}${v.toString(16).padStart(2, "0")}`, ""),
-      };
-   }
    function changeColor(e) {
       if (editTag) {
          const c = e.detail;
@@ -67,7 +61,9 @@
 <input type="checkbox" id="color-modal" class="ui-modal-toggle" bind:checked={pickerOpen} />
 <label for="color-modal" class="ui-modal ui-cursor-pointer">
    <label class="ui-modal-box ui-relative ui-w-fit" for="">
-      <HsvPicker on:colorChange={changeColor} {startColor} />
+      {#if pickerOpen}
+         <HsvPicker on:colorChange={changeColor} {startColor} />
+      {/if}
    </label>
 </label>
 

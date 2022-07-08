@@ -199,7 +199,7 @@ export const hookSpecs = [
   { id: "#onHit", parents: ["updateActor"], test: (actor, updates) => actor.data.data.attributes.hp.value < updates.prevHp },
   { id: "#onHeal", parents: ["updateActor"], test: (actor, updates) => actor.data.data.attributes.hp.value > updates.prevHp },
   { id: "#onDeath", parents: ["updateActor"], test: (actor, _) => actor.data.data.attributes.hp.value <= 0 },
-  { id: "#onMove", parents: ["updateToken"], test: (token, updates) => "x" in updates || "y" in updates },
+  { id: "#onMove", parents: ["updateToken"], test: (token, updates) => "x" in updates || "y" in updates || "elevation" in updates },
 ];
 
 export const argSpecs = [

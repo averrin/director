@@ -1,11 +1,14 @@
 <script>
    import Select from "svelte-select";
    import { argSpecs } from "../../constants.js";
-   import { logger } from "../../modules/helpers.js";
+   import { logger, rgb2hex } from "../../modules/helpers.js";
    import Tags from "./Tags.svelte";
    import { tagColors, globalTags } from "../../modules/stores.js";
    import { XIcon } from "@rgossiaux/svelte-heroicons/solid";
+   import { HsvPicker } from "svelte-color-picker";
+   import { v4 as uuidv4 } from "uuid";
 
+   export let id = uuidv4();
    export let value;
    export let type;
    export let variables = false;
@@ -21,6 +24,11 @@
       const fp = new FilePicker();
       fp.callback = (path) => (value = path);
       fp.browse(value);
+   }
+
+   function colorChange(e) {
+      value = rgb2hex(e.detail).hex;
+      logger.info(value);
    }
 
    let effect_files;
@@ -78,6 +86,15 @@
    const groupBy = (a) => a.group;
 </script>
 
+{#if type == "color"}
+   <input type="checkbox" id="color-modal-{id}" class="ui-modal-toggle" />
+   <label for="color-modal-{id}" class="ui-modal ui-cursor-pointer">
+      <label class="ui-modal-box ui-relative ui-w-fit" for="">
+         <HsvPicker on:colorChange={colorChange} startColor={value} />
+      </label>
+   </label>
+{/if}
+
 <label class="arg-input ui-input-group" for="" class:!ui-w-auto={widthAuto} class:ui-mr-3={widthAuto}>
    {#if label != ""}
       <span class="">{label}</span>
@@ -105,20 +122,9 @@
       {/if}
 
       {#if type == "int"}
-         <input
-            on:pointerdown|stopPropagation={() => null}
-            type="number"
-            bind:value
-            class="ui-input ui-input-lg ui-text-base"
-         />
+         <input type="number" bind:value class="ui-input ui-input-lg ui-text-base" />
       {:else if type == "float"}
-         <input
-            on:pointerdown|stopPropagation={() => null}
-            type="number"
-            bind:value
-            step="0.01"
-            class="ui-input ui-input-lg ui-text-base"
-         />
+         <input type="number" bind:value step="0.01" class="ui-input ui-input-lg ui-text-base" />
       {:else if type == "effect_file"}
          <label class="ui-input-group">
             <Select
@@ -149,7 +155,6 @@
       {:else if type == "sound_file"}
          <label class="ui-input-group">
             <input
-               on:pointerdown|stopPropagation={() => null}
                type="text"
                value={value && value.split("/")[value.split("/").length - 1]}
                on:change={(e) => (value = e.detail)}
@@ -192,13 +197,7 @@
                <XIcon class="ui-h-8 ui-w-8" />
             </button>
          {:else if value && typeof value === "string" && value.startsWith("#id:")}
-            <input
-               on:pointerdown|stopPropagation={() => null}
-               type="text"
-               value={value.slice(4)}
-               on:change={changeId}
-               class="ui-input ui-input-lg ui-text-base"
-            />
+            <input type="text" value={value.slice(4)} on:change={changeId} class="ui-input ui-input-lg ui-text-base" />
             <button class="ui-btn ui-btn-square" on:click={resetValue}>
                <XIcon class="ui-h-8 ui-w-8" />
             </button>
@@ -247,19 +246,12 @@
             listAutoWidth={false}
          />
       {:else if type == "code" || type == "expression"}
-         <input
-            on:pointerdown|stopPropagation={() => null}
-            type="text"
-            bind:value
-            class="ui-input ui-input-lg ui-text-base"
-         />
+         <input type="text" bind:value class="ui-input ui-input-lg ui-text-base" />
+      {:else if type == "color"}
+         <label for="color-modal-{id}" class="ui-btn ui-btn-square" style:background-color={value} />
+         <input type="text" bind:value class="ui-input ui-input-lg ui-text-base" />
       {:else}
-         <input
-            on:pointerdown|stopPropagation={() => null}
-            type="text"
-            bind:value
-            class="ui-input ui-input-lg ui-text-base"
-         />
+         <input type="text" bind:value class="ui-input ui-input-lg ui-text-base" />
       {/if}
    {:else}
       <button
