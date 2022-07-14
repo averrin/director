@@ -48,7 +48,7 @@
       <button class="ui-my-2 ui-btn ui-btn-outline ui-btn-primary ui-flex-1" on:click={(e) => addHook()}
          >Add Hook</button
       >
-      <button class="ui-btn ui-btn-square !ui-p-2 ui-flex-none ui-btn-outline" on:click={exportHooks}>
+      <button class="ui-btn ui-btn-square !ui-p-2 ui-flex-none ui-btn-outline" title="Export" on:click={exportHooks}>
          <FaFileExport />
       </button>
    </div>

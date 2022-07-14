@@ -92,7 +92,7 @@
       <button class="ui-btn ui-btn-outline ui-btn-primary ui-my-2 ui-flex-1" on:click={(e) => addAction()}
          >Add action</button
       >
-      <button class="ui-btn ui-btn-square !ui-p-2 ui-flex-none ui-btn-outline" on:click={exportActions}>
+      <button class="ui-btn ui-btn-square !ui-p-2 ui-flex-none ui-btn-outline" title="Export" on:click={exportActions}>
          <FaFileExport />
       </button>
    </div>

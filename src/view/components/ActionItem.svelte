@@ -34,6 +34,7 @@
             seqItems.push({ id: seq.id, label: seq.title, group: "Sequence" });
          }
          vars[seq.title] = seq.variables.filter((v) => v.type == "position" || v.type == "token");
+         vars[seq.title] = [{ name: "none" }, ...vars[seq.title]];
       }
    });
    unsubscribe();
@@ -48,6 +49,9 @@
    function setEffectSourceArg(e) {
       if (e.detail) {
          item.args[1] = e.detail;
+         if (item.args[0]?.value == "#origin") {
+            item.args[1] = e.detail.id;
+         }
          item.valueType = "effectSource";
       }
       dispatch("change", item);
@@ -86,7 +90,7 @@
       <button class="ui-btn ui-btn-outline ui-btn-error ui-btn-square" on:click={(e) => deleteAction(e, item.id)}>
          <XIcon class="ui-h-8 ui-w-8" />
       </button>
-      <div class="ui-min-w-[300px] ui-w-full ui-flex-row ui-flex">
+      <div class="ui-min-w-fit ui-w-full ui-flex-row ui-flex">
          <ArgInput
             hideSign={true}
             type="targets"
@@ -104,7 +108,7 @@
             </div>
          {/if}
       </div>
-      <div class:ui-input-group={item.type?.id in vars || item.type?.id == "endEffect"}>
+      <div class:ui-input-group={item.type?.id in vars || item.type?.id == "endEffect"} class="ui-justify-end">
          <Select
             items={types}
             optionIdentifier="id"
@@ -151,9 +155,9 @@
             {#if item.args[0]?.value == "#origin"}
                <Select
                   optionIdentifier="id"
-                  labelIdentifier="label"
+                  labelIdentifier="title"
                   on:select={setEffectSourceArg}
-                  items={seqItems}
+                  items={$sequences}
                   value={item.args[1]}
                   listAutoWidth={false}
                   isClearable={false}
