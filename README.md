@@ -167,8 +167,14 @@ It's not going to be MATT's alternative, so actions are pretty basic
 </details>
 
 ## Plans
-- [ ] Better support of Sequencer's functions and types
+- [ ] Documentation
+- [ ] v10 support
+- [ ] Beginner / Expert UI mode
+- [ ] Better import / export
+- [X] Better support of Sequencer's functions and types
 - [ ] Better support for Token Magic FX
+- [ ] Support for Dynamic Active Effects
+- [ ] Hooks for ending effects of a sequence. E.g. to destroy DAE's effects.
 - [ ] [Alpha HUD](https://github.com/averrin/alpha-hud) integrations. A scene widget with something like the hotbar.
 
 ## Images
