@@ -25,11 +25,16 @@
    position.scale = game.settings.get(moduleId, SETTINGS.UI_SCALE);
 
    let pickerOpen = false;
+   let startColor;
 
    let editTag;
    function onTagClick(e, tag) {
       editTag = tag;
-      pickerOpen = !pickerOpen;
+      tagColors.update((tagColors) => {
+         startColor = editTag && editTag in tagColors ? tagColors[editTag].slice(0, 7) : "#232323";
+         pickerOpen = !pickerOpen;
+         return tagColors;
+      });
    }
 
    function createAction(_, tags) {
@@ -59,8 +64,6 @@
       mode = t.mode;
       globalThis.game.settings.set(moduleId, SETTINGS.SELECTED_TAB, mode);
    }
-
-   let startColor = editTag && editTag in tagColors ? tagColors[editTag] : "#232323";
 </script>
 
 <input type="checkbox" id="color-modal" class="ui-modal-toggle" bind:checked={pickerOpen} />
