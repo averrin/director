@@ -8,17 +8,27 @@
    import CopyToClipboard from "svelte-copy-to-clipboard";
    import FaRegCopy from "svelte-icons/fa/FaRegCopy.svelte";
    import FaCode from "svelte-icons/fa/FaCode.svelte";
+   import ArgInput from "./ArgInput.svelte";
+   import exportFromJSON from "export-from-json";
+   import { setting } from "../../modules/helpers.js";
+   import { moduleId, SETTINGS } from "../../constants.js";
 
    export let onTagClick;
    let seq;
    let fullCode = "";
    const unsubscribe = sequences.subscribe((seqs) => {
       if (!seq) {
-         seq = seqs[0] || new DSequence(uuidv4(), "New Sequence");
+         seq =
+            seqs.find((s) => s.id == setting(SETTINGS.SELECTED_SEQ)) ||
+            seqs[0] ||
+            new DSequence(uuidv4(), "New Sequence");
       }
       fullCode = getCode();
+      globalThis.game.settings.set(moduleId, SETTINGS.SELECTED_SEQ, seq.id);
    });
-   $: debounce(() => (fullCode = getCode()), 200);
+   $: debounce(() => {
+      fullCode = getCode();
+   }, 200);
    onDestroy(unsubscribe);
 
    function getCode() {
@@ -39,6 +49,11 @@
          seq = seqs[0] || new DSequence(uuidv4(), "New Sequence");
          return seqs;
       });
+   }
+   function exportSeq() {
+      const fileName = `director-seq-${seq.title.replaceAll(" ", "_")}`;
+      const exportType = exportFromJSON.types.json;
+      exportFromJSON({ data: seq, fileName, exportType });
    }
 
    function duplicateSeq() {
@@ -88,44 +103,56 @@
 
       <div class="ui-modal-action">
          <label for="seq-modal" class="ui-btn ui-btn-error" on:click={deleteSeq}>Delete</label>
-         <label for="seq-modal" class="ui-btn ui-btn-primary" on:click={updateSequences}>Save</label>
          <label for="seq-modal" class="ui-btn ui-btn-accent" on:click={duplicateSeq}>Duplicate</label>
+         <label for="seq-modal" class="ui-btn ui-btn-accent" on:click={exportSeq}>Export</label>
          <label for="seq-modal" class="ui-btn">Close</label>
+         <label for="seq-modal" class="ui-btn ui-btn-primary" on:click={updateSequences}>Save</label>
       </div>
    </div>
 </div>
 
 <div class="ui-p-2">
    <div class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-my-1 ui-items-center ui-gap-1">
-      <label class="ui-input-group ui-flex-1" for="">
-         <Select
-            items={$sequences}
-            optionIdentifier="id"
-            labelIdentifier="title"
-            isClearable={false}
-            bind:value={seq}
-            listAutoWidth={false}
-         />
-         <CopyToClipboard
-            text={`await Director.playSequence("${seq.title}")`}
-            on:copy={(_) => globalThis.ui.notifications.info("Oneliner copied!")}
-            let:copy
-         >
-            <button class="ui-btn ui-btn-square ui-p-2 ui-btn-outline ui-m-0" on:click|preventDefault={copy}>
-               <FaRegCopy />
-            </button>
-         </CopyToClipboard>
-         <CopyToClipboard
-            text={fullCode}
-            on:copy={(_) => globalThis.ui.notifications.info("Full code copied!")}
-            let:copy
-         >
-            <button class="ui-btn ui-btn-square ui-p-2 ui-btn-outline ui-m-0" on:click|preventDefault={copy}>
-               <FaCode />
-            </button>
-         </CopyToClipboard>
-         <label for="seq-modal" class="ui-btn ui-modal-button">Edit</label>
-      </label>
+      <div class="ui-flex-1 ui-flex ui-flex-row">
+         <label class="ui-input-group !ui-w-fit" for="">
+            <Select
+               items={$sequences}
+               optionIdentifier="id"
+               labelIdentifier="title"
+               isClearable={false}
+               bind:value={seq}
+               listAutoWidth={false}
+            />
+            <CopyToClipboard
+               text={`await Director.playSequence("${seq.title}")`}
+               on:copy={(_) => globalThis.ui.notifications.info("Oneliner copied!")}
+               let:copy
+            >
+               <button class="ui-btn ui-btn-square ui-p-2 ui-btn-outline ui-m-0" on:click|preventDefault={copy}>
+                  <FaRegCopy />
+               </button>
+            </CopyToClipboard>
+            <CopyToClipboard
+               text={fullCode}
+               on:copy={(_) => globalThis.ui.notifications.info("Full code copied!")}
+               let:copy
+            >
+               <button class="ui-btn ui-btn-square ui-p-2 ui-btn-outline ui-m-0" on:click|preventDefault={copy}>
+                  <FaCode />
+               </button>
+            </CopyToClipboard>
+            <label for="seq-modal" class="ui-btn ui-modal-button">Edit</label>
+         </label>
+         <div class="ui-mx-3">
+            <ArgInput
+               label="In scene"
+               type="bool"
+               bind:value={seq.inScene}
+               hideSign={true}
+               on:change={updateSequences}
+            />
+         </div>
+      </div>
 
       <div class="ui-btn-group ui-flex-none">
          <button class="ui-btn ui-btn-outline ui-w-32 ui-btn-accent" on:click={(e) => addVariable()}

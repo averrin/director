@@ -35,6 +35,20 @@ export function initSettings(app) {
     default: '{}',
   });
 
+  game.settings.register(moduleId, SETTINGS.SELECTED_SEQ, {
+    scope: "client",
+    config: false,
+    type: String,
+    default: '',
+  });
+
+  game.settings.register(moduleId, SETTINGS.SELECTED_TAB, {
+    scope: "client",
+    config: false,
+    type: String,
+    default: '',
+  });
+
   foundry.settings.register(moduleId, SETTINGS.UI_SCALE, {
     name: 'UI scale',
     hint: 'If ui are too big or too small for your display. Requires refresh.',
@@ -51,17 +65,6 @@ export function initSettings(app) {
     }
   });
 
-  foundry.settings.register(moduleId, SETTINGS.SHOW_SEQUENCER, {
-    name: 'Show Sequencer tab',
-    hint: 'Early beta! Buggy and lacks of features. Requires refresh.',
-    config: true,
-    type: Boolean,
-    default: false,
-    onChange: value => {
-      debouncedReload();
-    },
-  });
-
   game.settings.register(moduleId, SETTINGS.RESOLUTION, {
     name: "Selected image resolution",
     hint: "Higher is better quality but slower",
@@ -75,21 +78,6 @@ export function initSettings(app) {
     default: 200,
     type: Number,
     onChange: debouncedReload
-  });
-
-  game.settings.register(moduleId, SETTINGS.DEFAULT_TAB, {
-    name: "Default tab",
-    hint: "it will be selected on start",
-    scope: "client",
-    config: true,
-    choices: {
-      actions: 'Actions',
-      hooks: 'Hooks',
-      selection: 'Selection',
-      sequencer: 'Sequencer',
-    },
-    default: 'actions',
-    type: String,
   });
 
   game.settings.register(moduleId, SETTINGS.MANUAL_MODE, {

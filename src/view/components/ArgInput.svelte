@@ -20,7 +20,7 @@
    export let widthAuto = false;
    export let onTagClick;
    let spec = argSpecs.find((s) => s.id == type);
-   if (value === undefined || value == null || (value == "" && spec.default && value != spec.default)) {
+   if (value === undefined || value == null || (value == "" && "default" in spec && value !== spec.default)) {
       resetValue();
    }
 
@@ -58,9 +58,17 @@
    import { createEventDispatcher } from "svelte";
 
    const dispatch = createEventDispatcher();
+   let options = additionalItems;
+   if (spec && "options" in spec) {
+      options = [...spec.options, ...additionalItems].flat();
+   }
 
    $: {
-      if (value === undefined || value == null || (value == "" && spec.default && value != spec.default)) {
+      spec = argSpecs.find((s) => s.id == type);
+      if (spec && "options" in spec) {
+         options = [...spec.options, ...additionalItems].flat();
+      }
+      if (value === undefined || value == null || (value == "" && "default" in spec && value !== spec.default)) {
          resetValue();
       }
       debounce(dispatch("change", value), 200);
@@ -90,7 +98,7 @@
    function resetValue() {
       if (spec.options) {
          value = spec.options[0];
-      } else if (spec.default) {
+      } else if ("default" in spec) {
          value = spec.default;
       } else {
          value = "";
@@ -112,7 +120,7 @@
    </label>
 {/if}
 
-<label class="arg-input ui-input-group" for="" class:!ui-w-auto={widthAuto} class:ui-mr-3={widthAuto}>
+<label class="arg-input ui-input-group ui-h-full" for="" class:!ui-w-auto={widthAuto} class:ui-mr-3={widthAuto}>
    {#if label != ""}
       <span class="">{label}</span>
    {/if}
@@ -220,13 +228,15 @@
             </button>
          {:else if (typeof value === "object" && "x" in value && "y" in value) || type == "offset" || type == "size"}
             <input
-               type="float"
+               type="number"
+               step="0.01"
                bind:value={value.x}
                on:change={convertFixed}
                class="ui-input ui-input-lg ui-text-base"
             />
             <input
-               type="float"
+               type="number"
+               step="0.01"
                bind:value={value.y}
                on:change={convertFixed}
                class="ui-input ui-input-lg ui-text-base"
@@ -236,7 +246,7 @@
             </button>
          {:else}
             <Select
-               items={[...spec.options, ...additionalItems]}
+               items={options}
                {value}
                {groupBy}
                on:select={(e) => (value = e.detail.value)}
@@ -247,8 +257,20 @@
             />
          {/if}
       {:else if type == "offset" || type == "size"}
-         <input type="float" bind:value={value.x} on:change={convertFixed} class="ui-input ui-input-lg ui-text-base" />
-         <input type="float" bind:value={value.y} on:change={convertFixed} class="ui-input ui-input-lg ui-text-base" />
+         <input
+            bind:value={value.x}
+            type="number"
+            step="0.01"
+            on:change={convertFixed}
+            class="ui-input ui-input-lg ui-text-base"
+         />
+         <input
+            type="number"
+            step="0.01"
+            bind:value={value.y}
+            on:change={convertFixed}
+            class="ui-input ui-input-lg ui-text-base"
+         />
          <button class="ui-btn ui-btn-square" on:click={resetValue}>
             <XIcon class="ui-h-8 ui-w-8" />
          </button>
@@ -261,7 +283,10 @@
             listAutoWidth={false}
          />
       {:else if type == "bool"}
-         <div class="ui-flex ui-flex-row ui-items-center">
+         <div
+            class="ui-flex ui-flex-row ui-items-center"
+            style={!hideSign || label != "" ? "border: 1px solid #ccc;" : ""}
+         >
             <input
                type="checkbox"
                class="ui-toggle ui-toggle-accent ui-toggle-lg"

@@ -3,6 +3,10 @@
 @tailwind utilities;
 @tailwind variants;
 
+.svelte-select-list {
+  z-index: 9999;
+}
+
 #director.window-app {
     min-width: 820px;
 
@@ -44,7 +48,7 @@
 
     .ui-input-lg {
         border-color: #ddd !important;
-        height: 42px !important;
+        height: 3rem !important;
     }
 
     .ui-text-base {

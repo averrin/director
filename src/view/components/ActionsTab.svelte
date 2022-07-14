@@ -6,6 +6,8 @@
    import { v4 as uuidv4 } from "uuid";
    import Action from "../../modules/Actions.js";
    import { calculateValue } from "../../modules/helpers.js";
+   import exportFromJSON from "export-from-json";
+   import FaFileExport from "svelte-icons/fa/FaFileExport.svelte";
 
    export let onTagClick;
    export let onSelect;
@@ -18,6 +20,12 @@
    function addAction(tags) {
       currentActions = [new Action(uuidv4()), ...currentActions];
       actions.set(currentActions);
+   }
+
+   function exportActions() {
+      const fileName = `director-actions`;
+      const exportType = exportFromJSON.types.json;
+      exportFromJSON({ data: currentActions, fileName, exportType });
    }
 
    const sortActions = (ev) => {
@@ -48,7 +56,7 @@
 
    async function selectAction(_, id) {
       const action = currentActions.find((a) => a.id === id);
-      selectByTags(await calculateValue(action.value));
+      selectByTags(await calculateValue(action.value, "selection"));
    }
 
    async function actionTags(event, id) {
@@ -80,10 +88,13 @@
 </script>
 
 <div class="flex ui-flex-col ui-p-1">
-   <div>
-      <button class="ui-btn ui-btn-outline ui-btn-primary ui-my-2 ui-w-full" on:click={(e) => addAction()}
+   <div class="ui-flex ui-flex-row ui-items-center ui-gap-2">
+      <button class="ui-btn ui-btn-outline ui-btn-primary ui-my-2 ui-flex-1" on:click={(e) => addAction()}
          >Add action</button
       >
+      <button class="ui-btn ui-btn-square !ui-p-2 ui-flex-none ui-btn-outline" on:click={exportActions}>
+         <FaFileExport />
+      </button>
    </div>
    <div>
       <Sortable items={currentActions} let:item let:index on:change={sortActions}>

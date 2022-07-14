@@ -27,16 +27,24 @@ export function initTagColors() {
 }
 
 export const sequences = writable([]);
+function updateSequences() {
+  const global = game.settings.get(moduleId, SETTINGS.SEQUENCES);
+  let inScene = "director-sequences" in globalThis.canvas.scene.data.flags
+    ? globalThis.canvas.scene.data.flags["director-sequences"].filter((a) => a).map(a => DSequence.fromPlain(a))
+    : [];
+  sequences.set(
+    [...inScene, ...global].flat()
+      .filter(s => s).map(s => DSequence.fromPlain(s)));
+}
 export function initSequences() {
   const ss = game.settings.get(moduleId, SETTINGS.SEQUENCES);
   if (typeof ss === 'string' || ss instanceof String) {
     game.settings.set(moduleId, SETTINGS.SEQUENCES, JSON.parse(ss)); //Migration
   }
-  sequences.set(
-    game.settings.get(moduleId, SETTINGS.SEQUENCES)
-      .filter(s => s).map(s => DSequence.fromPlain(s)));
+  updateSequences();
   sequences.subscribe(async (seqs) => {
-    game.settings.set(moduleId, SETTINGS.SEQUENCES, seqs);
+    game.settings.set(moduleId, SETTINGS.SEQUENCES, seqs.filter(s => !s.inScene));
+    globalThis.canvas.scene.update({ "flags.director-sequences": seqs.filter(s => s.inScene).map(classToPlain) });
   });
 }
 
@@ -57,6 +65,8 @@ export function initCurrentScene() {
       : []);
 
     await HookManager.onSceneChange(scene);
+
+    updateSequences();
   });
 }
 

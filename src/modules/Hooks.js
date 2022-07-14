@@ -9,6 +9,7 @@ export default class Hook {
     this.enabled = false;
     this.event = undefined;
     this.target = undefined;
+    this.args = [];
   }
 
   static fromPlain(plain) {

@@ -16,6 +16,7 @@
    import FaPlay from "svelte-icons/fa/FaPlay.svelte";
    import FaExpandArrowsAlt from "svelte-icons/fa/FaExpandArrowsAlt.svelte";
    import FaCompressArrowsAlt from "svelte-icons/fa/FaCompressArrowsAlt.svelte";
+   import FaRegCopy from "svelte-icons/fa/FaRegCopy.svelte";
 
    export let onTagClick;
 
@@ -34,6 +35,13 @@
    async function play() {
       updateSequences();
       seq.play();
+   }
+
+   function copySection(section) {
+      const ns = Section.fromPlain(section);
+      ns.id = uuidv4();
+      seq.sections.push(ns);
+      updateSequences();
    }
 
    async function playSection(section) {
@@ -149,9 +157,9 @@
    {/each}
    <div />
 
-   <div class="ui-overflow-auto ui-max-h-[600px]" id="sequencer-content">
+   <div class="ui-overflow-auto ui-max-h-[800px]" id="sequencer-content">
       <Sortable items={seq.sections} let:item let:index on:change={sortSections} options={{ handle: ".handle" }}>
-         <div class="ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-space-x-4 ui-my-1">
+         <div class="ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-gap-2 ui-my-1">
             <div class="ui-flex ui-flex-row ui-justify-start ui-space-x-2">
                <div class="ui-flex-1 ui-flex ui-flex-row ui-justify-start ui-space-x-2">
                   <button
@@ -196,6 +204,10 @@
                      {:else}
                         <FaCompressArrowsAlt />
                      {/if}
+                  </button>
+
+                  <button class="ui-btn ui-btn-square ui-p-2 ui-btn-outline ui-m-0" on:click={(e) => copySection(item)}>
+                     <FaRegCopy />
                   </button>
                   <button
                      style="padding: 8px"

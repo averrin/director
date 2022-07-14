@@ -13,6 +13,7 @@
    import SelectionTab from "./components/SelectionTab.svelte";
    import SequencerTab from "./components/SequencerTab.svelte";
    import HooksTab from "./components/HooksTab.svelte";
+   import ImportTab from "./components/ImportTab.svelte";
 
    import { HsvPicker } from "svelte-color-picker";
 
@@ -53,7 +54,11 @@
       }
    }
 
-   let mode = setting(SETTINGS.DEFAULT_TAB);
+   let mode = setting(SETTINGS.SELECTED_TAB) || tabs[0].mode;
+   function selectMode(t) {
+      mode = t.mode;
+      globalThis.game.settings.set(moduleId, SETTINGS.SELECTED_TAB, mode);
+   }
 
    let startColor = editTag && editTag in tagColors ? tagColors[editTag] : "#232323";
 </script>
@@ -72,7 +77,7 @@
       <TagsBar {onTagClick} />
       <div class="ui-tabs ui-tabs-boxed">
          {#each tabs as t (t.title)}
-            <a class="ui-tab ui-tab-lg" on:click={() => (mode = t.mode)} class:ui-tab-active={t.mode == mode}>
+            <a class="ui-tab ui-tab-lg" on:click={() => selectMode(t)} class:ui-tab-active={t.mode == mode}>
                {t.title}
                {#if t.badge}
                   {@html t.badge}
@@ -92,6 +97,9 @@
       {/if}
       {#if mode == "hooks"}
          <HooksTab {onTagClick} />
+      {/if}
+      {#if mode == "import"}
+         <ImportTab />
       {/if}
    </main>
 </ApplicationShell>

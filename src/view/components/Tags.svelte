@@ -462,7 +462,7 @@
       background: #fff;
 
       width: 100%;
-      border-radius: 6px;
+      /* border-radius: 6px; */
       height: 42px;
    }
 

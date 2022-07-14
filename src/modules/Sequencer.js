@@ -11,6 +11,7 @@ export class DSequence {
     this.title = title;
     this.sections = [];
     this.variables = [];
+    this.inScene = false;
 
     this.export = {
       vars: [],

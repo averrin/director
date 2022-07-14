@@ -98,7 +98,7 @@
             additionalItems={currentHooks}
          />
          {#if item.valueType == "hook" && hook && !hook?.enabled}
-            <div class="ui-flex ui-flex-row ui-items-center ui-text-base ui-h-[40px]" style:color="grey">
+            <div class="ui-flex ui-flex-row ui-items-center ui-text-base ui-h-10" style:color="grey">
                <div class="ui-p-2 ui-w-12"><FaBan /></div>
                <div>hook disabled</div>
             </div>

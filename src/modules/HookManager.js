@@ -7,8 +7,13 @@ class HookManager {
   #actions = [];
 
   constructor() {
-    Hooks.on("preUpdateActor", (actor, updates) => { updates.prevHp = actor.data.data.attributes.hp.value });
+    Hooks.on("preUpdateActor", (actor, _, updates) => {
+      updates.prevHp = actor.data.data.attributes.hp.value;
+      updates.prevData = JSON.parse(JSON.stringify(actor.data.data));
+      logger.info(updates.prevData);
+    });
     Hooks.on("preUpdateToken", (token, _, updates) => {
+      updates.prevData = JSON.parse(JSON.stringify(token.data));
       updates.prevPos = token.position;
       updates.prevX = token.data.x;
       updates.prevY = token.data.y;
@@ -25,15 +30,15 @@ class HookManager {
         if (!Array.isArray(targets)) targets = [targets];
         const spec = hookSpecs.find(s => s.id == hook.event);
         if (parent == "updateActor") {
-          const token = globalThis.canvas.scene.tokens.find(t => t.actor.id == args[0].id);
+          const tokensId = globalThis.canvas.scene.tokens.filter(t => t.actor.id == args[0].id).map(t => t.id);
           for (const target of targets) {
-            if ([args[0].id, token.id].includes(target.id) && spec.test(...args)) {
+            if ([args[0].id, ...tokensId].includes(target.id) && spec.test(...hook.args, ...args)) {
               hook.call(target, ...args);
             }
           }
         } else if (parent == "updateToken") {
           for (const target of targets) {
-            if ([args[0].id].includes(target.id) && spec.test(...args)) {
+            if ([args[0].id].includes(target.id) && spec.test(...hook.args, ...args)) {
               hook.call(target, ...args);
             }
           }
@@ -64,7 +69,7 @@ class HookManager {
     this.#actions = actions;
     this.updateHandlers();
     for (const a of this.#actions) {
-      if (!a.value || Array.isArray(a.value) || a.value.startsWith("#")) continue;
+      if (!a.value || Array.isArray(a.value) || typeof a.value === "object" || a.value.startsWith("#")) continue;
       const h = this.#hooks.find(h => a.value == h.id);
       if (!h) continue;
       const hName = h.getHookName();
@@ -76,7 +81,7 @@ class HookManager {
   }
 
   isActionListen(a, hook) {
-    if (!a.value || Array.isArray(a.value) || a.value.startsWith("#")) return false;
+    if (!a.value || Array.isArray(a.value) || typeof a.value === "object" || a.value.startsWith("#")) return false;
     const h = this.#hooks.find(h => a.value == h.id);
     return hook == h.getHookName();
   }

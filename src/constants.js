@@ -12,8 +12,9 @@ export const SETTINGS = {
   SEQUENCES: "sequences",
   SHOW_SEQUENCER: "show-sequencer",
 
-  DEFAULT_TAB: "default-tab",
   MANUAL_MODE: "warpgate-mode",
+  SELECTED_SEQ: "selected-seq",
+  SELECTED_TAB: "selected-tab",
 };
 
 export const HOOKS = [
@@ -42,6 +43,7 @@ export const tabs = [
     title: "Sequencer",
     badge: "<span class='ui-badge ui-mx-1' style='background-color: darkorange'>𝛽</span>",
   },
+  { mode: "import", title: "Import" },
 ];
 
 export const actionTypes = [
@@ -135,7 +137,7 @@ export const modifierSpecs = [
   { id: 'locally', group: 'effect', args: [], cat: "Generic" },
   { id: 'noLoop', group: 'effect', args: [{ type: 'bool', label: 'val' }], cat: "Generic" },
 
-  { id: 'persist', group: 'effect', args: [{ type: 'bool', label: 'val' }], cat: "Time" },
+  { id: 'persist', group: 'effect', args: [{ type: 'bool', label: 'val' }, { type: 'bool', label: 'persistTokenPrototype', option: true }], cat: "Time" },
   { id: 'startTime', group: 'effect', args: [{ type: 'int', label: 'ms' }], cat: "Time" },
   { id: 'startTimePerc', group: 'effect', args: [{ type: 'float', label: 'val' }], cat: "Time" },
   { id: 'endTime', group: 'effect', args: [{ type: 'int', label: 'ms' }], cat: "Time" },
@@ -202,10 +204,46 @@ export const modifierSpecs = [
 ];
 
 export const hookSpecs = [
-  { id: "#onHit", parents: ["updateActor"], test: (actor, updates) => actor.data.data.attributes.hp.value < updates.prevHp },
-  { id: "#onHeal", parents: ["updateActor"], test: (actor, updates) => actor.data.data.attributes.hp.value > updates.prevHp },
-  { id: "#onDeath", parents: ["updateActor"], test: (actor, _) => actor.data.data.attributes.hp.value <= 0 },
-  { id: "#onMove", parents: ["updateToken"], test: (token, updates, _) => "x" in updates || "y" in updates || "elevation" in updates },
+  {
+    id: "#onHit", parents: ["updateActor"],
+    test: (ts, actor, _, updates) => {
+      return updates.prevHp - actor.data.data.attributes.hp.value >= ts;
+    }, args: [{ type: "int", label: "threshold" }]
+  },
+  {
+    id: "#onHeal", parents: ["updateActor"],
+    test: (ts, actor, _, updates) => {
+      return actor.data.data.attributes.hp.value - updates.prevHp >= ts;
+    }, args: [{ type: "int", label: "threshold" }]
+  },
+  {
+    id: "#onDeath", parents: ["updateActor"],
+    test: (actor, _) => actor.data.data.attributes.hp.value <= 0
+  },
+  {
+    id: "#onMove", parents: ["updateToken"],
+    test: (token, updates, _) => "x" in updates || "y" in updates || "elevation" in updates
+  },
+
+  {
+    id: "#onTokenProperty", parents: ["updateToken"],
+    test: (prop, ts, token, _, updates) => {
+      return getProperty(updates.prevData, prop) - getProperty(token.data, prop) >= ts;
+    },
+    args: [{ type: "string", label: "property" }, { type: "int", label: "threshold" }]
+  },
+  {
+    id: "#onActorProperty", parents: ["updateActor"], test: (prop, ts, actor, _, updates) => {
+      return getProperty(updates.prevData, prop) - getProperty(actor.data.data, prop) >= ts;
+    }, args: [{ type: "string", label: "property" }, { type: "int", label: "threshold" }]
+  },
+  {
+    id: "#onUpdateActor", parents: ["updateActor"], test: (prop, ...args) => {
+      let code = `try {return ${prop}} catch(e) {return false}`;
+      const f = new Function("...args", code);
+      return f(...args)
+    }, args: [{ type: "expression", label: "test" }]
+  },
 ];
 
 export const argSpecs = [
@@ -284,7 +322,10 @@ export const argSpecs = [
       { value: "#onHeal", label: "On Heal" },
       { value: "#onDeath", label: "On Death" },
       { value: "#onMove", label: "On Move" },
-    ]
+      { value: "#onTokenProperty", label: "On Token's property" },
+      { value: "#onActorProperty", label: "On Actor's property" },
+      { value: "#onUpdateToken", label: "Generic updateToken" },
+      { value: "#onUpdateActor", label: "Generic updateActor" },]
   },
   {
     id: "effectSource", var_types: ["effect"], options: [

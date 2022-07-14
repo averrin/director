@@ -121,7 +121,9 @@ export function calculateValueSync(val, type, seq) {
     }
   } else if (Array.isArray(val)) {
     val = globalThis.Tagger.getByTag(val);
-    if (val.length > 0) val = val[0];
+    if (type != "selection") {
+      if (val.length > 0) val = val[0];
+    }
   }
   return val;
 }

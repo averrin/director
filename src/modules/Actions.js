@@ -24,9 +24,9 @@ export default class Action {
   async run(event, override, seqVars) {
     const value = override || this.value;
     let objects;
-    objects = await calculateValue(value);
+    objects = await calculateValue(value, "selection");
     if (!Array.isArray(objects)) objects = [objects];
-    switch (this.type) {
+    switch (this.type?.id) {
       case "toggle":
         objects.map((o) => o.document || o).forEach((o) => o.update({ hidden: !o.data.hidden }));
         break;
