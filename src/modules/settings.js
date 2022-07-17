@@ -94,4 +94,13 @@ export function initSettings(app) {
     default: 2,
     type: Number,
   });
+
+  game.settings.register(moduleId, SETTINGS.HIDE_IMPORT, {
+    name: "Disable import/export feature",
+    hint: "Just hide buttons if you don't need it",
+    scope: "world",
+    config: true,
+    default: false,
+    type: Boolean,
+  });
 }

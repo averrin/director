@@ -1,5 +1,11 @@
 export const moduleId = "director";
 
+export function evalExpression(expr, ...args) {
+  let code = `try {return ${expr}} catch(e) {return false}`;
+  const f = new Function("...args", code);
+  return f(...args)
+}
+
 // import { foundry } from '../modules/foundry.js';
 // import { moduleId, SETTINGS } from '../constants.js';
 
@@ -15,6 +21,7 @@ export const SETTINGS = {
   MANUAL_MODE: "warpgate-mode",
   SELECTED_SEQ: "selected-seq",
   SELECTED_TAB: "selected-tab",
+  HIDE_IMPORT: "hide-import",
 };
 
 export const HOOKS = [
@@ -244,6 +251,18 @@ export const hookSpecs = [
       return f(...args)
     }, args: [{ type: "expression", label: "test" }]
   },
+  {
+    id: "#onUpdateToken", parents: ["updateToken"], test: (prop, ...args) => {
+      let code = `try {return ${prop}} catch(e) {return false}`;
+      const f = new Function("...args", code);
+      return f(...args)
+    }, args: [{ type: "expression", label: "test" }]
+  },
+  {
+    id: "#setInterval", parents: [], test: (prop, ...args) => {
+      return evalExpression(prop, ...args);
+    }, args: [{ type: "expression", label: "test" }, { type: "expression", label: "interval" }]
+  },
 ];
 
 export const argSpecs = [
@@ -325,7 +344,8 @@ export const argSpecs = [
       { value: "#onTokenProperty", label: "On Token's property" },
       { value: "#onActorProperty", label: "On Actor's property" },
       { value: "#onUpdateToken", label: "Generic updateToken" },
-      { value: "#onUpdateActor", label: "Generic updateActor" },]
+      { value: "#onUpdateActor", label: "Generic updateActor" },
+      { value: "#setInterval", label: "Set Interval" },]
   },
   {
     id: "effectSource", var_types: ["effect"], options: [

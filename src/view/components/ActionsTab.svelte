@@ -8,6 +8,8 @@
    import { calculateValue } from "../../modules/helpers.js";
    import exportFromJSON from "export-from-json";
    import FaFileExport from "svelte-icons/fa/FaFileExport.svelte";
+   import { setting } from "../../modules/helpers.js";
+   import { SETTINGS } from "../../constants.js";
 
    export let onTagClick;
    export let onSelect;
@@ -92,9 +94,15 @@
       <button class="ui-btn ui-btn-outline ui-btn-primary ui-my-2 ui-flex-1" on:click={(e) => addAction()}
          >Add action</button
       >
-      <button class="ui-btn ui-btn-square !ui-p-2 ui-flex-none ui-btn-outline" title="Export" on:click={exportActions}>
-         <FaFileExport />
-      </button>
+      {#if !setting(SETTINGS.HIDE_IMPORT)}
+         <button
+            class="ui-btn ui-btn-square !ui-p-2 ui-flex-none ui-btn-outline"
+            title="Export"
+            on:click={exportActions}
+         >
+            <FaFileExport />
+         </button>
+      {/if}
    </div>
    <div>
       <Sortable items={currentActions} let:item let:index on:change={sortActions}>

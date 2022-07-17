@@ -77,29 +77,33 @@
 </script>
 
 {#if selection.length > 1}
-   <div class="ui-navbar bg-base-100 ui-space-4">
-      <div class="ui-flex-1 ui-space-4 ui-mr-1">
-         <a class="ui-btn ui-btn-ghost ui-normal-case ui-text-xl ui-no-animation">Mutual tags</a>
-         <div class="ui-w-full">
-            <Tags
-               allowPaste={true}
-               allowDrop={true}
-               onlyUnique={true}
-               splitWith={","}
-               placeholder="Tag"
-               autoComplete={$globalTags}
-               minChars="1"
-               on:tags={(e) => globalThis.debounce(onTagsSelected(e, -1), 100)}
-               tags={tagsMutual}
-               colors={$tagColors}
-               {onTagClick}
-            />
+   <div class="ui-p-2">
+      <div
+         class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-items-center ui-space-x-2 ui-cursor-move ui-my-1"
+      >
+         <div class="ui-input-group">
+            <span class="!ui-w-32">Mutual tags</span>
+            <div class="ui-w-full">
+               <Tags
+                  allowPaste={true}
+                  allowDrop={true}
+                  onlyUnique={true}
+                  splitWith={","}
+                  placeholder="Tag"
+                  autoComplete={$globalTags}
+                  minChars="1"
+                  on:tags={(e) => globalThis.debounce(onTagsSelected(e, -1), 100)}
+                  tags={tagsMutual}
+                  colors={$tagColors}
+                  {onTagClick}
+               />
+            </div>
          </div>
-      </div>
-      <div class="ui-flex-none">
-         <button class="ui-btn-square ui-btn ui-btn-primary" on:click={(e) => createAction(e, tagsMutual)}>
-            <PlusIcon />
-         </button>
+         <div class="ui-flex-none">
+            <button class="ui-btn-square ui-btn ui-btn-primary" on:click={(e) => createAction(e, tagsMutual)}>
+               <PlusIcon />
+            </button>
+         </div>
       </div>
    </div>
 {/if}

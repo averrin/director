@@ -1,4 +1,4 @@
-import { logger, calculateValueSync } from './helpers.js';
+import { logger, calculateValueSync, evalExpression } from './helpers.js';
 import { hookSpecs, moduleId, SETTINGS } from '../constants.js';
 
 class HookManager {
@@ -22,7 +22,6 @@ class HookManager {
 
   getHandler(parent) {
     return (...args) => {
-      logger.info(this.#hooks);
       for (const hook of this.#hooks) {
         if (!hook.enabled || !hook.event || !hook.target) continue;
         let targets = calculateValueSync(hook.target);
@@ -88,7 +87,17 @@ class HookManager {
 
   updateHandlers() {
     for (const [hook, handler] of Object.entries(this.#handlers)) {
-      if (this.#hooks.some(h => h.enabled && hookSpecs.find(s => s.id == h.event)?.parents.includes(hook))) {
+      if (hook.startsWith("#setInterval")) {
+        if (this.#hooks.some(h => h.enabled && `${h.event}-${h.args[1]}` == hook)) {
+          continue;
+        } else {
+          globalThis.Hooks.off(hook, handler);
+          delete this.#handlers[hook]
+          logger.info(`Hook: ${hook}#${handler} was uninstalled.`)
+          logger.info(this.#handlers);
+        }
+      } else if (this.#hooks.some(h => h.enabled &&
+        hookSpecs.find(s => s.id == h.event)?.parents.includes(hook))) {
         continue;
       } else if (this.#actions.some(a => this.isActionListen(a, hook))) {
         continue;
@@ -98,6 +107,24 @@ class HookManager {
         logger.info(`Hook: ${hook}#${handler} was uninstalled.`)
         logger.info(this.#handlers);
       }
+    }
+  }
+
+  getIntervalHandler(hook) {
+    return (...args) => {
+      logger.info("interval handler called");
+      const interval = evalExpression(hook.args[1])
+      setTimeout(() => {
+        const spec = hookSpecs.find(s => s.id == hook.event);
+        const id = `${spec.id}-${hook.args[1]}`;
+        if (id in this.#handlers) {
+          if (hook.enabled, spec.test(...hook.args, ...args)) {
+            logger.info(`Interval hook ${hook.getHookName()} was called`, hook);
+            globalThis.Hooks.call(hook.getHookName(), ...hook.args);
+          }
+          this.#handlers[id]();
+        }
+      }, interval);
     }
   }
 
@@ -112,6 +139,13 @@ class HookManager {
         this.#handlers[parent] = globalThis.Hooks.on(parent, this.getHandler(parent));
         logger.info(`Hook: ${parent}#${this.#handlers[parent]} was installed.`);
         logger.info(this.#handlers);
+      }
+      if (spec.id == "#setInterval") {
+        const id = `${spec.id}-${hook.args[1]}`;
+        if (id in this.#handlers) continue;
+        this.#handlers[id] = this.getIntervalHandler(hook);
+        this.#handlers[id]();
+        logger.info(`Hook: ${id}#${this.#handlers[id]} was installed.`);
       }
     }
 

@@ -17,9 +17,10 @@
 
    import { HsvPicker } from "svelte-color-picker";
 
-   import { tagColors, currentScene } from "../modules/stores.js";
+   import { tagColors, currentScene, actions } from "../modules/stores.js";
 
    import { getContext } from "svelte";
+   import Action from "../modules/Actions";
    const { application } = getContext("external");
    const position = application.position;
    position.scale = game.settings.get(moduleId, SETTINGS.UI_SCALE);
@@ -38,13 +39,9 @@
    }
 
    function createAction(_, tags) {
-      currentScene.update((scene) => {
-         let actions =
-            "director-actions" in scene.data.flags ? scene.data.flags["director-actions"].filter((a) => a) : [];
-         actions = [{ id: uuidv4(), tags: tags, type: "" }, ...actions];
-         scene.data.flags["director-actions"] = actions;
-         scene.update({ "flags.director-actions": actions });
-         return scene;
+      actions.update((actions) => {
+         actions = [Action.fromPlain({ id: uuidv4(), value: tags, type: "" }), ...actions];
+         return actions;
       });
       mode = "actions";
    }
@@ -64,6 +61,10 @@
       mode = t.mode;
       globalThis.game.settings.set(moduleId, SETTINGS.SELECTED_TAB, mode);
    }
+   let availableTabs = tabs;
+   if (setting(SETTINGS.HIDE_IMPORT)) {
+      availableTabs = availableTabs.filter((t) => t.mode != "import");
+   }
 </script>
 
 <input type="checkbox" id="color-modal" class="ui-modal-toggle" bind:checked={pickerOpen} />
@@ -79,7 +80,7 @@
    <main class="director-ui">
       <TagsBar {onTagClick} />
       <div class="ui-tabs ui-tabs-boxed">
-         {#each tabs as t (t.title)}
+         {#each availableTabs as t (t.title)}
             <a class="ui-tab ui-tab-lg" on:click={() => selectMode(t)} class:ui-tab-active={t.mode == mode}>
                {t.title}
                {#if t.badge}

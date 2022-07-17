@@ -122,7 +122,7 @@ export function calculateValueSync(val, type, seq) {
   } else if (Array.isArray(val)) {
     val = globalThis.Tagger.getByTag(val);
     if (type != "selection") {
-      if (val.length > 0) val = val[0];
+      if (val.length > 0) val = globalThis.Sequencer.Helpers.random_array_element(val);
     }
   }
   return val;
@@ -145,4 +145,10 @@ export async function calculateValue(val, type, seq) {
     }
   }
   return calculateValueSync(val, type, seq)
+}
+
+export function evalExpression(expr, ...args) {
+  let code = `try {return ${expr}} catch(e) {return false}`;
+  const f = new Function("...args", code);
+  return f(...args)
 }

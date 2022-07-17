@@ -104,7 +104,9 @@
       <div class="ui-modal-action">
          <label for="seq-modal" class="ui-btn ui-btn-error" on:click={deleteSeq}>Delete</label>
          <label for="seq-modal" class="ui-btn ui-btn-accent" on:click={duplicateSeq}>Duplicate</label>
-         <label for="seq-modal" class="ui-btn ui-btn-accent" on:click={exportSeq}>Export</label>
+         {#if !setting(SETTINGS.HIDE_IMPORT)}
+            <label for="seq-modal" class="ui-btn ui-btn-accent" on:click={exportSeq}>Export</label>
+         {/if}
          <label for="seq-modal" class="ui-btn">Close</label>
          <label for="seq-modal" class="ui-btn ui-btn-primary" on:click={updateSequences}>Save</label>
       </div>

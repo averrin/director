@@ -19,8 +19,9 @@
    export let hideSign = false;
    export let widthAuto = false;
    export let onTagClick;
+   export let justify = "start";
    let spec = argSpecs.find((s) => s.id == type);
-   if (value === undefined || value == null || (value == "" && "default" in spec && value !== spec.default)) {
+   if (value === undefined || value === null || (value === "" && "default" in spec && value !== spec.default)) {
       resetValue();
    }
 
@@ -68,7 +69,7 @@
       if (spec && "options" in spec) {
          options = [...spec.options, ...additionalItems].flat();
       }
-      if (value === undefined || value == null || (value == "" && "default" in spec && value !== spec.default)) {
+      if (value === undefined || value === null || (value === "" && "default" in spec && value !== spec.default)) {
          resetValue();
       }
       debounce(dispatch("change", value), 200);
@@ -120,7 +121,12 @@
    </label>
 {/if}
 
-<label class="arg-input ui-input-group ui-h-full" for="" class:!ui-w-auto={widthAuto} class:ui-mr-3={widthAuto}>
+<label
+   class="arg-input ui-input-group ui-h-full ui-justify-{justify}"
+   for=""
+   class:!ui-w-auto={widthAuto}
+   class:ui-mr-3={widthAuto}
+>
    {#if label != ""}
       <span class="">{label}</span>
    {/if}

@@ -10,6 +10,8 @@
    import { hookSpecs } from "../../constants.js";
    import exportFromJSON from "export-from-json";
    import FaFileExport from "svelte-icons/fa/FaFileExport.svelte";
+   import { setting } from "../../modules/helpers.js";
+   import { SETTINGS } from "../../constants.js";
 
    export let onTagClick;
 
@@ -34,6 +36,7 @@
       hooks.set(currentHooks);
    }
    function saveHooks() {
+      // debounce(() => hooks.set(currentHooks), 50);
       hooks.set(currentHooks);
    }
 
@@ -48,9 +51,11 @@
       <button class="ui-my-2 ui-btn ui-btn-outline ui-btn-primary ui-flex-1" on:click={(e) => addHook()}
          >Add Hook</button
       >
-      <button class="ui-btn ui-btn-square !ui-p-2 ui-flex-none ui-btn-outline" title="Export" on:click={exportHooks}>
-         <FaFileExport />
-      </button>
+      {#if !setting(SETTINGS.HIDE_IMPORT)}
+         <button class="ui-btn ui-btn-square !ui-p-2 ui-flex-none ui-btn-outline" title="Export" on:click={exportHooks}>
+            <FaFileExport />
+         </button>
+      {/if}
    </div>
    {#each currentHooks as hook (hook.id)}
       <div
@@ -67,7 +72,14 @@
             />
             <ArgInput hideSign={true} bind:value={hook.name} type="string" label="Name" on:change={saveHooks} />
 
-            <ArgInput hideSign={true} bind:value={hook.event} type="hook" label="Event" on:change={saveHooks} />
+            <ArgInput
+               hideSign={true}
+               bind:value={hook.event}
+               type="hook"
+               justify="end"
+               label="Event"
+               on:change={saveHooks}
+            />
             <div class="ui-flex-none ui-btn-group">
                <button
                   style="padding: 8px"
