@@ -33,6 +33,7 @@ It's not going to be MATT's alternative, so actions are pretty basic
 
 ## Plans
 - [ ] Documentation
+- [ ] Extension API
 - [ ] v10 support
 - [ ] Beginner / Expert UI mode
 - [ ] Better import / export

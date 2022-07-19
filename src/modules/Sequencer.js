@@ -22,6 +22,7 @@ export class DSequence {
   async prepare(overrides) {
     overrides = overrides || {};
     for (const [name, value] of Object.entries(overrides)) {
+      if (value === null) continue;
       const v = this.variables.find(v => v.name == name);
       if (v) {
         v.override(value)

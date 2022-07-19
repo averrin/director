@@ -16,6 +16,7 @@
    export let onTagClick;
    let seq;
    let fullCode = "";
+   let oneliner = "";
    const unsubscribe = sequences.subscribe((seqs) => {
       if (!seq) {
          seq =
@@ -24,16 +25,27 @@
             new DSequence(uuidv4(), "New Sequence");
       }
       fullCode = getCode();
+      oneliner = getOnelliner();
       globalThis.game.settings.set(moduleId, SETTINGS.SELECTED_SEQ, seq.id);
    });
    $: debounce(() => {
       fullCode = getCode();
+      oneliner = getOnelliner();
    }, 200);
    onDestroy(unsubscribe);
 
    function getCode() {
       seq = DSequence.fromPlain(seq);
       return seq.convertToCode();
+   }
+
+   function getOnelliner() {
+      let vars = {};
+      for (const v of seq.variables) {
+         vars[v.name] = null;
+      }
+      vars = JSON.stringify(vars);
+      return `await Director.playSequence("${seq.title}", ${vars});`;
    }
 
    function addSeq() {
@@ -126,7 +138,7 @@
                listAutoWidth={false}
             />
             <CopyToClipboard
-               text={`await Director.playSequence("${seq.title}")`}
+               text={oneliner}
                on:copy={(_) => globalThis.ui.notifications.info("Oneliner copied!")}
                let:copy
             >

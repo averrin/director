@@ -7,6 +7,7 @@
    import { XIcon } from "@rgossiaux/svelte-heroicons/solid";
    import { HsvPicker } from "svelte-color-picker";
    import { v4 as uuidv4 } from "uuid";
+   const dispatch = createEventDispatcher();
 
    export let id = uuidv4();
    export let value;
@@ -23,6 +24,7 @@
    let spec = argSpecs.find((s) => s.id == type);
    if (value === undefined || value === null || (value === "" && "default" in spec && value !== spec.default)) {
       resetValue();
+      debounce(dispatch("change", value), 200);
    }
 
    function selectFile() {
@@ -58,7 +60,6 @@
 
    import { createEventDispatcher } from "svelte";
 
-   const dispatch = createEventDispatcher();
    let options = additionalItems;
    if (spec && "options" in spec) {
       options = [...spec.options, ...additionalItems].flat();
@@ -98,7 +99,7 @@
    }
    function resetValue() {
       if (spec.options) {
-         value = spec.options[0];
+         value = spec.options[0].value;
       } else if ("default" in spec) {
          value = spec.default;
       } else {
