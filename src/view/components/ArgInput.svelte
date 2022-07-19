@@ -62,13 +62,21 @@
 
    let options = additionalItems;
    if (spec && "options" in spec) {
-      options = [...spec.options, ...additionalItems].flat();
+      let ops = spec.options;
+      if (typeof spec.options === "function") {
+         ops = spec.options(value);
+      }
+      options = [...ops, ...additionalItems].flat();
    }
 
    $: {
       spec = argSpecs.find((s) => s.id == type);
       if (spec && "options" in spec) {
-         options = [...spec.options, ...additionalItems].flat();
+         let ops = spec.options;
+         if (typeof spec.options === "function") {
+            ops = spec.options(value);
+         }
+         options = [...ops, ...additionalItems].flat();
       }
       if (value === undefined || value === null || (value === "" && "default" in spec && value !== spec.default)) {
          resetValue();
@@ -99,7 +107,11 @@
    }
    function resetValue() {
       if (spec.options) {
-         value = spec.options[0].value;
+         let ops = spec.options;
+         if (typeof spec.options === "function") {
+            ops = spec.options(value);
+         }
+         value = typeof ops[0] === "object" ? ops[0].value : ops[0];
       } else if ("default" in spec) {
          value = spec.default;
       } else {
@@ -281,14 +293,6 @@
          <button class="ui-btn ui-btn-square" on:click={resetValue}>
             <XIcon class="ui-h-8 ui-w-8" />
          </button>
-      {:else if type == "token-magic" && globalThis.TokenMagic}
-         <Select
-            items={globalThis.TokenMagic.getPresets().map((p) => p.name)}
-            {value}
-            on:select={(e) => (value = e.detail.value)}
-            on:clear={(_) => (value = "")}
-            listAutoWidth={false}
-         />
       {:else if type == "bool"}
          <div
             class="ui-flex ui-flex-row ui-items-center"
@@ -321,6 +325,14 @@
       {:else if type == "color"}
          <label for="color-modal-{id}" class="ui-btn ui-btn-square" style:background-color={value} />
          <input type="text" bind:value class="ui-input ui-input-lg ui-text-base" />
+      {:else if spec.control == "select"}
+         <Select
+            items={options}
+            {value}
+            on:select={(e) => (value = e.detail.value)}
+            on:clear={(_) => (value = "")}
+            listAutoWidth={false}
+         />
       {:else}
          <input type="text" bind:value class="ui-input ui-input-lg ui-text-base" />
       {/if}

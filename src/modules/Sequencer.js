@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { logger, setting } from "./helpers.js";
-import { sectionSpecs, modifierSpecs, SETTINGS, moduleId } from "../constants.js";
+import { sectionSpecs, modifierSpecs, SETTINGS, moduleId, argSpecs } from "../constants.js";
 import { calculateValue } from "./helpers.js"
 
 import { plainToClass, serialize, deserialize, classToPlain } from 'class-transformer';
@@ -127,7 +127,7 @@ controlled.forEach(c => c.control());`;
     r += `const sequence = new Sequence("${moduleId}")\n`;
     let i = 0;
     for (const section of this.sections) {
-      const args = section.args.map((a, i) => this.getCodeForVal("", a, section.spec.args[i].type)[0]);
+      const args = section.args.map((a, i) => this.getCodeForVal("", a, section._spec.args[i].type)[0]);
       let sectionName = section.type;
       if (section.type == "effect") {
         const name = section.args[0] || `${this.title}-${i}`;
@@ -135,29 +135,20 @@ controlled.forEach(c => c.control());`;
         r += `\t\t.origin("${this.id}")\n`;
         r += `\t\t.name("${name}")\n`;
       } else {
-        if (!section.type.startsWith("tm")) {
-          r += `\t.${sectionName}(${args.join(", ")})\n`;
+        if ("toCode" in section._spec) {
+          r += section._spec.toCode(args);
         } else {
-          if (args[1] == "\"\"") args[1] = null;
-          switch (section.type) {
-            case "tmAdd":
-              const filter = TokenMagic.getPresets().find(p => p.name == args[1].replaceAll('"', ''))?.params;
-              r += `\t.thenDo(async () => await TokenMagic.addUpdateFilters(${args[0]}, ${JSON.stringify(filter)}))\n`;
-              break;
-            case "tmDel":
-              r += `\t.thenDo(async () => await TokenMagic.deleteFilters(${args[0]}, ${args[1]}))\n`;
-              break
-          }
+          r += `\t.${sectionName}(${args.join(", ")})\n`;
         }
       }
 
       for (const m of section.modifiers) {
         const args = [];
-        const pre_args = m.args.map((a, i) => this.getCodeForVal("", a, m.spec.args[i].type)[0]);
+        const pre_args = m.args.map((a, i) => this.getCodeForVal("", a, m._spec.args[i].type)[0]);
         let n = 0;
         const options = {};
         for (const a of pre_args) {
-          const spec = m.spec.args[n];
+          const spec = m._spec.args[n];
           if (spec.option) {
             if (typeof a === 'string' || a instanceof String) {
               options[spec.label] = a.replaceAll('"', '');
@@ -217,7 +208,7 @@ controlled.forEach(c => c.control());`;
           val = await v.getValue(this);
         }
       }
-      const spec = obj.spec.args[n];
+      const spec = obj._spec.args[n];
       if (val === undefined) {
         val = await calculateValue(a, spec.type, this);
       }
@@ -244,27 +235,9 @@ controlled.forEach(c => c.control());`;
         let args = await this.makeArgs(section);
 
         let sectionName = section.type;
-        if (section.type.startsWith("tm")) {
+        if ("thenDo" in section._spec) {
           sectionName = "thenDo";
-          let f;
-          let filter;
-          let code;
-          const AsyncFunction = Object.getPrototypeOf(async function() { }).constructor;
-          switch (section.type) {
-            case "tmAdd":
-              code = 'await TokenMagic.addUpdateFilters(target, filter);'
-              filter = TokenMagic.getPresets().find(p => p.name == args[1])?.params;
-              break;
-            case "tmDel":
-              code = 'await TokenMagic.deleteFilters(target, filter);';
-              filter = args[1];
-              break;
-            default:
-              break;
-          }
-          const target = args[0];
-          f = new AsyncFunction('target', 'filter', code);
-          args = [async () => await f(target, filter)];
+          args = [section._spec.thenDo(args)];
         }
         let currentSection = s[sectionName](...args);
         if (section.type == "effect") {
@@ -306,7 +279,7 @@ controlled.forEach(c => c.control());`;
 
   toJSON() {
     this.reset();
-    return classToPlain(this);
+    return classToPlain(this, { excludePrefixes: ["_"] });
   }
   static fromPlain(plain) {
     if (typeof plain === 'string' || plain instanceof String) {
@@ -327,6 +300,7 @@ export class Variable {
   constructor(id, name, type) {
     this.id = id;
     this.name = name;
+    this.lazy = false;
     this.setType(type);
     this.reset();
   }
@@ -348,6 +322,8 @@ export class Variable {
 
   setValue(value) {
     this.value = value;
+    const spec = argSpecs.find(s => s.id == this.type);
+    this.lazy = spec?.options?.find(v => v.value == value)?.lazy || spec?.lazy;
     this.reset();
   }
 
@@ -375,14 +351,14 @@ export class Section {
 
   setType(type) {
     this.type = type;
-    this.spec = sectionSpecs.find(s => s.id == this.type);
+    this._spec = sectionSpecs.find(s => s.id == this.type);
     this.args = [];
   }
 
   static fromPlain(plain) {
     const s = plainToClass(Section, plain);
     s.modifiers = s.modifiers?.map(m => Modifier.fromPlain(m));
-    s.spec = sectionSpecs.find(spec => spec.id == s.type);
+    s._spec = sectionSpecs.find(spec => spec.id == s.type);
     return s;
   }
 }
@@ -395,12 +371,13 @@ export class Modifier {
   }
   setType(type, sectionType) {
     this.type = type;
-    this.spec = modifierSpecs.filter(s => s.group == sectionType).find(s => s.id == this.type);
+    this._spec = modifierSpecs.filter(s => s.group == sectionType).find(s => s.id == this.type);
     this.args = [];
   }
 
   static fromPlain(plain) {
     const m = plainToClass(Modifier, plain);
+    m._spec = modifierSpecs.find(spec => spec.id == m.type);
     return m;
   }
 }

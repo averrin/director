@@ -106,7 +106,7 @@
 
    function setModArg(e, section, mod, i) {
       const m = seq.sections.find((s) => s.id == section.id).modifiers.find((m) => m.id == mod.id);
-      const spec = m.spec.args[i];
+      const spec = m._spec.args[i];
       if (e.detail != undefined && e.detail != null && typeof e.detail === "object" && !Array.isArray(e.detail)) {
          if (e.detail.value) {
             if (m.args[i] == e.detail.value) return;
@@ -146,9 +146,6 @@
    }
 
    let specs = sectionSpecs;
-   if (!globalThis.TokenMagic) {
-      specs = sectionSpecs.filter((s) => s.require != "TokenMagic");
-   }
 </script>
 
 {#if seq}
@@ -176,8 +173,8 @@
                      value={item.type}
                      listAutoWidth={false}
                   />
-                  {#if item.spec?.args}
-                     {#each item.spec.args as arg, i}
+                  {#if item._spec?.args}
+                     {#each item._spec.args as arg, i}
                         <ArgInput
                            vars={seq.variables.filter((v) =>
                               argSpecs.find((s) => s.id == arg.type).var_types.includes(v.type)
@@ -242,8 +239,8 @@
                         value={mod.type}
                         listAutoWidth={false}
                      />
-                     {#if mod.spec?.args}
-                        {#each mod.spec.args as arg, i}
+                     {#if mod._spec?.args}
+                        {#each mod._spec.args as arg, i}
                            <ArgInput
                               vars={seq.variables.filter((v) =>
                                  argSpecs.find((s) => s.id == arg.type).var_types.includes(v.type)

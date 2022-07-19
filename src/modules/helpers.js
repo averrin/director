@@ -63,6 +63,20 @@ export function rgb2hex({ r, g, b, a = 1 }) {
   };
 }
 
+export const tools = {
+  toggle: async (o) => await o.update({ hidden: !o.data.hidden }),
+  hide: async (o) => await o.update({ hidden: true }),
+  show: async (o) => await o.update({ hidden: false }),
+  kill: async (o) =>
+    await o.actor.update({
+      "data.attributes.hp.value": 0,
+    }),
+  revive: async (o) =>
+    await o.actor.update({
+      "data.attributes.hp.value": o.actor.data.data.attributes.hp.max,
+    }),
+};
+
 export function calculateValueSync(val, type, seq) {
   let varName = this?.name || 'inline';
   if (typeof val === 'string' || val instanceof String) {
@@ -108,15 +122,20 @@ export function calculateValueSync(val, type, seq) {
       return globalThis.Director.getPlaceables().find(t => t.id == val.slice(4) || t.name == val.slice(4));
     } else if (type == "expression") {
       const vars = {};
-      seq.variables.forEach(v => vars[v.name] = v.calcValue);
+      for (const v of seq.variables) {
+        vars[v.name] = v.lazy ? v.calcValue : calculateValueSync(v.value, v.type, seq);
+      }
       let code = `'use strict'; try {return ${val}} catch(e) {return false}`;
       const f = new Function(...Object.keys(vars), code)
       return f(...Object.values(vars));
     } else if (type == "code") {
-      const vars = {};
-      seq.variables.forEach(v => vars[v.name] = v.calcValue);
+      const AsyncFunction = Object.getPrototypeOf(async function() { }).constructor;
+      const vars = { "_tools": tools };
+      for (const v of seq.variables) {
+        vars[v.name] = v.lazy ? v.calcValue : calculateValueSync(v.value, v.type, seq);
+      }
       let code = `'use strict'; try {${val}} catch(e) {}`;
-      const f = new Function(...Object.keys(vars), code)
+      const f = new AsyncFunction(...Object.keys(vars), code)
       return () => f(...Object.values(vars));
     }
   } else if (Array.isArray(val)) {

@@ -70,10 +70,11 @@ export const sectionSpecs = [
   { id: 'wait', label: 'Wait', args: [{ type: 'int', label: 'ms' }] },
   { id: 'macro', label: 'Macro', args: [{ type: 'macro', label: 'name' }] },
   { id: 'thenDo', label: 'thenDo', args: [{ type: 'code', label: 'func' }] },
-
-  { id: 'tmAdd', label: 'Token Magic Add', require: "TokenMagic", args: [{ type: 'token', label: 'target' }, { type: 'token-magic', label: 'filter' }] },
-  { id: 'tmDel', label: 'Token Magic Remove', require: "TokenMagic", args: [{ type: 'token', label: 'target' }, { type: 'token-magic', label: 'filter' }] },
 ];
+
+export function addSection(section) {
+  sectionSpecs.push(section);
+}
 
 export const modifierSpecs = [
   //Effect
@@ -210,6 +211,11 @@ export const modifierSpecs = [
   { id: 'locally', group: 'sound', args: [], cat: "Generic" },
 ];
 
+
+export function addModifier(modifier) {
+  modifierSpecs.push(modifier);
+}
+
 export const hookSpecs = [
   {
     id: "#onHit", parents: ["updateActor"],
@@ -272,7 +278,7 @@ export const argSpecs = [
       { value: "#controlled.last", label: "Last Controlled", group: "Controlled" },
       { value: "#target.first", label: "First Target", group: "Targets" },
       { value: "#target.last", label: "Last Target", group: "Targets" },
-      { value: "#manual", label: "Manual", group: "Other" },
+      { value: "#manual", label: "Manual", group: "Other", lazy: true },
       { value: { x: 0, y: 0 }, label: "Fixed", group: "Other" },
       { value: [], label: "Tagger", group: "Other" },
     ], var_types: ["position", "token", "tile", "expression"], default: { x: 0, y: 0 }
@@ -333,8 +339,7 @@ export const argSpecs = [
   { id: "string", var_types: ["string", "expression"] },
   { id: "color", var_types: ["string", "color", "expression"] },
   { id: "code", var_types: ["code", "string", "expression"] },
-  { id: "expression", var_types: ["expression"] },
-  { id: "token-magic", var_types: ["token-magic", "string", "expression"] },
+  { id: "expression", var_types: ["expression"], lazy: true },
   {
     id: "hook", var_types: ["hook"], options: [
       { value: "#onHit", label: "On Hit" },
@@ -393,3 +398,7 @@ export const argSpecs = [
     ]
   }
 ];
+
+export function addArgSpec(arg) {
+  argSpecs.push(arg);
+}

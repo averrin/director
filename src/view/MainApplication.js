@@ -1,10 +1,11 @@
 import { SvelteApplication } from "@typhonjs-fvtt/runtime/svelte/application";
 // import { TJSGameSettings } from "@typhonjs-fvtt/runtime/svelte/store";
-import { moduleId, SETTINGS } from "../constants.js";
+import { addArgSpec, addModifier, addSection, moduleId, SETTINGS } from "../constants.js";
 // import { logger } from "../modules/helpers.js";
 import { setting } from "../modules/settings.js";
 import { tilesStore, tokensStore, currentScene, initStores, sequences } from "../modules/stores.js";
 import { DSequence } from "../modules/Sequencer.js";
+import initIntegrations from "../modules/Integrations.js";
 
 import MainUI from "./MainUI.svelte";
 
@@ -94,6 +95,11 @@ export default class MainApplication extends SvelteApplication {
     API.getControlled = () => [globalThis.canvas.background.controlled, ...globalThis.canvas.tokens.controlled].flat();
     API.getPlaceables = () => [Array.from(globalThis.canvas.scene.tokens.values()), ...Array.from(globalThis.canvas.scene.tiles.values())].flat();
 
+    API.addArgSpec = addArgSpec;
+    API.addModifier = addModifier;
+    API.addSection = addSection;
+
+    initIntegrations();
   }
 
   toggle() {
