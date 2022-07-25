@@ -1,12 +1,13 @@
 <script>
    import Select from "svelte-select";
-   import { argSpecs } from "../../constants.js";
+   import { sectionSpecs, modifierSpecs, argSpecs } from "../../modules/Specs.js";
    import { logger, rgb2hex } from "../../modules/helpers.js";
    import Tags from "./Tags.svelte";
-   import { tagColors, globalTags } from "../../modules/stores.js";
-   import { XIcon } from "@rgossiaux/svelte-heroicons/solid";
+   import { tagColors, globalTags, sequences } from "../../modules/stores.js";
    import { HsvPicker } from "svelte-color-picker";
    import { v4 as uuidv4 } from "uuid";
+   import FaTimes from "svelte-icons/fa/FaTimes.svelte";
+   import FaHashtag from "svelte-icons/fa/FaHashtag.svelte";
    const dispatch = createEventDispatcher();
 
    export let id = uuidv4();
@@ -21,10 +22,26 @@
    export let widthAuto = false;
    export let onTagClick;
    export let justify = "start";
+   export let extra;
+
    let spec = argSpecs.find((s) => s.id == type);
    if (value === undefined || value === null || (value === "" && "default" in spec && value !== spec.default)) {
       resetValue();
       debounce(dispatch("change", value), 200);
+   }
+
+   function setEffectSource(e) {
+      value = [e.detail.value];
+      dispatch("change", value);
+   }
+   function setEffectSourceArg(e) {
+      if (e.detail) {
+         value[1] = e.detail;
+         if (value[0] == "#origin") {
+            value[1] = e.detail.id;
+         }
+      }
+      dispatch("change", value);
    }
 
    function selectFile() {
@@ -64,7 +81,13 @@
    if (spec && "options" in spec) {
       let ops = spec.options;
       if (typeof spec.options === "function") {
-         ops = spec.options(value);
+         ops = spec.options(value, extra);
+      }
+      if (!Array.isArray(ops)) {
+         ops.update((items) => {
+            ops = items;
+            return items;
+         });
       }
       options = [...ops, ...additionalItems].flat();
    }
@@ -74,7 +97,13 @@
       if (spec && "options" in spec) {
          let ops = spec.options;
          if (typeof spec.options === "function") {
-            ops = spec.options(value);
+            ops = spec.options(value, extra);
+         }
+         if (!Array.isArray(ops)) {
+            ops.update((items) => {
+               ops = items;
+               return items;
+            });
          }
          options = [...ops, ...additionalItems].flat();
       }
@@ -109,7 +138,7 @@
       if (spec.options) {
          let ops = spec.options;
          if (typeof spec.options === "function") {
-            ops = spec.options(value);
+            ops = spec.options(value, extra);
          }
          value = typeof ops[0] === "object" ? ops[0].value : ops[0];
       } else if ("default" in spec) {
@@ -135,33 +164,24 @@
 {/if}
 
 <label
-   class="arg-input ui-input-group ui-h-full ui-justify-{justify}"
+   class="arg-input ui-min-w-fit ui-input-group ui-h-full ui-justify-{justify} ui-min-h-12"
    for=""
    class:!ui-w-auto={widthAuto}
-   class:ui-mr-3={widthAuto}
 >
+   <slot name="left" />
    {#if label != ""}
       <span class="">{label}</span>
    {/if}
    {#if mode == "direct"}
       {#if !hideSign}
          <button
-            class="ui-btn ui-btn-square ui-m-0"
+            class="ui-btn ui-btn-square ui-m-0 !ui-p-[10px]"
             class:ui-btn-disabled={!(variables && vars.length > 0)}
             style:background-color={variables && vars.length > 0 ? "#316060" : "#c7e1e1"}
-            style:color={variables && vars.length > 0 ? "white" : "#232323"}
+            style:color={variables && vars.length > 0 ? "white" : "#444444"}
             on:click={(e) => setMode(e, "variable")}
          >
-            <svg
-               xmlns="http://www.w3.org/2000/svg"
-               class="ui-h-6 ui-w-6"
-               fill="none"
-               viewBox="0 0 24 24"
-               stroke="currentColor"
-               stroke-width="2"
-            >
-               <path stroke-linecap="round" stroke-linejoin="round" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-            </svg>
+            <FaHashtag />
          </button>
       {/if}
 
@@ -220,7 +240,7 @@
                >
             </button>
          </label>
-      {:else if type == "position" || type == "token" || type == "ease" || type == "targets" || type == "hook"}
+      {:else if type == "position" || type == "token" || type == "ease" || type == "targets" || type == "hook" || type == "placeable"}
          {#if Array.isArray(value)}
             <div class:ui-w-full={selectFull}>
                <Tags
@@ -235,15 +255,16 @@
                   colors={$tagColors}
                   on:tags={(e) => (value = e.detail.tags)}
                   tags={value}
+                  borderRadius="0rem"
                />
             </div>
-            <button class="ui-btn ui-btn-square" on:click={resetValue}>
-               <XIcon class="ui-h-8 ui-w-8" />
+            <button class="ui-btn ui-btn-square !ui-p-[8px]" on:click={resetValue}>
+               <FaTimes />
             </button>
          {:else if value && typeof value === "string" && value.startsWith("#id:")}
             <input type="text" value={value.slice(4)} on:change={changeId} class="ui-input ui-input-lg ui-text-base" />
-            <button class="ui-btn ui-btn-square" on:click={resetValue}>
-               <XIcon class="ui-h-8 ui-w-8" />
+            <button class="ui-btn ui-btn-square !ui-p-[8px]" on:click={resetValue}>
+               <FaTimes />
             </button>
          {:else if (typeof value === "object" && "x" in value && "y" in value) || type == "offset" || type == "size"}
             <input
@@ -260,8 +281,8 @@
                on:change={convertFixed}
                class="ui-input ui-input-lg ui-text-base"
             />
-            <button class="ui-btn ui-btn-square" on:click={resetValue}>
-               <XIcon class="ui-h-8 ui-w-8" />
+            <button class="ui-btn ui-btn-square !ui-p-[8px]" on:click={resetValue}>
+               <FaTimes />
             </button>
          {:else}
             <Select
@@ -290,8 +311,8 @@
             on:change={convertFixed}
             class="ui-input ui-input-lg ui-text-base"
          />
-         <button class="ui-btn ui-btn-square" on:click={resetValue}>
-            <XIcon class="ui-h-8 ui-w-8" />
+         <button class="ui-btn ui-btn-square !ui-p-[8px]" on:click={resetValue}>
+            <FaTimes />
          </button>
       {:else if type == "bool"}
          <div
@@ -325,10 +346,37 @@
       {:else if type == "color"}
          <label for="color-modal-{id}" class="ui-btn ui-btn-square" style:background-color={value} />
          <input type="text" bind:value class="ui-input ui-input-lg ui-text-base" />
+      {:else if type == "effectSource"}
+         <Select
+            items={options}
+            value={options.find((o) => o.value[0] == value[0])}
+            on:select={setEffectSource}
+            listAutoWidth={false}
+            isClearable={false}
+         />
+         {#if value[0] == "#origin"}
+            <Select
+               optionIdentifier="id"
+               labelIdentifier="title"
+               on:select={setEffectSourceArg}
+               items={$sequences}
+               value={value[1]}
+               listAutoWidth={false}
+               isClearable={false}
+            />
+         {:else if value[0] != "#sceneId"}
+            <input
+               on:change={setEffectSourceArg}
+               type="text"
+               bind:value={value[1]}
+               class="ui-input ui-input-lg ui-text-base"
+            />
+         {/if}
       {:else if spec.control == "select"}
          <Select
             items={options}
             {value}
+            {groupBy}
             on:select={(e) => (value = e.detail.value)}
             on:clear={(_) => (value = "")}
             listAutoWidth={false}
@@ -367,4 +415,5 @@
          isClearable={false}
       />
    {/if}
+   <slot name="right" />
 </label>

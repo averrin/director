@@ -1,8 +1,8 @@
 <script>
    import ArgInput from "./ArgInput.svelte";
-   import { XIcon } from "@rgossiaux/svelte-heroicons/solid";
    import Select from "svelte-select";
-   import { argSpecs } from "../../constants.js";
+   import FaTimes from "svelte-icons/fa/FaTimes.svelte";
+   import { argSpecs } from "../../modules/Specs.js";
    import { createEventDispatcher } from "svelte";
 
    const dispatch = createEventDispatcher();
@@ -46,7 +46,7 @@
 
    <Select items={argSpecs} optionIdentifier="id" labelIdentifier="id" value={variable.type} on:select={updateType} />
    <ArgInput {onTagClick} type={variable.type} bind:value={variable.value} on:change={emitChange} />
-   <button class="ui-btn ui-btn-outline ui-btn-error ui-btn-square ui-justify-self-end" on:click={remove}>
-      <XIcon class="ui-h-8 ui-w-8" />
+   <button class="ui-btn ui-btn-outline ui-btn-error ui-btn-square ui-justify-self-end !ui-p-[8px]" on:click={remove}>
+      <FaTimes />
    </button>
 </div>

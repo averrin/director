@@ -23,7 +23,6 @@
          reader.onload = function () {
             let data = JSON.parse(reader.result);
             file.data = data;
-            logger.info(data);
             if ("sections" in data) {
                file.dirType = "sequence";
                file.count = 1;

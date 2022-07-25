@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { logger, setting } from "./helpers.js";
-import { sectionSpecs, modifierSpecs, SETTINGS, moduleId, argSpecs } from "../constants.js";
+import { SETTINGS, moduleId } from "../constants.js";
+import { sectionSpecs, modifierSpecs, argSpecs } from "./Specs.js";
 import { calculateValue } from "./helpers.js"
 
 import { plainToClass, serialize, deserialize, classToPlain } from 'class-transformer';
@@ -82,7 +83,7 @@ controlled.forEach(c => c.control());`;
           ret += `[${val}.length-1]`;
         }
         val = ret;
-      } else if (val.startsWith("#targets")) {
+      } else if (val.startsWith("#target")) {
         ret = `Array.from(game.user.targets)`;
         if (val.endsWith(".first")) {
           ret += '[0]';
@@ -90,6 +91,8 @@ controlled.forEach(c => c.control());`;
           ret += `[${val}.length-1]`;
         }
         val = ret;
+      } else if (val.startsWith("#id:")) {
+        val = `Director.getPlaceables().find(t => t.id == "${val.slice(4)}" || t.name == "${val.slice(4)}")`;
       } else if (val.startsWith("@")) {
         val = val.slice(1);
       } else if (type == "expression") {
@@ -99,7 +102,11 @@ controlled.forEach(c => c.control());`;
         val = JSON.stringify(val);
       }
     } else if (Array.isArray(val)) {
-      val = `Tagger.getByTag(${JSON.stringify(val)})[0]`;
+      if (type == "effectSource") {
+        // keep end effect args as array
+      } else {
+        val = `Tagger.getByTag(${JSON.stringify(val)})[0]`;
+      }
     } else if (val != null && typeof val === "object" && "x" in val && "y" in val) {
       val = JSON.stringify(val);
     } else {
@@ -127,7 +134,7 @@ controlled.forEach(c => c.control());`;
     r += `const sequence = new Sequence("${moduleId}")\n`;
     let i = 0;
     for (const section of this.sections) {
-      const args = section.args.map((a, i) => this.getCodeForVal("", a, section._spec.args[i].type)[0]);
+      const args = section.args.map((a, i) => this.getCodeForVal("", a, section._spec?.args[i]?.type)[0]);
       let sectionName = section.type;
       if (section.type == "effect") {
         const name = section.args[0] || `${this.title}-${i}`;
@@ -135,7 +142,7 @@ controlled.forEach(c => c.control());`;
         r += `\t\t.origin("${this.id}")\n`;
         r += `\t\t.name("${name}")\n`;
       } else {
-        if ("toCode" in section._spec) {
+        if (section._spec && "toCode" in section._spec) {
           r += section._spec.toCode(args);
         } else {
           r += `\t.${sectionName}(${args.join(", ")})\n`;
@@ -248,18 +255,6 @@ controlled.forEach(c => c.control());`;
         let currentModifier;
         for (const m of section.modifiers) {
           const args = await this.makeArgs(m);
-          let argsString = args.map(a => {
-            if (a == undefined || a == null) return a;
-            if (Object.getPrototypeOf(a) == null || Object.getPrototypeOf(a) === Object.getPrototypeOf({})) {
-              return JSON.stringify(a).substring(0, 50);
-            } else {
-              if (typeof a === 'string' || a instanceof String) {
-                return JSON.stringify(a);
-              }
-              return a;
-            }
-          });
-          argsString = argsString.join(', ');
           let modName = m.type;
           if (currentModifier) {
             currentModifier = currentModifier[modName](...args);

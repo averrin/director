@@ -17,29 +17,32 @@ Director sometimes looks too complex, so read [Documentation](https://github.com
 ## Supported actions
 It's not going to be MATT's alternative, so actions are pretty basic
 - Execute a trigger [requires MATT]
-- Toggle visibility
-- Hide
-- Show
+- Toggle visibility / Hide / Show
 - Kill [only for tokens]
 - Revive [only for tokens]
 - Play a sequence
 - Stop Sequencer's effects
+- Manage Convenient Effects
+- Manage TokenMagicFX filters
 
 ## Integrations
 * Tagger [required]
-* Monk's Active Tiles Triggers
 * Sequencer [BETA, required]
-* Token Magic FX [Virtual Sequencer's section]
+* Monk's Active Tiles Triggers
+* Token Magic FX [optional Virtual Sequencer's section]
+* DFreds Convenient Effects [optional Virtual Sequencer's section]
 
 ## Plans
 - [ ] Documentation
-- [ ] Extension API
+- [X] Extension API
+- [ ] Token Attacher integration
+- [ ] Rolls support (variables, hooks)
 - [ ] v10 support
 - [ ] Beginner / Expert UI mode
 - [ ] Better import / export
 - [ ] Better support of Sequencer's functions and types
-- [ ] Better support for Token Magic FX
-- [ ] Support for Dynamic Active Effects
+- [X] Better support for Token Magic FX
+- [X] Support for Convenient Effects
 - [ ] Hooks for ending effects of a sequence. E.g. to destroy DAE's effects.
 - [ ] [Alpha HUD](https://github.com/averrin/alpha-hud) integrations. A scene widget with something like the hotbar.
 

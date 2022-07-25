@@ -3,15 +3,15 @@
    import { hooks } from "../../modules/stores.js";
    import { onDestroy } from "svelte";
    import { v4 as uuidv4 } from "uuid";
-   import { XIcon } from "@rgossiaux/svelte-heroicons/solid";
    import Hook from "../../modules/Hooks.js";
    import FaExpandArrowsAlt from "svelte-icons/fa/FaExpandArrowsAlt.svelte";
    import FaCompressArrowsAlt from "svelte-icons/fa/FaCompressArrowsAlt.svelte";
-   import { hookSpecs } from "../../constants.js";
+   import { hookSpecs } from "../../modules/Specs.js";
    import exportFromJSON from "export-from-json";
    import FaFileExport from "svelte-icons/fa/FaFileExport.svelte";
    import { setting } from "../../modules/helpers.js";
    import { SETTINGS } from "../../constants.js";
+   import FaTimes from "svelte-icons/fa/FaTimes.svelte";
 
    export let onTagClick;
 
@@ -61,7 +61,7 @@
       <div
          class="ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-my-1 ui-items-start ui-gap-3 ui-justify-start"
       >
-         <div class="ui-flex ui-flex-row ui-items-center ui-gap-3 ui-w-full">
+         <div class="ui-flex ui-flex-row ui-items-start ui-gap-3 ui-w-full">
             <ArgInput
                hideSign={true}
                widthAuto={true}
@@ -93,19 +93,23 @@
                      <FaCompressArrowsAlt />
                   {/if}
                </button>
-               <button class="ui-btn ui-btn-outline ui-btn-error ui-btn-square" on:click={(e) => deleteHook(hook.id)}>
-                  <XIcon class="ui-h-8 ui-w-8" />
+               <button
+                  class="ui-btn ui-btn-outline ui-btn-error ui-btn-square !ui-p-[8px]"
+                  on:click={(e) => deleteHook(hook.id)}
+               >
+                  <FaTimes />
                </button>
             </div>
          </div>
          {#if !hook.collapsed}
-            <div class="ui-flex ui-flex-row ui-items-center ui-gap-3 ui-w-full ui-px-3 ui-justify-center">
+            <div class="ui-flex ui-flex-row ui-items-center ui-gap-3 ui-w-full ui-justify-start">
                <ArgInput
                   hideSign={true}
                   bind:value={hook.target}
                   type="targets"
                   label="Target"
                   on:change={saveHooks}
+                  widthAuto={true}
                   {onTagClick}
                />
                {#if hookSpecs.find((s) => s.id == hook.event)?.args}

@@ -1,6 +1,6 @@
 import { plainToClass } from 'class-transformer';
 import { logger } from './helpers.js';
-import { hookSpecs } from '../constants.js';
+import { hookSpecs } from './Specs.js';
 
 export default class Hook {
   constructor(id, name) {

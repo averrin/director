@@ -10,6 +10,8 @@
    import FaFileExport from "svelte-icons/fa/FaFileExport.svelte";
    import { setting } from "../../modules/helpers.js";
    import { SETTINGS } from "../../constants.js";
+   import { HsvPicker } from "svelte-color-picker";
+   import { logger, rgb2hex } from "../../modules/helpers.js";
 
    export let onTagClick;
    export let onSelect;
@@ -18,6 +20,15 @@
       currentActions = actions;
    });
    onDestroy(unsubscribe3);
+
+   let pickerOpen = false;
+   let editItem;
+   let startColor = "#ffffff";
+   function itemClick(item) {
+      editItem = item;
+      startColor = editItem.color?.slice(0, 7);
+      pickerOpen = !pickerOpen;
+   }
 
    function addAction(tags) {
       currentActions = [new Action(uuidv4()), ...currentActions];
@@ -87,9 +98,23 @@
       actions.set(currentActions);
       // }
    }
+
+   function colorChange(e) {
+      editItem.color = rgb2hex(e.detail).hex;
+      currentActions = currentActions;
+   }
 </script>
 
-<div class="flex ui-flex-col ui-p-1">
+{#if editItem}
+   <input type="checkbox" id="color-modal-actions" class="ui-modal-toggle" bind:checked={pickerOpen} />
+   <label for="color-modal-actions" class="ui-modal ui-cursor-pointer">
+      <label class="ui-modal-box ui-relative ui-w-fit" for="">
+         <HsvPicker on:colorChange={colorChange} {startColor} />
+      </label>
+   </label>
+{/if}
+
+<div class="flex ui-flex-col ui-p-2">
    <div class="ui-flex ui-flex-row ui-items-center ui-gap-2">
       <button class="ui-btn ui-btn-outline ui-btn-primary ui-my-2 ui-flex-1" on:click={(e) => addAction()}
          >Add action</button
@@ -105,8 +130,17 @@
       {/if}
    </div>
    <div>
-      <Sortable items={currentActions} let:item let:index on:change={sortActions}>
-         <ActionItem {item} {selectAction} {deleteAction} {onTagClick} {actionTags} {$tagColors} on:change={onChange} />
+      <Sortable items={currentActions} let:item let:index on:change={sortActions} options={{ handle: ".handle" }}>
+         <ActionItem
+            {item}
+            {selectAction}
+            {deleteAction}
+            {onTagClick}
+            {actionTags}
+            {$tagColors}
+            on:change={onChange}
+            {itemClick}
+         />
       </Sortable>
    </div>
 </div>

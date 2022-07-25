@@ -1,6 +1,8 @@
 <script>
    // This is a modified version of https://github.com/agustinl/svelte-tags-input
    import { createEventDispatcher } from "svelte";
+   import { contrastColor } from "../../modules/helpers.js";
+   import { XIcon } from "@rgossiaux/svelte-heroicons/solid";
 
    const dispatch = createEventDispatcher();
 
@@ -32,17 +34,7 @@
    export let labelText;
    export let labelShow;
    export let colors = {};
-
-   function contrastColor(color) {
-      if (!color || color == "") return "#eeeeeeff";
-      const pRed = 0.299;
-      const pGreen = 0.587;
-      const pBlue = 0.114;
-      const rgb = foundry.utils.hexToRGB(parseInt(color.slice(1).substring(0, 6), 16));
-
-      const contrast = Math.sqrt(pRed * rgb[0] ** 2 + pGreen * rgb[1] ** 2 + pBlue * rgb[2] ** 2);
-      return contrast > 0.5 ? "#232323ff" : "#eeeeeeff";
-   }
+   export let borderRadius;
 
    let layoutElement;
 
@@ -362,14 +354,19 @@
    }
 
    export let onTagClick;
-   function onTagClickHandler(e, tag) {
+   function onTagClickHandler(event, tag) {
       if (event.which == 3) {
-         onTagClick(e, tag);
+         onTagClick(event, tag);
       }
    }
 </script>
 
-<div class="svelte-tags-input-layout" class:sti-layout-disable={disable} bind:this={layoutElement}>
+<div
+   class="svelte-tags-input-layout"
+   class:sti-layout-disable={disable}
+   bind:this={layoutElement}
+   style:border-radius={borderRadius}
+>
    <label for={id} class={labelShow ? "" : "sr-only"}>{labelText}</label>
 
    {#if tags.length > 0}
@@ -388,7 +385,10 @@
                {tag[autoCompleteKey]}
             {/if}
             {#if !disable}
-               <b class="svelte-tags-input-tag-remove" on:click={() => removeTag(i)}> &#215;</b>
+               <XIcon
+                  class="ui-h-4 ui-w-4 ui-mx-1 ui-mt-1 ui-cursor-pointer svelte-tags-input-tag-remove"
+                  on:click={() => removeTag(i)}
+               />
             {/if}
          </span>
       {/each}

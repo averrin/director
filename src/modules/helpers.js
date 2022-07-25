@@ -1,4 +1,4 @@
-import { moduleId, SETTINGS } from '../constants.js';
+import { moduleId, SETTINGS, infoColor } from '../constants.js';
 import consola from 'consola/src/browser'
 
 export let setting = key => {
@@ -42,6 +42,7 @@ export function isLiving(token) {
 }
 
 export let logger = consola.withTag(moduleId);
+logger._reporters[0].levelColorMap[3] = infoColor;
 
 export function findItems(token, itemsToFind) {
   // logger.info(`find items for: ${token.data.name}`, token, itemsToFind);
@@ -86,6 +87,9 @@ export function calculateValueSync(val, type, seq) {
     } else if (val.startsWith("#controlled")) {
       let ret = globalThis.canvas.tokens.controlled;
       ret = [globalThis.canvas.background.controlled, ...ret].flat();
+      if (ret.length == 0) {
+        throw new Error("Nothing is selected.");
+      }
       if (val.endsWith(".first")) {
         seq?.export.vars.push(`const ${varName} = Director.getControlled();`);
         return ret[0];
@@ -101,6 +105,9 @@ export function calculateValueSync(val, type, seq) {
       }
     } else if (val.startsWith("#target")) {
       const ret = Array.from(globalThis.game.user.targets);
+      if (ret.length == 0) {
+        throw new Error("Nothing is targeted.");
+      }
       if (val.endsWith(".first")) {
         seq?.export.vars.push(`const ${varName} = Array.from(game.user.targets)[0];`);
         return ret[0];
@@ -122,7 +129,7 @@ export function calculateValueSync(val, type, seq) {
       return globalThis.Director.getPlaceables().find(t => t.id == val.slice(4) || t.name == val.slice(4));
     } else if (type == "expression") {
       const vars = {};
-      for (const v of seq.variables) {
+      for (const v of seq.variables.filter(v => v.name != varName && v.value != val)) {
         vars[v.name] = v.lazy ? v.calcValue : calculateValueSync(v.value, v.type, seq);
       }
       let code = `'use strict'; try {return ${val}} catch(e) {return false}`;
@@ -139,9 +146,13 @@ export function calculateValueSync(val, type, seq) {
       return () => f(...Object.values(vars));
     }
   } else if (Array.isArray(val)) {
-    val = globalThis.Tagger.getByTag(val);
-    if (type != "selection") {
-      if (val.length > 0) val = globalThis.Sequencer.Helpers.random_array_element(val);
+    if (type == "effectSource" || type == "hookData") {
+      return val;
+    } else {
+      val = globalThis.Tagger.getByTag(val);
+      if (type != "selection") {
+        if (val.length > 0) val = globalThis.Sequencer.Helpers.random_array_element(val);
+      }
     }
   }
   return val;
@@ -170,4 +181,15 @@ export function evalExpression(expr, ...args) {
   let code = `try {return ${expr}} catch(e) {return false}`;
   const f = new Function("...args", code);
   return f(...args)
+}
+
+export function contrastColor(color) {
+  if (!color || color == "") return "#eeeeeeff";
+  const pRed = 0.299;
+  const pGreen = 0.587;
+  const pBlue = 0.114;
+  const rgb = foundry.utils.hexToRGB(parseInt(color.slice(1).substring(0, 6), 16));
+
+  const contrast = Math.sqrt(pRed * rgb[0] ** 2 + pGreen * rgb[1] ** 2 + pBlue * rgb[2] ** 2);
+  return contrast > 0.5 ? "#232323ff" : "#eeeeeeff";
 }

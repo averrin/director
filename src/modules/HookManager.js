@@ -1,5 +1,6 @@
 import { logger, calculateValueSync, evalExpression } from './helpers.js';
-import { hookSpecs, moduleId, SETTINGS } from '../constants.js';
+import { moduleId, SETTINGS } from '../constants.js';
+import { hookSpecs } from "./Specs.js";
 
 class HookManager {
   #hooks = [];
@@ -9,37 +10,29 @@ class HookManager {
   constructor() {
     Hooks.on("preUpdateActor", (actor, _, updates) => {
       updates.prevHp = actor.data.data.attributes.hp.value;
-      updates.prevData = JSON.parse(JSON.stringify(actor.data.data));
-      logger.info(updates.prevData);
+      updates.prevData = { ...actor.getRollData() };
     });
     Hooks.on("preUpdateToken", (token, _, updates) => {
-      updates.prevData = JSON.parse(JSON.stringify(token.data));
+      updates.prevTokenData = { ...token.data };
       updates.prevPos = token.position;
       updates.prevX = token.data.x;
       updates.prevY = token.data.y;
     });
   }
 
-  getHandler(parent) {
+  getHandler(_parent) {
     return (...args) => {
+      const parent = _parent;
       for (const hook of this.#hooks) {
+        const spec = hookSpecs.find(s => s.id == hook.event);
+        if (!spec.parents.includes(parent)) continue;
         if (!hook.enabled || !hook.event || !hook.target) continue;
         let targets = calculateValueSync(hook.target);
         if (!targets) return;
         if (!Array.isArray(targets)) targets = [targets];
-        const spec = hookSpecs.find(s => s.id == hook.event);
-        if (parent == "updateActor") {
-          const tokensId = globalThis.canvas.scene.tokens.filter(t => t.actor.id == args[0].id).map(t => t.id);
-          for (const target of targets) {
-            if ([args[0].id, ...tokensId].includes(target.id) && spec.test(...hook.args, ...args)) {
-              hook.call(target, ...args);
-            }
-          }
-        } else if (parent == "updateToken") {
-          for (const target of targets) {
-            if ([args[0].id].includes(target.id) && spec.test(...hook.args, ...args)) {
-              hook.call(target, ...args);
-            }
+        for (const target of targets) {
+          if ("target" in spec && spec.target(target, ...args) && spec.test(...hook.args, ...args)) {
+            hook.call(target, ...args);
           }
         }
       }

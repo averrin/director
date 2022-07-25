@@ -1,14 +1,14 @@
 <script>
    export let seq;
 
+   import FaTimes from "svelte-icons/fa/FaTimes.svelte";
    import { sequences } from "../../modules/stores";
-   import { sectionSpecs, modifierSpecs, argSpecs } from "../../constants.js";
+   import { sectionSpecs, modifierSpecs, argSpecs } from "../../modules/Specs.js";
    import { Section, Modifier, DSequence, Variable } from "../../modules/Sequencer.js";
    // import { logger } from "../../modules/helpers.js";
    import { v4 as uuidv4 } from "uuid";
    import Select from "svelte-select";
    import Sortable from "./Sortable.svelte";
-   import { XIcon } from "@rgossiaux/svelte-heroicons/solid";
    import VariableComponent from "./Variable.svelte";
    import ArgInput from "./ArgInput.svelte";
 
@@ -162,6 +162,7 @@
                   <button
                      class="ui-btn ui-btn-square ui-btn-ghost handle ui-justify-self-start ui-cursor-move"
                      style="color: #46525d; padding: 8px"
+                     title="move"
                   >
                      <FaArrowsAlt />
                   </button>
@@ -190,34 +191,45 @@
                   {/if}
                </div>
                <div class="ui-flex-none ui-btn-group">
-                  <button
-                     style="padding: 8px"
-                     class="ui-btn ui-btn-square ui-justify-self-end"
-                     class:ui-btn-outline={!item.collapsed}
-                     on:click={(e) => toggleCollapsed(item)}
-                  >
-                     {#if item.collapsed}
-                        <FaExpandArrowsAlt />
-                     {:else}
-                        <FaCompressArrowsAlt />
-                     {/if}
-                  </button>
+                  {#if item._spec.collapsible}
+                     <button
+                        title="toggle collapsed"
+                        style="padding: 8px"
+                        class="ui-btn ui-btn-square ui-justify-self-end"
+                        class:ui-btn-outline={!item.collapsed}
+                        on:click={(e) => toggleCollapsed(item)}
+                     >
+                        {#if item.collapsed}
+                           <FaExpandArrowsAlt />
+                        {:else}
+                           <FaCompressArrowsAlt />
+                        {/if}
+                     </button>
+                  {/if}
 
-                  <button class="ui-btn ui-btn-square ui-p-2 ui-btn-outline ui-m-0" on:click={(e) => copySection(item)}>
+                  <button
+                     title="duplicate"
+                     class="ui-btn ui-btn-square ui-p-2 ui-btn-outline ui-m-0"
+                     on:click={(e) => copySection(item)}
+                  >
                      <FaRegCopy />
                   </button>
+                  {#if !item._spec.nonPlayable}
+                     <button
+                        title="play section"
+                        style="padding: 8px"
+                        class="ui-btn ui-btn-outline ui-btn-square ui-justify-self-end"
+                        on:click={(e) => playSection(item)}
+                     >
+                        <FaPlay />
+                     </button>
+                  {/if}
                   <button
-                     style="padding: 8px"
-                     class="ui-btn ui-btn-outline ui-btn-square ui-justify-self-end"
-                     on:click={(e) => playSection(item)}
-                  >
-                     <FaPlay />
-                  </button>
-                  <button
-                     class="ui-btn ui-btn-outline ui-btn-error ui-btn-square ui-justify-self-end"
+                     title="delete section"
+                     class="ui-btn ui-btn-outline ui-btn-error ui-btn-square ui-justify-self-end !ui-p-[8px]"
                      on:click={(e) => deleteSection(item)}
                   >
-                     <XIcon class="ui-h-8 ui-w-8" />
+                     <FaTimes />
                   </button>
                </div>
             </div>
@@ -256,10 +268,10 @@
                      {/if}
 
                      <button
-                        class="ui-btn ui-btn-outline ui-btn-error ui-btn-square ui-justify-self-end"
+                        class="ui-btn ui-btn-outline ui-btn-error ui-btn-square ui-justify-self-end !ui-p-[8px]"
                         on:click={(e) => deleteModifier(item, mod)}
                      >
-                        <XIcon class="ui-h-8 ui-w-8" />
+                        <FaTimes />
                      </button>
                   </div>
                {/each}

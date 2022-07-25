@@ -10,6 +10,9 @@
 #director.window-app {
     min-width: 820px;
 
+    svg {
+      border-radius: 0px !important;
+    }
     .window-content {
         padding: 0px;
     }
@@ -24,8 +27,16 @@
 
         input, .selection {
           font-size: 1rem !important;
-          height: 3rem !important;
+          height: 100% !important;
         }
+    }
+    .svelte-tags-input-layout {
+      height: 100%;
+      align-items: stretch;
+      input {
+        display: flex;
+        height: unset !important;
+      }
     }
 
     .ui-input-group .svelte-select:first-child:not(:last-child),

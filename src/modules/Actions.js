@@ -1,5 +1,6 @@
-import { plainToClass, serialize, deserialize } from 'class-transformer';
+import { plainToClass, serialize, deserialize, classToPlain } from 'class-transformer';
 import { calculateValue } from "./helpers.js"
+import { actionTypes } from './Specs.js';
 
 export default class Action {
   constructor(id) {
@@ -7,6 +8,14 @@ export default class Action {
     this.type = undefined;
     this.args = [];
     this.value = undefined;
+    this.color = undefined;
+    this.name = "";
+  }
+
+  toJSON() {
+    this.type = { ...this.type };
+    delete this.type?.execute;
+    return classToPlain(this, { excludePrefixes: ["_"] });
   }
 
   static fromPlain(plain) {
@@ -18,65 +27,32 @@ export default class Action {
       a.value = a.tags;
       a.tags = undefined;
     }
+    a.type = { ...actionTypes.find(t => t.id == a?.type?.id) };
+    if (a?.type?.execute) {
+      delete a.type.execute;
+    }
     return a;
   }
 
   async run(event, override, seqVars) {
+    const spec = actionTypes.find(t => t.id == this.type.id);
     const value = override || this.value;
     let objects;
     objects = await calculateValue(value, "selection");
     if (!Array.isArray(objects)) objects = [objects];
-    switch (this.type?.id) {
-      case "toggle":
-        objects.map((o) => o.document || o).forEach((o) => o.update({ hidden: !o.data.hidden }));
-        break;
-      case "hide":
-        objects.map((o) => o.document || o).forEach((o) => o.update({ hidden: true }));
-        break;
-      case "show":
-        objects.map((o) => o.document || o).forEach((o) => o.update({ hidden: false }));
-        break;
-      case "kill":
-        objects.map((o) => o.document || o).forEach((o) =>
-          o.actor.update({
-            "data.attributes.hp.value": 0,
-          })
-        );
-        break;
-      case "revive":
-        objects.map((o) => o.document || o).forEach((o) =>
-          o.actor.update({
-            "data.attributes.hp.value": o.actor.data.data.attributes.hp.max,
-          })
-        );
-        break;
-      case "execute":
-        objects.forEach((o) => {
-          if (o.data.flags["monks-active-tiles"]) {
-            globalThis.game.MonksActiveTiles.object = { document: o };
-            globalThis.game.MonksActiveTiles.manuallyTrigger(event);
-          }
-        });
-        break;
-      default:
-        if (!this.type || !this.type.id) return;
-        if (this.type.id == "endEffect") {
-          if (this.args[0].value == "#sceneId") {
-            globalThis.Sequencer.EffectManager.endEffects();
-          } else if (this.args[0].value == "#origin") {
-            globalThis.Sequencer.EffectManager.endEffects({ origin: this.args[1].id });
-          } else if (this.args.length >= 2) {
-            const f = {};
-            f[this.args[0].value.slice(1)] = this.args[1];
-            globalThis.Sequencer.EffectManager.endEffects(f);
-          }
-        } else {
-          objects.map(async (o) => {
-            const overrides = seqVars || {};
-            overrides[this.args[0]?.name || this.args[0]] = o;
-            globalThis.Director.playSequence(this.type.id, overrides);
-          });
-        }
+    if (spec?.execute) {
+      if (spec.ignoreTarget) {
+        spec.execute(null, this, event, seqVars);
+      } else {
+        objects.forEach((o) => spec.execute(o, this, event, seqVars));
+      }
+    } else {
+      if (!this.type || !this.type.id) return;
+      objects.map(async (o) => {
+        const overrides = seqVars || {};
+        overrides[this.args[0]?.name || this.args[0]] = o;
+        globalThis.Director.playSequence(this.type.id, overrides);
+      });
     }
   }
 }
