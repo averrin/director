@@ -195,7 +195,8 @@ function initConvenientEffectsIntegration() {
         group: 'Convenient Effects',
         execute: (object, action, event) => {
           game.dfreds.effectInterface.addEffect({ effectName: action.args[0], uuid: object.actor.uuid });
-        }, args: [{ type: 'ce-effect', label: 'effect' }]
+        },
+        args: [{ type: 'ce-effect', label: 'effect' }]
       });
 
     Director.addAction(

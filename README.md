@@ -11,6 +11,8 @@ Director sometimes looks too complex, so read [Documentation](https://github.com
 ## Hints
 - you can drag and drop tags
 - right click on tag opens a color picker
+- right click on action item opens a color picker for its accent
+- if director fails to open, please try `Director.clearSceneData()` or `Director.clearGlobalData()` to clear data.
 - click on "visible/hidden" tag in a selection card toggles visibility
 - You can [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/averrin)
 
