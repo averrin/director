@@ -29,9 +29,12 @@ export function initTagColors() {
 export const sequences = writable([]);
 function updateSequences() {
   const global = game.settings.get(moduleId, SETTINGS.SEQUENCES);
-  let inScene = "director-sequences" in globalThis.canvas.scene.data.flags
-    ? globalThis.canvas.scene.data.flags["director-sequences"].filter((a) => a).map(a => DSequence.fromPlain(a))
-    : [];
+  let inScene = [];
+  if (globalThis.canvas.scene) {
+    inScene = "director-sequences" in globalThis.canvas.scene?.data.flags
+      ? globalThis.canvas.scene.data.flags["director-sequences"].filter((a) => a).map(a => DSequence.fromPlain(a))
+      : [];
+  }
   sequences.set(
     [...inScene, ...global].flat()
       .filter(s => s).map(s => DSequence.fromPlain(s)));
@@ -44,7 +47,7 @@ export function initSequences() {
   updateSequences();
   sequences.subscribe(async (seqs) => {
     game.settings.set(moduleId, SETTINGS.SEQUENCES, seqs.filter(s => !s.inScene));
-    globalThis.canvas.scene.update({ "flags.director-sequences": seqs.filter(s => s.inScene).map(s => s.toJSON()) });
+    globalThis.canvas.scene?.update({ "flags.director-sequences": seqs.filter(s => s.inScene).map(s => s.toJSON()) });
   });
 }
 

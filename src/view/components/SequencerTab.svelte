@@ -14,7 +14,7 @@
    import { moduleId, SETTINGS } from "../../constants.js";
 
    export let onTagClick;
-   let seq;
+   let seq = undefined;
    let fullCode = "";
    let oneliner = "";
    const unsubscribe = sequences.subscribe((seqs) => {
@@ -23,6 +23,9 @@
             seqs.find((s) => s.id == setting(SETTINGS.SELECTED_SEQ)) ||
             seqs[0] ||
             new DSequence(uuidv4(), "New Sequence");
+      }
+      if (Array.isArray(seq)) {
+         seq = new DSequence(uuidv4(), "New Sequence");
       }
       fullCode = getCode();
       oneliner = getOnelliner();
@@ -35,6 +38,7 @@
    onDestroy(unsubscribe);
 
    function getCode() {
+      if (!seq) return "";
       try {
          seq = DSequence.fromPlain(seq);
          return seq?.convertToCode();
@@ -45,12 +49,18 @@
    }
 
    function getOnelliner() {
-      let vars = {};
-      for (const v of seq.variables) {
-         vars[v.name] = null;
+      if (!seq) return "";
+      try {
+         let vars = {};
+         for (const v of seq.variables) {
+            vars[v.name] = null;
+         }
+         vars = JSON.stringify(vars);
+         return `await Director.playSequence("${seq.title}", ${vars});`;
+      } catch (error) {
+         logger.error(error);
+         return ``;
       }
-      vars = JSON.stringify(vars);
-      return `await Director.playSequence("${seq.title}", ${vars});`;
    }
 
    function addSeq() {
@@ -181,5 +191,7 @@
       </div>
    </div>
 
-   <SequenceEditor {seq} {onTagClick} />
+   {#if seq}
+      <SequenceEditor {seq} {onTagClick} />
+   {/if}
 </div>
