@@ -35,8 +35,13 @@
    onDestroy(unsubscribe);
 
    function getCode() {
-      seq = DSequence.fromPlain(seq);
-      return seq.convertToCode();
+      try {
+         seq = DSequence.fromPlain(seq);
+         return seq?.convertToCode();
+      } catch (error) {
+         logger.error(error);
+         return ``;
+      }
    }
 
    function getOnelliner() {
