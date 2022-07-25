@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Dates are d
 
 ## [Unreleased]
 
+## [0.7.1](https://github.com/averrin/director/compare/0.7.0...0.7.1)
+
+Fixed:
+  * Using variables as effects name causes "@varname" during converting to code 
+
 ## [0.7.0](https://github.com/averrin/director/compare/0.6.1...0.7.0)
 
 Bad news:

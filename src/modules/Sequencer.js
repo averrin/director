@@ -137,10 +137,10 @@ controlled.forEach(c => c.control());`;
       const args = section.args.map((a, i) => this.getCodeForVal("", a, section._spec?.args[i]?.type)[0]);
       let sectionName = section.type;
       if (section.type == "effect") {
-        const name = section.args[0] || `${this.title}-${i}`;
+        const name = args[0] || `${this.title}-${i}`;
         r += `\t.${section.type}()\n`;
         r += `\t\t.origin("${this.id}")\n`;
-        r += `\t\t.name("${name}")\n`;
+        r += `\t\t.name(${name})\n`;
       } else {
         if (section._spec && "toCode" in section._spec) {
           r += section._spec.toCode(args);
