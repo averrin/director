@@ -8,8 +8,10 @@
   "contributors": [
     "Averrin - Averrin#0374"
   ],
+  "version": "0.7.0",
   "dependencies": {
     "@typhonjs-fvtt/runtime": "^0.0.14",
+    "auto-changelog": "^2.4.0",
     "class-transformer": "^0.5.1",
     "consola": "^2.15.3",
     "daisyui": "^2.17.0",
