@@ -4,7 +4,10 @@
 
 
 ```
-Module in active development, even minor versions can (and most likely will) break your saved data (actions / hooks / sequences). Please consider it before updating. If feature marked as `alpha` it means patch versions are dangerous too. Sorry for that, but it's the only way to deliver these features for you.
+Module in active development, even minor versions can (and most likely will) break your saved data (actions / hooks / sequences).
+Please consider it before updating.
+If feature marked as `alpha` it means patch versions are dangerous too.
+Sorry for that, but it's the only way to deliver these features for you.
 ```
 
 Are you annoyed with assigning a single tag for a huge bunch of tiles? Or with managing all your MATT-powered switches on a scene? This module is a solution!
@@ -43,8 +46,9 @@ It's not going to be MATT's alternative, so actions are pretty basic
 - [ ] Documentation
 - [X] Extension API
 - [ ] Token Attacher integration
+- [ ] Warpgate mutations & summons integration
 - [ ] Rolls support (variables, hooks)
-- [ ] v10 support
+- [X] v10 support
 - [ ] Beginner / Expert UI mode
 - [ ] Better import / export
 - [ ] Better support of Sequencer's functions and types
