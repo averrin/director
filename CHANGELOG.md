@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
 ## [Unreleased]
+Added:
+  * Foundry v10 compatibility. Requires Sequencer's [Foundry_v10 branch](https://github.com/fantasycalendar/FoundryVTT-Sequencer/tree/Foundry_v10)
+  * `abs` argument for "property" hooks. Applies `Math.abs` before comparing with threshold
+  * `args[1]` of the "setInterval" hook now contains the count of successful calls
+
+Fixed:
+  * Wrong width of argument labels 
+  * A couple of rare problems in the hooks' calling
+  * Sequencer's warning about reading db before it's populated
 
 ## [0.7.2](https://github.com/averrin/director/compare/0.7.1...0.7.2)
 

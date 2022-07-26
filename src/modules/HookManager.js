@@ -6,6 +6,7 @@ class HookManager {
   #hooks = [];
   #handlers = {};
   #actions = [];
+  #counts = {};
 
   constructor() {
     Hooks.on("preUpdateActor", (actor, _, updates) => {
@@ -31,7 +32,7 @@ class HookManager {
         if (!targets) return;
         if (!Array.isArray(targets)) targets = [targets];
         for (const target of targets) {
-          if ("target" in spec && spec.target(target, ...args) && spec.test(...hook.args, ...args)) {
+          if (hook.testTarget(target, ...args) && hook.testCondition(...args)) {
             hook.call(target, ...args);
           }
         }
@@ -50,7 +51,11 @@ class HookManager {
 
   async onSceneChange(scene) {
     for (const [hook, handler] of Object.entries(this.#handlers)) {
-      globalThis.Hooks.off(hook, handler);
+      try {
+        globalThis.Hooks.off(hook, handler);
+      } catch (e) {
+        console.warn(e);
+      }
       delete this.#handlers[hook]
       logger.info(`Hook: ${hook}#${handler} was uninstalled.`)
       logger.info(this.#handlers);
@@ -84,7 +89,11 @@ class HookManager {
         if (this.#hooks.some(h => h.enabled && `${h.event}-${h.args[1]}` == hook)) {
           continue;
         } else {
-          globalThis.Hooks.off(hook, handler);
+          try {
+            globalThis.Hooks.off(hook, handler);
+          } catch (e) {
+            console.warn(e);
+          }
           delete this.#handlers[hook]
           logger.info(`Hook: ${hook}#${handler} was uninstalled.`)
           logger.info(this.#handlers);
@@ -105,14 +114,18 @@ class HookManager {
 
   getIntervalHandler(hook) {
     return (...args) => {
-      logger.info("interval handler called");
       const interval = evalExpression(hook.args[1])
       setTimeout(() => {
         const spec = hookSpecs.find(s => s.id == hook.event);
         const id = `${spec.id}-${hook.args[1]}`;
         if (id in this.#handlers) {
-          if (hook.enabled, spec.test(...hook.args, ...args)) {
-            logger.info(`Interval hook ${hook.getHookName()} was called`, hook);
+          if (hook.enabled, spec.test(...hook.args, this.#counts[id] || 0, ...args)) {
+            if (id in this.#counts) {
+              this.#counts[id]++;
+            } else {
+              this.#counts[id] = 1;
+            }
+            logger.info(`Interval hook ${hook.getHookName()} was called: ${this.#counts[id]}`, hook);
             globalThis.Hooks.call(hook.getHookName(), ...hook.args);
           }
           this.#handlers[id]();

@@ -54,7 +54,7 @@ const API = {
     }
   },
 
-  getControlled: () => [globalThis.canvas.background.controlled, ...globalThis.canvas.tokens.controlled].flat(),
+  getControlled: () => [getControlledTiles(), ...globalThis.canvas.tokens.controlled].flat(),
   getPlaceables: () => [Array.from(globalThis.canvas.scene.tokens.values()), ...Array.from(globalThis.canvas.scene.tiles.values())].flat(),
 
   clearSceneData: () => {

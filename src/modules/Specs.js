@@ -118,7 +118,7 @@ export const sectionSpecs = [
     group: "Actions",
     thenDo: (args) => () => tools.revive(args[0].document),
     toCode: (args) => `\t.thenDo(async () => ${args[0]}.document.actor.update({
-      "data.attributes.hp.value": ${args[0]}.document.actor.data.data.attributes.hp.max,
+      "data.attributes.hp.value": ${args[0]}.document.actor.getRollData().attributes.hp.max,
     }))\n`,
   },
   {
@@ -316,7 +316,7 @@ export const hookSpecs = [
     parents: ["updateActor"],
     target: targetFromActor,
     test: (ts, limit, actor, _, updates) => {
-      return (ts > 0 && updates.prevHp - actor.data.data.attributes.hp.value >= ts) || actor.data.data.attributes.hp.value / actor.data.data.attributes.hp.max * 100 <= limit;
+      return (ts > 0 && updates.prevHp - actor.getRollData().attributes.hp.value >= ts) || actor.getRollData().attributes.hp.value / actor.getRollData().attributes.hp.max * 100 <= limit;
     }, args: [{ type: "int", label: "threshold" }, { type: "int", label: "drop lower %" }]
   },
   {
@@ -325,7 +325,7 @@ export const hookSpecs = [
     parents: ["updateActor"],
     target: targetFromActor,
     test: (ts, actor, _, updates) => {
-      return actor.data.data.attributes.hp.value - updates.prevHp >= ts;
+      return actor.getRollData().attributes.hp.value - updates.prevHp >= ts;
     }, args: [{ type: "int", label: "threshold" }]
   },
   {
@@ -333,7 +333,7 @@ export const hookSpecs = [
     name: "On Death",
     parents: ["updateActor"],
     target: targetFromActor,
-    test: (actor, _) => actor.data.data.attributes.hp.value <= 0
+    test: (actor, _) => actor.getRollData().attributes.hp.value <= 0
   },
   {
     id: "#onMove",
@@ -348,29 +348,35 @@ export const hookSpecs = [
     name: "Token's property change",
     parents: ["updateToken"],
     target: targetFromToken,
-    test: (prop, ts, token, _, updates) => {
-      return getProperty(updates.prevTokenData, prop) - getProperty(token.data, prop) >= ts;
+    test: (prop, ts, abs, token, _, updates) => {
+      let d = getProperty(updates.prevTokenData, prop) - getProperty(token.data, prop);
+      if (abs) d = Math.abs(d);
+      return d >= ts;
     },
-    args: [{ type: "string", label: "property" }, { type: "int", label: "threshold" }]
+    args: [{ type: "string", label: "property" }, { type: "int", label: "threshold" }, { type: "bool", label: "abs" }]
   },
   {
     id: "#onTokenPropertyProc",
     name: "% of Token's property change",
     parents: ["updateToken"],
     target: targetFromToken,
-    test: (prop, ts, prop2, token, _, updates) => {
-      return (getProperty(updates.prevTokenData, prop) - getProperty(token.data, prop)) / getProperty(updates.prevTokenData, prop2) * 100 >= ts;
+    test: (prop, ts, abs, prop2, token, _, updates) => {
+      let d = (getProperty(updates.prevTokenData, prop) - getProperty(token.data, prop));
+      if (abs) d = Math.abs(d);
+      return d / getProperty(updates.prevTokenData, prop2) * 100 >= ts;
     },
-    args: [{ type: "string", label: "property" }, { type: "int", label: "threshold %" }, { type: "string", label: "of property" }]
+    args: [{ type: "string", label: "property" }, { type: "int", label: "threshold %" }, { type: "string", label: "of property" }, { type: "bool", label: "abs" }]
   },
   {
     id: "#onActorProperty",
     name: "Actor's property change",
     parents: ["updateActor"],
     target: targetFromActor,
-    test: (prop, ts, actor, _, updates) => {
-      return getProperty(updates.prevData, prop) - getProperty(actor.data.data, prop) >= ts;
-    }, args: [{ type: "string", label: "property" }, { type: "int", label: "threshold" }]
+    test: (prop, ts, abs, actor, _, updates) => {
+      let d = getProperty(updates.prevData, prop) - getProperty(actor.getRollData(), prop);
+      if (abs) d = Math.abs(d);
+      return d >= ts;
+    }, args: [{ type: "string", label: "property" }, { type: "int", label: "threshold" }, { type: "bool", label: "abs" }]
   },
   {
     id: "#onActorPropertyProc",
@@ -378,8 +384,10 @@ export const hookSpecs = [
     parents: ["updateActor"],
     target: targetFromActor,
     test: (prop, ts, prop2, actor, _, updates) => {
-      return (getProperty(updates.prevData, prop) - getProperty(actor.data.data, prop)) / getProperty(updates.prevData, prop2) * 100 >= ts;
-    }, args: [{ type: "string", label: "property" }, { type: "int", label: "threshold %" }, { type: "string", label: "of property" }]
+      let d = getProperty(updates.prevData, prop) - getProperty(actor.getRollData(), prop);
+      if (abs) d = Math.abs(d);
+      return d / getProperty(updates.prevData, prop2) * 100 >= ts;
+    }, args: [{ type: "string", label: "property" }, { type: "int", label: "threshold %" }, { type: "string", label: "of property" }, { type: "bool", label: "abs" }]
   },
   {
     id: "#onUpdateActor",
@@ -407,8 +415,8 @@ export const hookSpecs = [
     id: "#setInterval",
     name: "Set Interval",
     parents: [],
-    test: (prop, ...args) => {
-      return evalExpression(prop, ...args);
+    test: (expr, ...args) => {
+      return evalExpression(expr, ...args);
     }, args: [{ type: "expression", label: "test" }, { type: "expression", label: "interval" }]
   },
 ];

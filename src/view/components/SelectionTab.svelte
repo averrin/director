@@ -38,12 +38,15 @@
 
    async function updateThumbs() {
       for (const obj of selection) {
-         if (!(obj.data.img in thumbs)) {
-            const thumb = await ImageHelper.createThumbnail(obj.data.img, {
+         const img = obj.document.texture.src;
+         logger.info(img);
+         if (!(img in thumbs)) {
+            const thumb = await ImageHelper.createThumbnail(img, {
                width: setting(SETTINGS.RESOLUTION),
                height: setting(SETTINGS.RESOLUTION),
             });
-            thumbs[obj.data.img] = thumb.thumb;
+            logger.info(thumb);
+            thumbs[img] = thumb.thumb;
          }
       }
    }
@@ -118,28 +121,33 @@
       {#each selection as tile, i}
          <div class="ui-card ui-card-side ui-bg-base-100 ui-shadow-xl">
             <figure>
-               <img class="ui-h-[170px]" style="border: none;" src={thumbs[tile.data.img]} alt="Selected image" />
+               <img
+                  class="ui-h-[170px]"
+                  style="border: none;"
+                  src={thumbs[tile.document.texture.src]}
+                  alt="Selected image"
+               />
             </figure>
             <div class="ui-card-body">
                <h2 class="ui-card-title">
-                  {#if !tile.data.name}
+                  {#if !tile.name}
                      Tile: {tile.id}
-                     {#if tile.data.flags["monks-active-tiles"]?.actions?.length > 0}
+                     {#if tile.document.flags["monks-active-tiles"]?.actions?.length > 0}
                         <span class="ui-badge ui-badge-primary">MATT</span>
                      {/if}
                   {:else}
-                     Token: {tile.data.name}
+                     Token: {tile.name}
                   {/if}
                   {#if true}
-                     <span class="ui-badge">{tile.data.width}x{tile.data.height}</span>
+                     <span class="ui-badge">{tile.width}x{tile.height}</span>
                   {/if}
                   <span
                      class="ui-badge"
-                     class:ui-badge-ghost={tile.data.hidden}
-                     class:ui-badge-success={!tile.data.hidden}
-                     on:click={() => tile.document.update({ hidden: !tile.data.hidden })}
+                     class:ui-badge-ghost={tile.hidden}
+                     class:ui-badge-success={!tile.hidden}
+                     on:click={() => tile.document.update({ hidden: !tile.hidden })}
                   >
-                     {tile.data.hidden ? "hidden" : "visible"}
+                     {tile.hidden ? "hidden" : "visible"}
                   </span>
                </h2>
 

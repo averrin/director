@@ -9,6 +9,7 @@ import initIntegrations from "../modules/Integrations.js";
 import { initAPI } from "../modules/API.js";
 
 import MainUI from "./MainUI.svelte";
+import { getControlledTiles } from "../modules/helpers.js";
 
 export default class MainApplication extends SvelteApplication {
   // #gameSettings = new TJSGameSettings();
@@ -75,7 +76,7 @@ export default class MainApplication extends SvelteApplication {
 
   onSelectionUpdate() {
     tokensStore.set(canvas.tokens.controlled);
-    tilesStore.set(canvas.background.controlled);
+    tilesStore.set(getControlledTiles());
     currentScene.set(canvas.scene);
   }
 }

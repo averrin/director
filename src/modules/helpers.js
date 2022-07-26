@@ -15,7 +15,7 @@ export function matchTrackers(token) {
   const trackers = JSON.parse(game.settings.get(moduleId, SETTINGS.TRACKERS));
   if (!trackers) return [];
   const matched = [];
-  const found = globalThis.CrashTNT.getActivitiesForActor(token.document.actor.data.name);
+  const found = globalThis.CrashTNT.getActivitiesForActor(token.document.actor.name);
   for (const t of trackers) {
     if (found.filter(f => f.name === t.name)) matched.push(t);
   }
@@ -25,7 +25,7 @@ export function matchTrackers(token) {
 export function hasResourceIcons(token) {
   const showRI = game.settings.get(moduleId, SETTINGS.SHOW_RESOURCE_ICONS);
   if (!showRI) return false;
-  const data = token.document.data.flags["resource-icons"];
+  const data = token.document.flags["resource-icons"];
   if (!data) return false;
   if (data.icon1.resource !== '') return true;
   if (data.icon2.resource !== '') return true;
@@ -65,7 +65,7 @@ export function rgb2hex({ r, g, b, a = 1 }) {
 }
 
 export const tools = {
-  toggle: async (o) => await o.update({ hidden: !o.data.hidden }),
+  toggle: async (o) => await o.update({ hidden: !o.hidden }),
   hide: async (o) => await o.update({ hidden: true }),
   show: async (o) => await o.update({ hidden: false }),
   kill: async (o) =>
@@ -74,7 +74,7 @@ export const tools = {
     }),
   revive: async (o) =>
     await o.actor.update({
-      "data.attributes.hp.value": o.actor.data.data.attributes.hp.max,
+      "data.attributes.hp.value": o.actor.getRollData().attributes.hp.max,
     }),
 };
 
@@ -86,7 +86,7 @@ export function calculateValueSync(val, type, seq) {
       return val;
     } else if (val.startsWith("#controlled")) {
       let ret = globalThis.canvas.tokens.controlled;
-      ret = [globalThis.canvas.background.controlled, ...ret].flat();
+      ret = [getControlledTiles(), ...ret].flat();
       if (ret.length == 0) {
         throw new Error("Nothing is selected.");
       }
@@ -162,7 +162,7 @@ export async function calculateValue(val, type, seq) {
   const varName = this ? this.name : "inline";
   if (typeof val === 'string' || val instanceof String) {
     if (val === "#manual") {
-      const controlled = [globalThis.canvas.background.controlled, ...globalThis.canvas.tokens.controlled].flat();
+      const controlled = [getControlledTiles(), ...globalThis.canvas.tokens.controlled].flat();
       let t = await globalThis.warpgate.crosshairs.show({
         drawIcon: true,
         icon: "modules/director/icons/crosshair.png",
@@ -178,7 +178,7 @@ export async function calculateValue(val, type, seq) {
 }
 
 export function evalExpression(expr, ...args) {
-  let code = `try {return ${expr}} catch(e) {return false}`;
+  let code = `try {return ${expr}} catch(e) {console.error(e); return false}`;
   const f = new Function("...args", code);
   return f(...args)
 }
@@ -192,4 +192,28 @@ export function contrastColor(color) {
 
   const contrast = Math.sqrt(pRed * rgb[0] ** 2 + pGreen * rgb[1] ** 2 + pBlue * rgb[2] ** 2);
   return contrast > 0.5 ? "#232323ff" : "#eeeeeeff";
+}
+
+export function getControlledTiles() {
+  if (game.version < 10) {
+    return canvas.background.controlled;
+  } else {
+    return canvas.tiles.controlled;
+  }
+}
+
+export function hasFlag(obj, flag) {
+  if (game.version < 10) {
+    return flag in obj.data.flags;
+  } else {
+    return flag in obj.flags;
+  }
+}
+
+export function getFlag(obj, flag) {
+  if (game.version < 10) {
+    return obj.data.flags[flag];
+  } else {
+    return obj.flags[flag];
+  }
 }

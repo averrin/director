@@ -1,27 +1,26 @@
 {
-  "name": "director",
   "title": "Director",
   "description": "Control your scenes!",
-  "author": "Averrin - Averrin#0374",
   "authors": [
     {
       "name": "Averrin",
       "url": "https://github.com/averrin",
       "discord": "Averrin#0374"
+    },
+    {
+      "name": "Averrin - Averrin#0374"
     }
   ],
   "url": "https://github.com/averrin/director",
   "readme": "https://github.com/averrin/director/blob/master/README.md",
   "bugs": "https://github.com/averrin/director/issues",
   "changelog": "https://github.com/averrin/director/releases/latest/",
-  "version": "0.6.0",
-  "minimumCoreVersion": "0.8.6",
-  "compatibleCoreVersion": "9",
+  "version": "1.0.0",
   "esmodules": [
-    "./dist/director.js"
+    "dist/director.js"
   ],
   "styles": [
-    "./dist/director.css"
+    "dist/director.css"
   ],
   "languages": [
     {
@@ -30,25 +29,36 @@
       "path": "lang/en.json"
     }
   ],
-  "system": [],
-  "dependencies": [
-    {
-      "name": "tagger"
-    },
-    {
-      "name": "sequencer"
-    },
-    {
-      "name": "socketlib"
-    },
-    {
-      "name": "warpgate"
-    }
-  ],
-  "socket": false,
   "manifest": "https://github.com/averrin/director/releases/latest/download/module.json",
   "download": "https://github.com/averrin/director/releases/download/0.2.0/module.zip",
-  "protected": false,
-  "coreTranslation": false,
-  "library": false
+  "id": "director",
+  "name": "director",
+  "relationships": {
+    "requires": [
+      {
+        "id": "tagger",
+        "type": "module",
+        "compatibility": {}
+      },
+      {
+        "id": "sequencer",
+        "type": "module",
+        "compatibility": {}
+      },
+      {
+        "id": "socketlib",
+        "type": "module",
+        "compatibility": {}
+      },
+      {
+        "id": "warpgate",
+        "type": "module",
+        "compatibility": {}
+      }
+    ]
+  },
+  "compatibility": {
+    "minimum": "0.8.6",
+    "verified": "9"
+  }
 }
