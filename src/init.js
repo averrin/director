@@ -2,7 +2,7 @@ import MainApplication from './view/MainApplication.js';
 import 'reflect-metadata';
 
 import { moduleId, SETTINGS } from "./constants.js";
-import { initSettings, setting } from "./modules/settings.js";
+import { initSettings, migrateFromString, setting } from "./modules/settings.js";
 import { logger } from "./modules/helpers.js";
 import { initFoundry } from './modules/foundry.js';
 
@@ -12,6 +12,15 @@ const app = new MainApplication();
 Hooks.once('init', async () => {
   initFoundry();
   initSettings(app);
+
+  game.keybindings.register(moduleId, SETTINGS.KEY_SHOW, {
+    name: 'Show Director',
+    editable: [{ key: 'KeyD', modifiers: [KeyboardManager.MODIFIER_KEYS.ALT] }],
+    namespace: 'Director',
+    onDown: () => {
+      app.toggle();
+    }
+  });
 });
 
 Hooks.on('getSceneControlButtons', (buttons) => {
@@ -22,7 +31,7 @@ Hooks.on('getSceneControlButtons', (buttons) => {
         name: "director",
         title: "Toggle Director",
         icon: "fas director-icon",
-        visible: game.user.isGm,
+        visible: game.user.isGM,
         onClick: () => {
           app.toggle();
         },
@@ -34,6 +43,10 @@ Hooks.on('getSceneControlButtons', (buttons) => {
 
 Hooks.once('sequencerReady', async () => {
   if (game.user.isGM) {
+    await migrateFromString(SETTINGS.GLOBAL_TAGS);
+    await migrateFromString(SETTINGS.SEQUENCES);
+    await migrateFromString(SETTINGS.TAG_COLORS);
+
     await app.start();
     if (setting(SETTINGS.SHOW)) app.show();
 

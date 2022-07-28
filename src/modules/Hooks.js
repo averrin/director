@@ -10,6 +10,7 @@ export default class Hook {
     this.event = undefined;
     this.target = undefined;
     this.args = [];
+    this.version = 1;
   }
 
   static fromPlain(plain) {

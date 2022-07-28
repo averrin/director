@@ -1,9 +1,6 @@
 import { SETTINGS } from "../constants.js";
 import { tools, evalExpression, getIconNames } from "./helpers.js";
 import { setting } from "./settings.js";
-// const iconCollection = "mdi";
-// const iconCollection = "material-symbols";
-const iconCollection = "openmoji";
 
 export const actionTypes = [
   {

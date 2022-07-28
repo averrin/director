@@ -130,7 +130,7 @@
       } else if ("default" in spec) {
          value = spec.default;
       } else {
-         debugger;
+         // debugger;
       }
    }
    const groupBy = (a) => a.group;
@@ -144,7 +144,7 @@
    <input type="checkbox" id="color-modal-{id}" class="ui-modal-toggle" />
    <label for="color-modal-{id}" class="ui-modal ui-cursor-pointer">
       <label class="ui-modal-box ui-relative ui-w-fit" for="">
-         <HsvPicker on:colorChange={colorChange} startColor={value} />
+         <HsvPicker on:colorChange={colorChange} startColor={value?.slice(0, 7) || "#46525D"} />
       </label>
    </label>
 {/if}

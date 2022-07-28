@@ -1,3 +1,5 @@
+import { capitalize } from "./helpers";
+
 export default function initIntegrations() {
   initActiveTilesIntegration();
   initTokenMagicIntegration();
@@ -68,7 +70,7 @@ function initTokenMagicIntegration() {
       }
     });
 
-    Director.addArgSpec({ id: "token-magic", var_types: ["token-magic", "string", "expression"], options: (_) => globalThis.TokenMagic.getPresets().map((p) => p.name), control: "select" });
+    Director.addArgSpec({ id: "token-magic", var_types: ["token-magic", "string", "expression"], options: (_) => globalThis.TokenMagic.getPresets().map((p) => { return { value: p.name, label: capitalize(p.name) }; }), control: "select" });
 
     Director.addAction(
       {
@@ -114,7 +116,7 @@ function initFxMasterIntegration() {
   if (!globalThis.FXMASTER) return;
   Hooks.on("DirectorInitIntegrations", () => {
     Director.addArgSpec(
-      { id: 'weather', options: (_) => Object.keys(CONFIG.fxmaster.weather).map((k) => { return { value: k, label: k }; }), control: "select", var_types: ["string", "weather", "expression"] }
+      { id: 'weather', options: (_) => Object.keys(CONFIG.fxmaster.weather).map((k) => { return { value: k, label: capitalize(k) }; }), control: "select", var_types: ["string", "weather", "expression"] }
     );
 
     Director.addAction(
@@ -145,7 +147,7 @@ function initConvenientEffectsIntegration() {
   if (!globalThis.game.dfreds || !globalThis.game.dfreds.effectInterface) return;
   Hooks.on("DirectorInitIntegrations", () => {
     Director.addArgSpec(
-      { id: 'ce-effect', options: (_) => game.dfreds.effects.all.map(e => e.name), control: "select", var_types: ["string", "ce-effect", "expression"] }
+      { id: 'ce-effect', options: (_) => game.dfreds.effects.all.map(e => { return { value: e.name, label: capitalize(e.name) }; }), control: "select", var_types: ["string", "ce-effect", "expression"] }
     );
     Director.addSection({
       id: 'ceToggle',

@@ -23,7 +23,9 @@ export const SETTINGS = {
   SELECTED_SEQ: "selected-seq",
   SELECTED_TAB: "selected-tab",
   HIDE_IMPORT: "hide-import",
-  ICON_COLLECTION: "icon-collection"
+  ICON_COLLECTION: "icon-collection",
+
+  KEY_SHOW: "key-show",
 };
 
 export const HOOKS = [

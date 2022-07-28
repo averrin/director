@@ -13,6 +13,7 @@ export class DSequence {
     this.sections = [];
     this.variables = [];
     this.inScene = false;
+    this.version = 1;
 
     this.export = {
       vars: [],
@@ -296,6 +297,7 @@ export class Variable {
     this.id = id;
     this.name = name;
     this.lazy = false;
+    this.version = 1;
     this.setType(type);
     this.reset();
   }
@@ -342,6 +344,7 @@ export class Section {
     this.setType(type)
     this.args = args || [];
     this.collapsed = false;
+    this.version = 1;
   }
 
   setType(type) {
@@ -383,6 +386,7 @@ export class Modifier {
     this.id = id;
     this.setType(type)
     this.args = args || [];
+    this.version = 1;
   }
   setType(type, sectionType) {
     this.type = type;

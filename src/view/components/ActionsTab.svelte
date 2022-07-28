@@ -99,6 +99,11 @@
       actions.set(currentActions);
       // }
    }
+
+   function apply() {
+      actions.set(currentActions);
+      pickerOpen = false;
+   }
 </script>
 
 {#if editItem}
@@ -132,9 +137,7 @@
             </div>
          </div>
          <div class="ui-modal-action">
-            <label for="seq-modal" class="ui-btn ui-btn-primary" on:click={(_) => actions.set(currentActions)}
-               >Save</label
-            >
+            <label for="seq-modal" class="ui-btn ui-btn-primary" on:click={(_) => apply()}>Save</label>
          </div>
       </div>
    </label>

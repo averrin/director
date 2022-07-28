@@ -5,6 +5,13 @@ export let setting = key => {
   return game.settings.get(moduleId, key);
 };
 
+export async function migrateFromString(key) {
+  const current = game.settings.get(moduleId, key);
+  if (typeof current === "string" || current instanceof String) {
+    await game.settings.set(moduleId, key, JSON.parse(current));
+  }
+}
+
 const debouncedReload = debounce(() => window.location.reload(), 100);
 export function initSettings(app) {
   game.settings.register(moduleId, SETTINGS.SHOW, {
@@ -18,21 +25,22 @@ export function initSettings(app) {
     scope: "world",
     config: false,
     type: Array,
-    default: '[]',
+    default: [],
   });
+
 
   game.settings.register(moduleId, SETTINGS.SEQUENCES, {
     scope: "world",
     config: false,
     type: Array,
-    default: '[]',
+    default: [],
   });
 
   game.settings.register(moduleId, SETTINGS.TAG_COLORS, {
     scope: "world",
     config: false,
     type: Object,
-    default: '{}',
+    default: {},
   });
 
   game.settings.register(moduleId, SETTINGS.SELECTED_SEQ, {
@@ -64,7 +72,6 @@ export function initSettings(app) {
       step: 0.01
     }
   });
-
   game.settings.register(moduleId, SETTINGS.RESOLUTION, {
     name: "Selected image resolution",
     hint: "Higher is better quality but slower",
@@ -112,4 +119,9 @@ export function initSettings(app) {
     default: "mdi",
     type: String,
   });
+
+  // game.settings.registerMenu(moduleId, {
+  //   name: 'Hotkeys',
+  //   type: Hotkeys.createConfig('Hotkeys', [`${moduleId}.general`]),
+  // });
 }

@@ -230,3 +230,7 @@ export async function getIconNames(collection) {
   return _cachedIcons[collection];
 
 }
+
+export function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}

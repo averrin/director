@@ -72,7 +72,7 @@
 <label for="color-modal" class="ui-modal ui-cursor-pointer">
    <label class="ui-modal-box ui-relative ui-w-fit" for="">
       {#if pickerOpen}
-         <HsvPicker on:colorChange={changeColor} {startColor} />
+         <HsvPicker on:colorChange={changeColor} startColor={startColor.slice(0, 7)} />
       {/if}
    </label>
 </label>

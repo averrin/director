@@ -49,6 +49,7 @@ export function initSequences() {
   sequences.subscribe(async (seqs) => {
     game.settings.set(moduleId, SETTINGS.SEQUENCES, seqs.filter(s => !s.inScene));
     globalThis.canvas.scene?.update({ "flags.director-sequences": seqs.filter(s => s.inScene).map(s => s.toJSON()) });
+    globalThis.Hooks.call("DirectorUpdateSequences", sequences);
   });
 }
 
@@ -84,6 +85,7 @@ export function initActions() {
       if (getFlag(scene, "director-actions")?.filter((a) => a) != actions) {
         scene.update({ "flags.director-actions": actions.map(a => a.toJSON()) });
         await HookManager.onActionsChange(actions);
+        globalThis.Hooks.call("DirectorUpdateActions", actions);
       }
       return scene;
     });
@@ -100,6 +102,7 @@ export function initHooks() {
       if (getFlag(scene, "director-hooks")?.filter((a) => a) != hooks) {
         scene.update({ "flags.director-hooks": hooks });
         await HookManager.onHooksChange(hooks);
+        globalThis.Hooks.call("DirectorUpdateHooks", hooks);
       }
       return scene;
     });

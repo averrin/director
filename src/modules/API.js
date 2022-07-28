@@ -1,6 +1,6 @@
 import { moduleId, SETTINGS } from '../constants.js';
 import { addArgSpec, addModifier, addSection, addHook, addAction } from "./Specs.js";
-import { sequences } from "./stores.js";
+import { sequences, actions } from "./stores.js";
 import { DSequence } from "./Sequencer.js";
 
 const API = {
@@ -19,6 +19,17 @@ const API = {
       const s_seq = await seq.prepare(overrides);
       seq.reset();
       return s_seq;
+    }
+  },
+
+  runAction: (id) => {
+    let action;
+    actions.update(a => {
+      action = a.find(action => action.id == id || action.name == id);
+      return a;
+    });
+    if (action) {
+      action.run(new MouseEvent(""))
     }
   },
 

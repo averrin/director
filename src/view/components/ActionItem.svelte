@@ -16,9 +16,7 @@
    import FaTimes from "svelte-icons/fa/FaTimes.svelte";
    import FaEdit from "svelte-icons/fa/FaEdit.svelte";
    import { loadIcon } from "iconify-icon";
-
    import { createEventDispatcher } from "svelte";
-
    const dispatch = createEventDispatcher();
 
    export let item;
@@ -167,7 +165,11 @@
          </div>
 
          <div class="ui-btn-group ui-justify-self-end ui-flex-none">
-            <button title="edit" class="ui-btn ui-btn-square ui-btn-outline !ui-p-[8px]">
+            <button
+               title="edit"
+               class="ui-btn ui-btn-square ui-btn-outline !ui-p-[8px]"
+               on:click={(_) => itemClick(item)}
+            >
                <FaEdit />
             </button>
             {#if Array.isArray(item.value) || item.value?.startsWith("#")}

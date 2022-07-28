@@ -10,6 +10,7 @@ Added:
   * `animateProperty` / `loopProperty` modifiers for sequences
   * FxMaster integration
   * Setting icon from action's button
+  * `alt-D` shortcut for toggle Director window
 
 Fixed:
   * Wrong width of argument labels 
