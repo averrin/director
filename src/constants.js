@@ -23,6 +23,7 @@ export const SETTINGS = {
   SELECTED_SEQ: "selected-seq",
   SELECTED_TAB: "selected-tab",
   HIDE_IMPORT: "hide-import",
+  ICON_COLLECTION: "icon-collection"
 };
 
 export const HOOKS = [

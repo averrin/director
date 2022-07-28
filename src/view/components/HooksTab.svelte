@@ -13,8 +13,6 @@
    import { SETTINGS } from "../../constants.js";
    import FaTimes from "svelte-icons/fa/FaTimes.svelte";
 
-   export let onTagClick;
-
    let currentHooks;
    const unsubscribe3 = hooks.subscribe((hooks) => {
       currentHooks = hooks;
@@ -110,7 +108,6 @@
                   label="Target"
                   on:change={saveHooks}
                   widthAuto={true}
-                  {onTagClick}
                />
                {#if hookSpecs.find((s) => s.id == hook.event)?.args}
                   {#each hookSpecs.find((s) => s.id == hook.event)?.args as arg, i}

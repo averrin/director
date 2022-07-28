@@ -31,6 +31,7 @@
   "devDependencies": {
     "@babel/core": "^7",
     "@babel/preset-env": "^7",
+    "@iconify/svelte": "^2.2.1",
     "@rgossiaux/svelte-heroicons": "^0.1.2",
     "@rollup/plugin-babel": "^5",
     "@rollup/plugin-commonjs": "^21.0.0",
@@ -38,6 +39,7 @@
     "@typhonjs-fvtt/eslint-config-foundry.js": "^0.8.0",
     "autoprefixer": "^10.4.4",
     "eslint": "^8",
+    "iconify-icon": "^1.0.0-beta.2",
     "postcss": "^8.4.12",
     "postcss-load-config": "^3.1.4",
     "rollup": "^2",

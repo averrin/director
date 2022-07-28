@@ -13,7 +13,6 @@
    import { setting } from "../../modules/helpers.js";
    import { moduleId, SETTINGS } from "../../constants.js";
 
-   export let onTagClick;
    let seq = undefined;
    let fullCode = "";
    let oneliner = "";
@@ -192,6 +191,6 @@
    </div>
 
    {#if seq}
-      <SequenceEditor {seq} {onTagClick} />
+      <SequenceEditor {seq} />
    {/if}
 </div>

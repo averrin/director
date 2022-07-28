@@ -9,6 +9,7 @@ export default class Action {
     this.args = [];
     this.value = undefined;
     this.color = undefined;
+    this.icon = undefined;
     this.name = "";
   }
 

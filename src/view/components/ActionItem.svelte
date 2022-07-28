@@ -14,16 +14,18 @@
    import FaExclamationTriangle from "svelte-icons/fa/FaExclamationTriangle.svelte";
    import FaArrowsAlt from "svelte-icons/fa/FaArrowsAlt.svelte";
    import FaTimes from "svelte-icons/fa/FaTimes.svelte";
+   import FaEdit from "svelte-icons/fa/FaEdit.svelte";
+   import { loadIcon } from "iconify-icon";
 
    import { createEventDispatcher } from "svelte";
 
    const dispatch = createEventDispatcher();
 
    export let item;
+   if (item.icon) loadIcon(item.icon);
 
    export let selectAction;
    export let deleteAction;
-   export let onTagClick;
    export let actionTags;
    export let itemClick;
 
@@ -122,12 +124,17 @@
          </button>
          <button
             title="execute action"
-            class="ui-btn ui-btn-square !ui-p-[8px]"
+            class="ui-btn ui-btn-square"
             on:click={(e) => item.run(e)}
             style:background-color={item.color}
             style:color={contrastColor(item.color)}
+            class:!ui-p-[8px]={!item.icon}
          >
-            <FaPlay />
+            {#if item.icon}
+               <iconify-icon style:font-size="2rem" icon={item.icon} style:color={contrastColor(item.color)} />
+            {:else}
+               <FaPlay />
+            {/if}
          </button>
       </div>
    </div>
@@ -141,7 +148,6 @@
                bind:value={item.value}
                on:change={changeTargets}
                selectFull={true}
-               {onTagClick}
                widthAuto={true}
                additionalItems={currentHooks}
             />
@@ -161,6 +167,9 @@
          </div>
 
          <div class="ui-btn-group ui-justify-self-end ui-flex-none">
+            <button title="edit" class="ui-btn ui-btn-square ui-btn-outline !ui-p-[8px]">
+               <FaEdit />
+            </button>
             {#if Array.isArray(item.value) || item.value?.startsWith("#")}
                <button
                   title="select target"

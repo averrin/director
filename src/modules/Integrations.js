@@ -2,6 +2,7 @@ export default function initIntegrations() {
   initActiveTilesIntegration();
   initTokenMagicIntegration();
   initConvenientEffectsIntegration();
+  initFxMasterIntegration();
 
   Hooks.call("DirectorInitIntegrations");
 }
@@ -106,6 +107,37 @@ function initTokenMagicIntegration() {
         }, args: [{ type: 'token-magic', label: 'filter' }]
       });
 
+  });
+}
+
+function initFxMasterIntegration() {
+  if (!globalThis.FXMASTER) return;
+  Hooks.on("DirectorInitIntegrations", () => {
+    Director.addArgSpec(
+      { id: 'weather', options: (_) => Object.keys(CONFIG.fxmaster.weather).map((k) => { return { value: k, label: k }; }), control: "select", var_types: ["string", "weather", "expression"] }
+    );
+
+    Director.addAction(
+      {
+        id: 'fxmSetWeather',
+        label: 'Set Weather',
+        group: 'FxMaster',
+        ignoreTarget: true,
+        execute: (object, action, event) => {
+          Hooks.call("fxmaster.switchWeather", { type: action.args[0], id: "weather", options: {} });
+        }, args: [{ type: 'weather', label: 'weather' }]
+      });
+
+    Director.addAction(
+      {
+        id: 'fxmClear',
+        label: 'Clear Weather',
+        group: 'FxMaster',
+        ignoreTarget: true,
+        execute: (object, action, event) => {
+          canvas.scene.unsetFlag("fxmaster", "effects");
+        }, args: []
+      });
   });
 }
 

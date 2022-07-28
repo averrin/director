@@ -19,7 +19,7 @@
 
    import { tagColors, currentScene, actions } from "../modules/stores.js";
 
-   import { getContext } from "svelte";
+   import { getContext, setContext } from "svelte";
    import Action from "../modules/Actions";
    const { application } = getContext("external");
    const position = application.position;
@@ -37,6 +37,7 @@
          return tagColors;
       });
    }
+   setContext("onTagClick", onTagClick);
 
    function createAction(_, tags) {
       actions.update((actions) => {
@@ -91,16 +92,16 @@
       </div>
 
       {#if mode == "selection"}
-         <SelectionTab {onTagClick} {createAction} />
+         <SelectionTab {createAction} />
       {/if}
       {#if mode == "actions"}
-         <ActionsTab {onTagClick} onSelect={() => (mode = "selection")} />
+         <ActionsTab onSelect={() => (mode = "selection")} />
       {/if}
       {#if mode == "sequencer"}
-         <SequencerTab {onTagClick} />
+         <SequencerTab />
       {/if}
       {#if mode == "hooks"}
-         <HooksTab {onTagClick} />
+         <HooksTab />
       {/if}
       {#if mode == "import"}
          <ImportTab />

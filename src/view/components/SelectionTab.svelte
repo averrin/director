@@ -7,8 +7,6 @@
    import { setting } from "../../modules/settings.js";
    import { moduleId, SETTINGS } from "../../constants.js";
 
-   export let onTagClick;
-
    function editObject(_, object) {
       object.document.sheet.render(true);
    }
@@ -22,6 +20,9 @@
    let tiles = [];
    let tokens = [];
    let thumbs = {};
+
+   import { getContext } from "svelte";
+   const onTagClick = getContext("onTagClick");
 
    function onTagsSelected(event, i) {
       const tags = event.detail.tags.filter((t) => t.trim() != "");
@@ -98,7 +99,6 @@
                   on:tags={(e) => globalThis.debounce(onTagsSelected(e, -1), 100)}
                   tags={tagsMutual}
                   colors={$tagColors}
-                  {onTagClick}
                />
             </div>
          </div>

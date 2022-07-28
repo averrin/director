@@ -348,6 +348,26 @@ export class Section {
     this.type = type;
     this._spec = sectionSpecs.find(s => s.id == this.type);
     this.args = [];
+    if (!this._spec) return;
+    for (const arg of this._spec.args) {
+      const spec = argSpecs.find(s => s.id == arg.type);
+      let value = spec.default;
+      if (value === undefined && spec.options) {
+        let ops = spec.options;
+        if (typeof spec.options === "function") {
+          ops = spec.options(value, this);
+        }
+        if (typeof ops[0] === "object") {
+          value = ops[0].value;
+        } else {
+          value = ops[0];
+        }
+      }
+      if (value === undefined) {
+        value = ""
+      }
+      this.args.push(value);
+    }
   }
 
   static fromPlain(plain) {
@@ -368,6 +388,26 @@ export class Modifier {
     this.type = type;
     this._spec = modifierSpecs.filter(s => s.group == sectionType).find(s => s.id == this.type);
     this.args = [];
+    if (!this._spec) return;
+    for (const arg of this._spec.args) {
+      const spec = argSpecs.find(s => s.id == arg.type);
+      let value = spec.default;
+      if (value === undefined && spec.options) {
+        let ops = spec.options;
+        if (typeof spec.options === "function") {
+          ops = spec.options(value, this);
+        }
+        if (typeof ops[0] === "object") {
+          value = ops[0].value;
+        } else {
+          value = ops[0];
+        }
+      }
+      if (value === undefined) {
+        value = ""
+      }
+      this.args.push(value);
+    }
   }
 
   static fromPlain(plain) {

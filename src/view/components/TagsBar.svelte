@@ -5,12 +5,13 @@
    import FaDatabase from "svelte-icons/fa/FaDatabase.svelte";
    import FaFilm from "svelte-icons/fa/FaFilm.svelte";
 
-   export let onTagClick;
-
    function onTags(event) {
       const tags = event.detail.tags.filter((t) => t.trim() != "");
       globalTags.set(tags);
    }
+
+   import { getContext } from "svelte";
+   const onTagClick = getContext("onTagClick");
 </script>
 
 <div class="ui-navbar ui-bg-base-100 ui-gap-3">
@@ -24,8 +25,8 @@
          on:tags={onTags}
          tags={$globalTags}
          colors={$tagColors}
-         {onTagClick}
          borderRadius="0.5rem"
+         {onTagClick}
       />
    </div>
    <div class="ui-flex ui-flex-row ui-gap-2 ui-flex-none">

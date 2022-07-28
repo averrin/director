@@ -103,4 +103,13 @@ export function initSettings(app) {
     default: false,
     type: Boolean,
   });
+
+  game.settings.register(moduleId, SETTINGS.ICON_COLLECTION, {
+    name: "Icon collection for actions",
+    hint: "Examples: mdi, material-symbols, openmoji. More: https://icon-sets.iconify.design",
+    scope: "client",
+    config: true,
+    default: "mdi",
+    type: String,
+  });
 }

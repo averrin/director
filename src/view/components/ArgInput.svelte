@@ -8,7 +8,10 @@
    import { v4 as uuidv4 } from "uuid";
    import FaTimes from "svelte-icons/fa/FaTimes.svelte";
    import FaHashtag from "svelte-icons/fa/FaHashtag.svelte";
+   import { createEventDispatcher } from "svelte";
    const dispatch = createEventDispatcher();
+   import { getContext } from "svelte";
+   const onTagClick = getContext("onTagClick");
 
    export let id = uuidv4();
    export let value;
@@ -20,19 +23,30 @@
    export let selectFull = false;
    export let hideSign = false;
    export let widthAuto = false;
-   export let onTagClick;
    export let justify = "start";
    export let extra;
 
    let spec = argSpecs.find((s) => s.id == type);
-   if (value === undefined || value === null || (value === "" && "default" in spec && value !== spec.default)) {
-      resetValue();
-      debounce(dispatch("change", value), 200);
+   let lastVal = value;
+   function update() {
+      if (lastVal == value) return;
+      dispatch("change", value);
+      lastVal = value;
    }
+
+   function fixEmpty() {
+      if (value === undefined || value === null || (value === "" && "default" in spec && value !== spec.default)) {
+         resetValue();
+         update();
+         return true;
+      }
+      return false;
+   }
+   fixEmpty();
 
    function setEffectSource(e) {
       value = [e.detail.value];
-      dispatch("change", value);
+      update();
    }
    function setEffectSourceArg(e) {
       if (e.detail) {
@@ -41,7 +55,7 @@
             value[1] = e.detail.id;
          }
       }
-      dispatch("change", value);
+      update();
    }
 
    function selectFile() {
@@ -54,50 +68,13 @@
       value = rgb2hex(e.detail).hex;
    }
 
-   let effect_files;
-   function getEffectFiles() {
-      let files = [];
-      try {
-         if (value && value.startsWith("jb2a")) {
-            files = globalThis.Sequencer.Database.getPathsUnder(value).map((o) => value + "." + o);
-         } else {
-            if (!value || (value && value.indexOf("/") == -1)) {
-               try {
-                  files = globalThis.Sequencer.Database.getPathsUnder("jb2a").map((o) => "jb2a." + o);
-               } catch (error) {
-                  files = [];
-               }
-            }
-         }
-      } catch (e) {
-         //filepath
-      }
-      return files;
-   }
-
-   import { createEventDispatcher } from "svelte";
-
    let options = additionalItems;
-   if (spec && "options" in spec) {
-      let ops = spec.options;
-      if (typeof spec.options === "function") {
-         ops = spec.options(value, extra);
-      }
-      if (!Array.isArray(ops)) {
-         ops.update((items) => {
-            ops = items;
-            return items;
-         });
-      }
-      options = [...ops, ...additionalItems].flat();
-   }
-
-   $: {
+   async function populateOptions() {
       spec = argSpecs.find((s) => s.id == type);
       if (spec && "options" in spec) {
          let ops = spec.options;
          if (typeof spec.options === "function") {
-            ops = spec.options(value, extra);
+            ops = await spec.options(value, extra);
          }
          if (!Array.isArray(ops)) {
             ops.update((items) => {
@@ -107,11 +84,16 @@
          }
          options = [...ops, ...additionalItems].flat();
       }
-      if (value === undefined || value === null || (value === "" && "default" in spec && value !== spec.default)) {
-         resetValue();
+   }
+   populateOptions();
+
+   $: {
+      if (lastVal != value) {
+         populateOptions();
+         if (!fixEmpty()) {
+            update();
+         }
       }
-      debounce(dispatch("change", value), 200);
-      effect_files = getEffectFiles();
    }
    let mode = "direct";
    if ((typeof value === "string" || value instanceof String) && value.startsWith("@")) {
@@ -140,11 +122,15 @@
          if (typeof spec.options === "function") {
             ops = spec.options(value, extra);
          }
-         value = typeof ops[0] === "object" ? ops[0].value : ops[0];
+         if (typeof ops[0] === "object") {
+            value = ops[0].value;
+         } else {
+            value = ops[0];
+         }
       } else if ("default" in spec) {
          value = spec.default;
       } else {
-         value = "";
+         debugger;
       }
    }
    const groupBy = (a) => a.group;
@@ -164,7 +150,7 @@
 {/if}
 
 <label
-   class="arg-input ui-min-w-fit ui-input-group ui-h-full ui-justify-{justify} ui-min-h-12"
+   class="arg-input ui-min-w-fit ui-input-group ui-justify-{justify} ui-min-h-12"
    for=""
    class:!ui-w-auto={widthAuto}
 >
@@ -192,7 +178,7 @@
       {:else if type == "effect_file"}
          <label class="ui-input-group">
             <Select
-               items={effect_files}
+               items={spec.options(value)}
                value={value && value.split("/")[value.split("/").length - 1]}
                on:select={(e) => (value = e.detail.value)}
                on:clear={(_) => (value = "")}

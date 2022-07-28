@@ -1,7 +1,6 @@
 <script>
    export let seq;
 
-   import FaTimes from "svelte-icons/fa/FaTimes.svelte";
    import { sequences } from "../../modules/stores";
    import { sectionSpecs, modifierSpecs, argSpecs } from "../../modules/Specs.js";
    import { Section, Modifier, DSequence, Variable } from "../../modules/Sequencer.js";
@@ -11,17 +10,16 @@
    import Sortable from "./Sortable.svelte";
    import VariableComponent from "./Variable.svelte";
    import ArgInput from "./ArgInput.svelte";
+   import ModifierItem from "./ModifierItem.svelte";
 
    import FaArrowsAlt from "svelte-icons/fa/FaArrowsAlt.svelte";
    import FaPlay from "svelte-icons/fa/FaPlay.svelte";
    import FaExpandArrowsAlt from "svelte-icons/fa/FaExpandArrowsAlt.svelte";
    import FaCompressArrowsAlt from "svelte-icons/fa/FaCompressArrowsAlt.svelte";
    import FaRegCopy from "svelte-icons/fa/FaRegCopy.svelte";
-
-   export let onTagClick;
+   import FaTimes from "svelte-icons/fa/FaTimes.svelte";
 
    const groupBy = (i) => i.group;
-   const groupByCat = (i) => i.cat;
    async function stop() {
       seq.stop();
    }
@@ -104,35 +102,30 @@
       updateSequences();
    }
 
-   function setModArg(e, section, mod, i) {
-      const m = seq.sections.find((s) => s.id == section.id).modifiers.find((m) => m.id == mod.id);
-      const spec = m._spec.args[i];
-      if (e.detail != undefined && e.detail != null && typeof e.detail === "object" && !Array.isArray(e.detail)) {
-         if (e.detail.value) {
-            if (m.args[i] == e.detail.value) return;
-            m.args[i] = e.detail.value;
+   function setModArg(e, m, i, value) {
+      if (value != undefined && value != null && typeof value === "object" && !Array.isArray(e.detail)) {
+         if (value.value) {
+            if (m.args[i] == value.value) return;
+            m.args[i] = value.value;
          } else {
-            if (JSON.stringify(m.args[i]) == JSON.stringify(e.detail)) return;
-            m.args[i] = e.detail;
+            if (JSON.stringify(m.args[i]) == JSON.stringify(value)) return;
+            m.args[i] = value;
          }
       } else {
-         if (JSON.stringify(m.args[i]) == JSON.stringify(e.detail)) return;
-         m.args[i] = e.detail;
+         if (JSON.stringify(m.args[i]) == JSON.stringify(value)) return;
+         m.args[i] = value;
       }
-      if (m.args[i] != null && e.detail != undefined) {
+      if (m.args[i] != null && value != undefined) {
          updateSequences();
       }
    }
 
    function setModType(e, section, mod) {
-      seq.sections
-         .find((s) => s.id == section.id)
-         .modifiers.find((m) => m.id == mod.id)
-         .setType(e.detail.id, section.type);
+      mod.setType(e.detail.id, section.type);
       updateSequences();
    }
    function setSectionType(e, section) {
-      seq.sections.find((s) => s.id == section.id).setType(e.detail.id);
+      section.setType(e.detail.id);
       updateSequences();
    }
 
@@ -150,7 +143,7 @@
 
 {#if seq}
    {#each seq.variables as variable (variable.id)}
-      <VariableComponent {variable} {onTagClick} on:remove={deleteVariable} on:change={updateVariable} />
+      <VariableComponent {variable} on:remove={deleteVariable} on:change={updateVariable} />
    {/each}
    <div />
 
@@ -177,6 +170,7 @@
                   {#if item._spec?.args}
                      {#each item._spec.args as arg, i}
                         <ArgInput
+                           extra={item}
                            vars={seq.variables.filter((v) =>
                               argSpecs.find((s) => s.id == arg.type).var_types.includes(v.type)
                            )}
@@ -185,7 +179,6 @@
                            type={arg.type}
                            bind:value={seq.sections[index].args[i]}
                            on:change={(e) => setSectionArg(e, item, i)}
-                           {onTagClick}
                         />
                      {/each}
                   {/if}
@@ -238,42 +231,15 @@
                {#if item.modifiers.length > 0}
                   <div class="ui-divider">Modifiers</div>
                {/if}
-               {#each item.modifiers as mod (mod.id)}
-                  <div
-                     class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-py-2 ui-px-4 ui-gap-2 ui-my-1"
-                  >
-                     <Select
-                        items={modifierSpecs.filter((m) => item.type == m.group)}
-                        groupBy={groupByCat}
-                        optionIdentifier="id"
-                        labelIdentifier="id"
-                        on:select={(e) => setModType(e, item, mod)}
-                        value={mod.type}
-                        listAutoWidth={false}
-                     />
-                     {#if mod._spec?.args}
-                        {#each mod._spec.args as arg, i}
-                           <ArgInput
-                              vars={seq.variables.filter((v) =>
-                                 argSpecs.find((s) => s.id == arg.type).var_types.includes(v.type)
-                              )}
-                              label={arg.label}
-                              variables={true}
-                              type={arg.type}
-                              value={mod.args[i]}
-                              on:change={(e) => setModArg(e, seq.sections[index], mod, i)}
-                              {onTagClick}
-                           />
-                        {/each}
-                     {/if}
-
-                     <button
-                        class="ui-btn ui-btn-outline ui-btn-error ui-btn-square ui-justify-self-end !ui-p-[8px]"
-                        on:click={(e) => deleteModifier(item, mod)}
-                     >
-                        <FaTimes />
-                     </button>
-                  </div>
+               {#each item.modifiers as modifier (modifier.id)}
+                  <ModifierItem
+                     {modifier}
+                     parent={item}
+                     on:changeType={(e) => setModType(e, item, modifier)}
+                     on:changeArg={(e) => setModArg(e, modifier, ...e.detail)}
+                     on:delete={(e) => deleteModifier(item, e.detail)}
+                     vars={seq.variables}
+                  />
                {/each}
                {#if modifierSpecs.filter((m) => item.type == m.group).length > 0}
                   <div class="ui-p-1">

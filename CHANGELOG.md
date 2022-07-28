@@ -7,6 +7,9 @@ Added:
   * Foundry v10 compatibility. Requires Sequencer's [Foundry_v10 branch](https://github.com/fantasycalendar/FoundryVTT-Sequencer/tree/Foundry_v10)
   * `abs` argument for "property" hooks. Applies `Math.abs` before comparing with threshold
   * `args[1]` of the "setInterval" hook now contains the count of successful calls
+  * `animateProperty` / `loopProperty` modifiers for sequences
+  * FxMaster integration
+  * Setting icon from action's button
 
 Fixed:
   * Wrong width of argument labels 

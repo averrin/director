@@ -5,15 +5,18 @@
    import { onDestroy } from "svelte";
    import { v4 as uuidv4 } from "uuid";
    import Action from "../../modules/Actions.js";
-   import { calculateValue } from "../../modules/helpers.js";
+   import { calculateValue, getIconNames } from "../../modules/helpers.js";
    import exportFromJSON from "export-from-json";
    import FaFileExport from "svelte-icons/fa/FaFileExport.svelte";
    import { setting } from "../../modules/helpers.js";
    import { SETTINGS } from "../../constants.js";
-   import { HsvPicker } from "svelte-color-picker";
    import { logger, rgb2hex } from "../../modules/helpers.js";
+   import ArgInput from "./ArgInput.svelte";
+   import { contrastColor } from "../../modules/helpers.js";
+   import FaPlay from "svelte-icons/fa/FaPlay.svelte";
 
-   export let onTagClick;
+   getIconNames("mdi");
+
    export let onSelect;
    let currentActions;
    const unsubscribe3 = actions.subscribe(async (actions) => {
@@ -23,10 +26,8 @@
 
    let pickerOpen = false;
    let editItem;
-   let startColor = "#ffffff";
    function itemClick(item) {
       editItem = item;
-      startColor = editItem.color?.slice(0, 7);
       pickerOpen = !pickerOpen;
    }
 
@@ -98,19 +99,44 @@
       actions.set(currentActions);
       // }
    }
-
-   function colorChange(e) {
-      editItem.color = rgb2hex(e.detail).hex;
-      currentActions = currentActions;
-   }
 </script>
 
 {#if editItem}
    <input type="checkbox" id="color-modal-actions" class="ui-modal-toggle" bind:checked={pickerOpen} />
    <label for="color-modal-actions" class="ui-modal ui-cursor-pointer">
-      <label class="ui-modal-box ui-relative ui-w-fit" for="">
-         <HsvPicker on:colorChange={colorChange} {startColor} />
-      </label>
+      <div class="ui-modal-box ui-w-11/12 ui-max-w-5xl">
+         <h3 class="ui-py-4 ui-font-bold ui-text-lg">Edit action</h3>
+         <div class="ui-flex ui-flex-row ui-items-center ui-gap-2">
+            <div class="ui-flex ui-flex-row ui-flex-1 ui-items-center ui-gap-2">
+               <ArgInput type="color" label="color" bind:value={editItem.color} hideSign={true} widthAuto={true} />
+               <ArgInput type="icon" label="icon" bind:value={editItem.icon} hideSign={true} widthAuto={true} />
+            </div>
+            <div class="ui-flex ui-flex-none">
+               <button
+                  title="execute action"
+                  class="ui-btn ui-btn-square"
+                  style:background-color={editItem.color}
+                  style:color={contrastColor(editItem.color)}
+                  class:!ui-p-[8px]={!editItem.icon}
+               >
+                  {#if editItem.icon}
+                     <iconify-icon
+                        style:font-size="2rem"
+                        icon={editItem.icon}
+                        style:color={contrastColor(editItem.color)}
+                     />
+                  {:else}
+                     <FaPlay />
+                  {/if}
+               </button>
+            </div>
+         </div>
+         <div class="ui-modal-action">
+            <label for="seq-modal" class="ui-btn ui-btn-primary" on:click={(_) => actions.set(currentActions)}
+               >Save</label
+            >
+         </div>
+      </div>
    </label>
 {/if}
 
@@ -131,16 +157,7 @@
    </div>
    <div>
       <Sortable items={currentActions} let:item let:index on:change={sortActions} options={{ handle: ".handle" }}>
-         <ActionItem
-            {item}
-            {selectAction}
-            {deleteAction}
-            {onTagClick}
-            {actionTags}
-            {$tagColors}
-            on:change={onChange}
-            {itemClick}
-         />
+         <ActionItem {item} {selectAction} {deleteAction} {actionTags} {$tagColors} on:change={onChange} {itemClick} />
       </Sortable>
    </div>
 </div>

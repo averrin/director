@@ -1,4 +1,9 @@
-import { tools, evalExpression } from "./helpers.js";
+import { SETTINGS } from "../constants.js";
+import { tools, evalExpression, getIconNames } from "./helpers.js";
+import { setting } from "./settings.js";
+// const iconCollection = "mdi";
+// const iconCollection = "material-symbols";
+const iconCollection = "openmoji";
 
 export const actionTypes = [
   {
@@ -165,6 +170,34 @@ export const modifierSpecs = [
   { id: 'file', group: 'effect', args: [{ type: 'effect_file', label: 'file' }], cat: "Required" },
   { id: 'atLocation', group: 'effect', args: [{ type: 'position', label: 'pos' }], cat: "Required" },
   //{ id: 'name', group: 'effect', args: [{ type: 'string', label: 'name' }], cat: "Generic" },
+  {
+    id: 'animateProperty', group: 'effect', args: [
+      { type: 'animate-target', label: 'target' },
+      { type: "animate-property", label: "property" },
+      { type: "int", label: "from", option: true },
+      { type: "int", label: "to", option: true },
+      { type: "int", label: "duration", option: true },
+      { type: "int", label: "delay", option: true },
+      { type: "ease", label: "ease", option: true },
+      { type: "bool", label: "gridUnits", option: true },
+    ], cat: "Animate"
+  },
+
+  {
+    id: 'loopProperty', group: 'effect', args: [
+      { type: 'animate-target', label: 'target' },
+      { type: "animate-property", label: "property" },
+      { type: "int", label: "from", option: true },
+      { type: "int", label: "to", option: true },
+      { type: "int", label: "duration", option: true },
+      { type: "int", label: "delay", option: true },
+      { type: "ease", label: "ease", option: true },
+      { type: "bool", label: "gridUnits", option: true },
+      { type: "int", label: "loop", option: true },
+      { type: "bool", label: "pingPong", option: true },
+    ], cat: "Animate"
+  },
+
 
   { id: 'scaleToObject', group: 'effect', args: [{ type: 'float', label: 'scale' }], cat: "Scale" },
   { id: 'scale', group: 'effect', args: [{ type: 'float', label: 'scale' }], cat: "Scale" },
@@ -485,10 +518,31 @@ export const argSpecs = [
   {
     id: "bool", var_types: ["bool", "expression"], default: false,
   },
-  { id: "effect_file", var_types: ["effect_file", "expression"] },
+  {
+    id: "effect_file", var_types: ["effect_file", "expression"], options: (value) => {
+
+      let files = [];
+      try {
+        if (value && value.startsWith("jb2a")) {
+          files = globalThis.Sequencer.Database.getPathsUnder(value).map((o) => value + "." + o);
+        } else {
+          if (!value || (value && value.indexOf("/") == -1)) {
+            try {
+              files = globalThis.Sequencer.Database.getPathsUnder("jb2a").map((o) => "jb2a." + o);
+            } catch (error) {
+              files = [];
+            }
+          }
+        }
+      } catch (e) {
+        //filepath
+      }
+      return files;
+    }
+  },
   { id: "sound_file", var_types: ["sound_file", "expression"] },
-  { id: "int", var_types: ["int", "expression"] },
-  { id: "float", var_types: ["float", "int", "expression"] },
+  { id: "int", var_types: ["int", "expression"], default: 0 },
+  { id: "float", var_types: ["float", "int", "expression"], default: 0 },
   { id: "macro", var_types: ["macro", "string", "expression"] },
   { id: "string", var_types: ["string", "expression"] },
   { id: "color", var_types: ["string", "color", "expression"] },
@@ -500,6 +554,46 @@ export const argSpecs = [
     }
     , control: "select"
   },
+  {
+    id: "animate-target", var_types: ["animate-target"], options: [
+      { value: "sprite", label: "sprite" },
+      { value: "alphaFilter", label: "alphaFilter" },
+      { value: "spriteContainer", label: "spriteContainer" },
+    ]
+    , control: "select"
+  },
+
+  {
+    id: "animate-property", var_types: ["animate-property"], options: (_, modifier) => {
+      return {
+        "sprite": [
+          { value: "position.x", label: "position.x" },
+          { value: "position.y", label: "position.y" },
+          { value: "rotation", label: "rotation" },
+          { value: "angle", label: "angle" },
+          { value: "scale.x", label: "scale.x" },
+          { value: "scale.y", label: "scale.y" },
+          { value: "width", label: "width" },
+          { value: "height", label: "height" },
+        ],
+        "alphaFilter": [
+          { value: "alpha", label: "alpha" },
+        ],
+        "spriteContainer": [
+          { value: "position.x", label: "position.x" },
+          { value: "position.y", label: "position.y" },
+          { value: "rotation", label: "rotation" },
+          { value: "angle", label: "angle" },
+          { value: "scale.x", label: "scale.x" },
+          { value: "scale.y", label: "scale.y" },
+          { value: "width", label: "width" },
+          { value: "height", label: "height" },
+        ]
+      }[modifier.args[0] || "sprite"];
+    }, default: "position.x"
+    , control: "select"
+  },
+
   {
     id: "sequence-vars", var_types: ["sequence-vars"], options: (_, extra) => {
       const seqId = extra.args[0];
@@ -522,6 +616,14 @@ export const argSpecs = [
     id: "action-type", var_types: ["action-type"], options: (_) => {
       return actionTypes.map((type) => {
         return { "value": type.id, "label": type.label, group: type.group };
+      });
+    }, control: "select"
+  },
+  {
+    id: "icon", var_types: ["icon", "string", "expression"], options: async (_) => {
+      const iconCollection = setting(SETTINGS.ICON_COLLECTION);
+      return (await getIconNames(iconCollection)).map((icon) => {
+        return { "value": `${iconCollection}:${icon}`, "label": icon }; // TODO: add categories
       });
     }, control: "select"
   },
@@ -568,7 +670,7 @@ export const argSpecs = [
       { value: "easeInBounce", label: "InBounce" },
       { value: "easeOutBounce", label: "OutBounce" },
       { value: "easeInOutBounce", label: "InOutBounce" },
-    ]
+    ], default: "linear"
   }
 ];
 

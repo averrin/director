@@ -217,3 +217,16 @@ export function getFlag(obj, flag) {
     return obj.flags[flag];
   }
 }
+
+let _cachedIcons = {};
+export async function getIconNames(collection) {
+  if (_cachedIcons[collection]) return _cachedIcons[collection];
+  const url = `https://api.iconify.design/collection?prefix=${collection}`
+  const res = await fetch(url).then(r => r.json());
+  _cachedIcons[collection] = [...res.uncategorized];
+  for (const [_, i] of Object.entries(res.categories)) {
+    _cachedIcons[collection].push(...i);
+  }
+  return _cachedIcons[collection];
+
+}
