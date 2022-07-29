@@ -65,7 +65,7 @@
    }
 
    function colorChange(e) {
-      value = rgb2hex(e.detail).hex;
+      value = rgb2hex(e.detail).hex.slice(0, 7);
    }
 
    let options = additionalItems;

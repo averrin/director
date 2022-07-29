@@ -252,8 +252,8 @@ function initConvenientEffectsIntegration() {
         target: (target, ...args) => {
           return target.actor.id == args[0].parent.id;
         },
-        test: (effect, ...args) => {
-          return args[1].data.label == effect;
+        test: (target, effect, ...args) => {
+          return args[0].data.label == effect;
         }, args: [{ type: "ce-effect", label: "effect" }]
       });
 
@@ -265,8 +265,8 @@ function initConvenientEffectsIntegration() {
         target: (target, ...args) => {
           return target.actor.id == args[0].parent.id;
         },
-        test: (effect, ...args) => {
-          return args[1].data.label == effect;
+        test: (target, effect, ...args) => {
+          return args[0].data.label == effect;
         }, args: [{ type: "ce-effect", label: "effect" }]
       });
   });

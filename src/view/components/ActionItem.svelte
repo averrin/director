@@ -18,6 +18,8 @@
    import { loadIcon } from "iconify-icon";
    import { createEventDispatcher } from "svelte";
    const dispatch = createEventDispatcher();
+   import CopyToClipboard from "svelte-copy-to-clipboard";
+   import FaRegCopy from "svelte-icons/fa/FaRegCopy.svelte";
 
    export let item;
    if (item.icon) loadIcon(item.icon);
@@ -66,6 +68,8 @@
       hook = currentHooks.find((h) => h.value == item.value);
       dispatch("change", item);
    }
+
+   const oneliner = `Director.runAction("${item.name || item.id}");`;
 </script>
 
 <div
@@ -172,6 +176,17 @@
             >
                <FaEdit />
             </button>
+
+            <CopyToClipboard
+               text={oneliner}
+               on:copy={(_) => globalThis.ui.notifications.info("Oneliner copied!")}
+               let:copy
+            >
+               <button class="ui-btn ui-btn-square ui-p-2 ui-btn-outline ui-m-0" on:click|preventDefault={copy}>
+                  <FaRegCopy />
+               </button>
+            </CopyToClipboard>
+
             {#if Array.isArray(item.value) || item.value?.startsWith("#")}
                <button
                   title="select target"

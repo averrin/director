@@ -152,12 +152,12 @@ controlled.forEach(c => c.control());`;
 
       for (const m of section.modifiers) {
         const args = [];
-        const pre_args = m.args.map((a, i) => this.getCodeForVal("", a, m._spec.args[i].type)[0]);
+        const pre_args = m.args?.map((a, i) => this.getCodeForVal("", a, m._spec?.args[i]?.type)[0]);
         let n = 0;
         const options = {};
         for (const a of pre_args) {
-          const spec = m._spec.args[n];
-          if (spec.option) {
+          const spec = m._spec?.args[n];
+          if (spec?.option) {
             if (typeof a === 'string' || a instanceof String) {
               options[spec.label] = a.replaceAll('"', '');
             }
@@ -237,6 +237,34 @@ controlled.forEach(c => c.control());`;
     const s = new globalThis.Sequence(moduleId);
     try {
       let i = 0;
+      const _seq = [...seq]
+      seq = [];
+      for (const section of _seq) {
+        let isMulti = false;
+        let targets;
+        let mode;
+        for (const m of section.modifiers) {
+          if (m.type == "multiply") {
+            isMulti = true;
+            targets = await calculateValue(m.args[0], "selection");
+            mode = m.args[1] || "on";
+          }
+        }
+        if (!isMulti) {
+          seq.push(section);
+        } else {
+          for (const target of targets) {
+            const ns = Section.fromPlain(section);
+            ns.id = uuidv4();
+            ns.modifiers = ns.modifiers.filter(m => m.type != "multiply");
+            const mod = new Modifier(uuidv4(), mode);
+            mod.setType(mode, section.type);
+            mod.args[0] = target;
+            ns.modifiers.push(mod);
+            seq.push(ns);
+          }
+        }
+      }
       for (const section of seq) {
         if (this.onlySection != undefined && section.id != this.onlySection) continue;
         if (section.args[1] == "") section.args[1] = null;
@@ -348,11 +376,11 @@ export class Section {
   }
 
   setType(type) {
+    this.args = [];
     this.type = type;
     this._spec = sectionSpecs.find(s => s.id == this.type);
-    this.args = [];
-    if (!this._spec) return;
-    for (const arg of this._spec.args) {
+    if (!this._spec || !this._spec.args) return;
+    for (const arg of this._spec?.args) {
       const spec = argSpecs.find(s => s.id == arg.type);
       let value = spec.default;
       if (value === undefined && spec.options) {
@@ -375,7 +403,7 @@ export class Section {
 
   static fromPlain(plain) {
     const s = plainToClass(Section, plain);
-    s.modifiers = s.modifiers?.map(m => Modifier.fromPlain(m));
+    s.modifiers = s.modifiers?.map(m => Modifier.fromPlain(m, s.type));
     s._spec = sectionSpecs.find(spec => spec.id == s.type);
     return s;
   }
@@ -384,16 +412,19 @@ export class Section {
 export class Modifier {
   constructor(id, type, args) {
     this.id = id;
+    this.sectionType = "";
     this.setType(type)
     this.args = args || [];
     this.version = 1;
   }
   setType(type, sectionType) {
+    this._spec = modifierSpecs.filter(s => s.group == sectionType).find(s => s.id == type);
+    this.sectionType = sectionType;
+    if (this.type == type) return;
     this.type = type;
-    this._spec = modifierSpecs.filter(s => s.group == sectionType).find(s => s.id == this.type);
     this.args = [];
-    if (!this._spec) return;
-    for (const arg of this._spec.args) {
+    if (!this._spec || !this._spec.args) return;
+    for (const arg of this._spec?.args) {
       const spec = argSpecs.find(s => s.id == arg.type);
       let value = spec.default;
       if (value === undefined && spec.options) {
@@ -414,9 +445,10 @@ export class Modifier {
     }
   }
 
-  static fromPlain(plain) {
+  static fromPlain(plain, sectionType) {
     const m = plainToClass(Modifier, plain);
-    m._spec = modifierSpecs.find(spec => spec.id == m.type);
+    m.setType(m.type, sectionType);
+    // this._spec = modifierSpecs.filter(s => s.group == sectionType).find(s => s.id == m.type);
     return m;
   }
 }

@@ -32,7 +32,7 @@ class HookManager {
         if (!targets) return;
         if (!Array.isArray(targets)) targets = [targets];
         for (const target of targets) {
-          if (hook.testTarget(target, ...args) && hook.testCondition(...args)) {
+          if (hook.testTarget(target, ...args) && hook.testCondition(target, ...args)) {
             hook.call(target, ...args);
           }
         }

@@ -11,11 +11,15 @@ Added:
   * FxMaster integration
   * Setting icon from action's button
   * `alt-D` shortcut for toggle Director window
+  * `runAction` function for the API.
+  * "copy oneliner" button for actions
+  * `multiply` modifier for repeating section (effect or animation) for all targets
 
 Fixed:
   * Wrong width of argument labels 
   * A couple of rare problems in the hooks' calling
   * Sequencer's warning about reading db before it's populated
+  * Many problems with arguments' inputs (i suppose, i also added some more bugs)
 
 ## [0.7.2](https://github.com/averrin/director/compare/0.7.1...0.7.2)
 

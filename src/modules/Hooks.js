@@ -36,9 +36,9 @@ export default class Hook {
     return "target" in spec && spec.target(target, ...args);
   }
 
-  testCondition(...args) {
+  testCondition(target, ...args) {
     const spec = hookSpecs.find(s => s.id == this.event);
-    return spec.test(...this.args.slice(0, spec?.args?.length || 0), ...args);
+    return spec.test(target, ...this.args.slice(0, spec?.args?.length || 0), ...args);
   }
 }
 

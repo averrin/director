@@ -29,7 +29,7 @@
          {#each modifier._spec.args as arg, i}
             <ArgInput
                extra={modifier}
-               vars={vars.filter((v) => argSpecs.find((s) => s.id == arg.type).var_types.includes(v.type))}
+               vars={vars.filter((v) => argSpecs.find((s) => s.id == arg.type).var_types?.includes(v.type))}
                label={arg.label}
                variables={true}
                type={arg.type}

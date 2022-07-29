@@ -195,6 +195,7 @@ export const modifierSpecs = [
     ], cat: "Animate"
   },
 
+  { id: 'multiply', group: 'effect', args: [{ type: 'targets', label: 'targets' }, { type: "multiply-mode", label: "mode" }], cat: "Special" },
 
   { id: 'scaleToObject', group: 'effect', args: [{ type: 'float', label: 'scale' }], cat: "Scale" },
   { id: 'scale', group: 'effect', args: [{ type: 'float', label: 'scale' }], cat: "Scale" },
@@ -269,6 +270,7 @@ export const modifierSpecs = [
 
   //Animation
   { id: 'on', group: 'animation', args: [{ type: 'placeable', label: 'placeable' }], cat: 'Required' },
+  { id: 'multiply', group: 'animation', args: [{ type: 'targets', label: 'targets' }], cat: "Special" },
 
   { id: 'repeats', group: 'animation', args: [{ type: 'int', label: 'count' }, { type: 'int', label: 'delay min' }, { type: 'int', label: 'delay max' }], cat: "Generic" },
   { id: 'delay', group: 'animation', args: [{ type: 'int', label: 'ms' }], cat: 'Generic' },
@@ -345,7 +347,7 @@ export const hookSpecs = [
     name: "On Hit",
     parents: ["updateActor"],
     target: targetFromActor,
-    test: (ts, limit, actor, _, updates) => {
+    test: (target, ts, limit, actor, _, updates) => {
       return (ts > 0 && updates.prevHp - actor.getRollData().attributes.hp.value >= ts) || actor.getRollData().attributes.hp.value / actor.getRollData().attributes.hp.max * 100 <= limit;
     }, args: [{ type: "int", label: "threshold" }, { type: "int", label: "drop lower %" }]
   },
@@ -354,7 +356,7 @@ export const hookSpecs = [
     name: "On Heal",
     parents: ["updateActor"],
     target: targetFromActor,
-    test: (ts, actor, _, updates) => {
+    test: (target, ts, actor, _, updates) => {
       return actor.getRollData().attributes.hp.value - updates.prevHp >= ts;
     }, args: [{ type: "int", label: "threshold" }]
   },
@@ -363,14 +365,14 @@ export const hookSpecs = [
     name: "On Death",
     parents: ["updateActor"],
     target: targetFromActor,
-    test: (actor, _) => actor.getRollData().attributes.hp.value <= 0
+    test: (target, actor, _) => actor.getRollData().attributes.hp.value <= 0
   },
   {
     id: "#onMove",
     name: "On Move",
     parents: ["updateToken"],
     target: targetFromToken,
-    test: (token, updates, _) => "x" in updates || "y" in updates || "elevation" in updates
+    test: (target, token, updates, _) => "x" in updates || "y" in updates || "elevation" in updates
   },
 
   {
@@ -378,7 +380,7 @@ export const hookSpecs = [
     name: "Token's property change",
     parents: ["updateToken"],
     target: targetFromToken,
-    test: (prop, ts, abs, token, _, updates) => {
+    test: (target, prop, ts, abs, token, _, updates) => {
       let d = getProperty(updates.prevTokenData, prop) - getProperty(token.data, prop);
       if (abs) d = Math.abs(d);
       return d >= ts;
@@ -390,7 +392,7 @@ export const hookSpecs = [
     name: "% of Token's property change",
     parents: ["updateToken"],
     target: targetFromToken,
-    test: (prop, ts, abs, prop2, token, _, updates) => {
+    test: (target, prop, ts, abs, prop2, token, _, updates) => {
       let d = (getProperty(updates.prevTokenData, prop) - getProperty(token.data, prop));
       if (abs) d = Math.abs(d);
       return d / getProperty(updates.prevTokenData, prop2) * 100 >= ts;
@@ -402,7 +404,7 @@ export const hookSpecs = [
     name: "Actor's property change",
     parents: ["updateActor"],
     target: targetFromActor,
-    test: (prop, ts, abs, actor, _, updates) => {
+    test: (target, prop, ts, abs, actor, _, updates) => {
       let d = getProperty(updates.prevData, prop) - getProperty(actor.getRollData(), prop);
       if (abs) d = Math.abs(d);
       return d >= ts;
@@ -413,7 +415,7 @@ export const hookSpecs = [
     name: "% of Actor's property change",
     parents: ["updateActor"],
     target: targetFromActor,
-    test: (prop, ts, prop2, actor, _, updates) => {
+    test: (target, prop, ts, prop2, actor, _, updates) => {
       let d = getProperty(updates.prevData, prop) - getProperty(actor.getRollData(), prop);
       if (abs) d = Math.abs(d);
       return d / getProperty(updates.prevData, prop2) * 100 >= ts;
@@ -424,10 +426,10 @@ export const hookSpecs = [
     name: "Generic updateActor",
     parents: ["updateActor"],
     target: targetFromActor,
-    test: (prop, ...args) => {
+    test: (target, prop, ...args) => {
       let code = `try {return ${prop}} catch(e) {return false}`;
-      const f = new Function("actor", "delta", "updates", "userId", "...args", code);
-      return f(...args, ...args)
+      const f = new Function("target", "actor", "delta", "updates", "userId", "...args", code);
+      return f(target, ...args, ...args)
     }, args: [{ type: "expression", label: "test" }]
   },
   {
@@ -435,17 +437,17 @@ export const hookSpecs = [
     name: "Generic updateToken",
     parents: ["updateToken"],
     target: targetFromToken,
-    test: (prop, ...args) => {
+    test: (target, prop, ...args) => {
       let code = `try {return ${prop}} catch(e) {return false}`;
-      const f = new Function("token", "delta", "updates", "userId", "...args", code);
-      return f(...args, ...args)
+      const f = new Function("target", "token", "delta", "updates", "userId", "...args", code);
+      return f(target, ...args, ...args)
     }, args: [{ type: "expression", label: "test" }]
   },
   {
     id: "#setInterval",
     name: "Set Interval",
     parents: [],
-    test: (expr, ...args) => {
+    test: (target, expr, ...args) => {
       return evalExpression(expr, ...args);
     }, args: [{ type: "expression", label: "test" }, { type: "expression", label: "interval" }]
   },
@@ -510,7 +512,7 @@ export const argSpecs = [
       { value: "#tokens.all", label: "All Tokens", group: "Other" },
       { value: "#tiles.all", label: "All Tiles", group: "Other" },
       { value: [], label: "Tagger", group: "Other" },
-    ]
+    ], var_types: ["targets"]
   },
   {
     id: "bool", var_types: ["bool", "expression"], default: false,
@@ -589,6 +591,14 @@ export const argSpecs = [
       }[modifier.args[0] || "sprite"];
     }, default: "position.x"
     , control: "select"
+  },
+
+  {
+    id: "multiply-mode", var_types: ["multiply-mode"], options: [
+      { value: "atLocation", label: "atLocation" },
+      { value: "attachTo", label: "attachTo" },
+      { value: "stretchTo", label: "stretchTo" },
+    ], control: "select", default: "atLocation"
   },
 
   {
