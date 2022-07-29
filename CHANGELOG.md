@@ -20,6 +20,7 @@ Fixed:
   * A couple of rare problems in the hooks' calling
   * Sequencer's warning about reading db before it's populated
   * Many problems with arguments' inputs (i suppose, i also added some more bugs)
+  * Fixed missing dependencies for v9
 
 ## [0.7.2](https://github.com/averrin/director/compare/0.7.1...0.7.2)
 

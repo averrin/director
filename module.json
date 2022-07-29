@@ -57,6 +57,28 @@
       }
     ]
   },
+  "dependencies": [
+    {
+      "name": "tagger",
+      "type": "module",
+      "compatibility": {}
+    },
+    {
+      "name": "sequencer",
+      "type": "module",
+      "compatibility": {}
+    },
+    {
+      "name": "socketlib",
+      "type": "module",
+      "compatibility": {}
+    },
+    {
+      "name": "warpgate",
+      "type": "module",
+      "compatibility": {}
+    }
+  ],
   "compatibility": {
     "minimum": "0.8.6",
     "verified": "9"
