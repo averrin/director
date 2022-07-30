@@ -115,6 +115,13 @@
             <div class="ui-flex ui-flex-row ui-flex-1 ui-items-center ui-gap-2">
                <ArgInput type="color" label="color" bind:value={editItem.color} hideSign={true} widthAuto={true} />
                <ArgInput type="icon" label="icon" bind:value={editItem.icon} hideSign={true} widthAuto={true} />
+               <ArgInput
+                  type="bool"
+                  label="hide in bar"
+                  bind:value={editItem.hidden}
+                  hideSign={true}
+                  widthAuto={true}
+               />
             </div>
             <div class="ui-flex ui-flex-none">
                <button

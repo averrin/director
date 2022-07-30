@@ -21,6 +21,15 @@ Hooks.once('init', async () => {
       app.toggle();
     }
   });
+
+  game.keybindings.register(moduleId, SETTINGS.KEY_COLLAPSE, {
+    name: 'Toggle collapsed UI',
+    editable: [{ key: 'KeyC', modifiers: [KeyboardManager.MODIFIER_KEYS.ALT] }],
+    namespace: 'Director',
+    onDown: () => {
+      app.toggleCollapsed();
+    }
+  });
 });
 
 Hooks.on('getSceneControlButtons', (buttons) => {

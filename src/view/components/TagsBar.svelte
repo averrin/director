@@ -4,6 +4,11 @@
    import FaFeatherAlt from "svelte-icons/fa/FaFeatherAlt.svelte";
    import FaDatabase from "svelte-icons/fa/FaDatabase.svelte";
    import FaFilm from "svelte-icons/fa/FaFilm.svelte";
+   import FaExpandArrowsAlt from "svelte-icons/fa/FaExpandArrowsAlt.svelte";
+   import FaCompressArrowsAlt from "svelte-icons/fa/FaCompressArrowsAlt.svelte";
+   import { SETTINGS } from "../../constants.js";
+   import { createEventDispatcher } from "svelte";
+   const dispatch = createEventDispatcher();
 
    function onTags(event) {
       const tags = event.detail.tags.filter((t) => t.trim() != "");
@@ -11,7 +16,14 @@
    }
 
    import { getContext } from "svelte";
+   import { setting } from "../../modules/helpers";
    const onTagClick = getContext("onTagClick");
+
+   let collapsed = setting(SETTINGS.COLLAPSED);
+   function toggleCollapsed() {
+      collapsed = !collapsed;
+      dispatch("collapsed", collapsed);
+   }
 </script>
 
 <div class="ui-navbar ui-bg-base-100 ui-gap-3">
@@ -46,5 +58,18 @@
             <FaFilm />
          </button>
       </div>
+
+      <button
+         title="toggle collapsed"
+         class="ui-btn ui-btn-square ui-justify-self-end !ui-p-[8px]"
+         class:ui-btn-outline={!collapsed}
+         on:click={(e) => toggleCollapsed()}
+      >
+         {#if collapsed}
+            <FaExpandArrowsAlt />
+         {:else}
+            <FaCompressArrowsAlt />
+         {/if}
+      </button>
    </div>
 </div>

@@ -24,8 +24,10 @@ export const SETTINGS = {
   SELECTED_TAB: "selected-tab",
   HIDE_IMPORT: "hide-import",
   ICON_COLLECTION: "icon-collection",
+  COLLAPSED: "collapsed",
 
   KEY_SHOW: "key-show",
+  KEY_COLLAPSE: "key-collapsed",
 };
 
 export const HOOKS = [
@@ -46,13 +48,13 @@ export const tabs = [
   {
     mode: "hooks",
     title: "Hooks",
-    badge: "<span class='ui-badge ui-mx-1' style='background-color: indianred'>𝛼</span>",
+    // badge: "<span class='ui-badge ui-indicator-item ui-mx-1' style='background-color: indianred'>𝛼</span>",
   },
   { mode: "selection", title: "Selection" },
   {
     mode: "sequencer",
     title: "Sequencer",
-    badge: "<span class='ui-badge ui-mx-1' style='background-color: darkorange'>𝛽</span>",
+    // badge: "<span class='ui-badge ui-indicator-item ui-mx-1' style='background-color: darkorange'>𝛽</span>",
   },
   { mode: "import", title: "Import" },
 ];

@@ -48,7 +48,7 @@ function initTokenMagicIntegration() {
       toCode: (args) => {
         if (args.length < 2) return '';
         const filter = TokenMagic.getPreset((args[1] ? args[1].replaceAll('"', '') : ""))?.params;
-        return `\t.thenDo(async () => await TokenMagic.addUpdateFilters(${args[0]}, ${JSON.stringify(filter)}))\n`;
+        return `.thenDo(async () => await TokenMagic.addUpdateFilters(${args[0]}, ${JSON.stringify(filter)}))`;
       }
     });
     Director.addSection({
@@ -66,7 +66,7 @@ function initTokenMagicIntegration() {
       },
       toCode: (args) => {
         if (args.length < 2) return '';
-        return `\t.thenDo(async () => await TokenMagic.deleteFilters(${args[0]}, ${args[1]}))\n`;
+        return `.thenDo(async () => await TokenMagic.deleteFilters(${args[0]}, ${args[1]}))`;
       }
     });
 
@@ -166,7 +166,7 @@ function initConvenientEffectsIntegration() {
       },
       toCode: (args) => {
         if (args.length < 2) return '';
-        return `\t.thenDo(async () => game.dfreds.effectInterface.toggleEffect(${args[1]}, { uuids: [${args[0]}.actor.uuid] }))\n`;
+        return `.thenDo(async () => game.dfreds.effectInterface.toggleEffect(${args[1]}, { uuids: [${args[0]}.actor.uuid] }))`;
       }
     });
 
@@ -187,7 +187,7 @@ function initConvenientEffectsIntegration() {
       },
       toCode: (args) => {
         if (args.length < 2) return '';
-        return `\t.thenDo(async () => game.dfreds.effectInterface.addEffect({effectName: ${args[1]}, uuid: ${args[0]}.actor.uuid }))\n`;
+        return `.thenDo(async () => game.dfreds.effectInterface.addEffect({effectName: ${args[1]}, uuid: ${args[0]}.actor.uuid }))`;
       }
     });
 
@@ -208,7 +208,7 @@ function initConvenientEffectsIntegration() {
       },
       toCode: (args) => {
         if (args.length < 2) return '';
-        return `\t.thenDo(async () => game.dfreds.effectInterface.removeEffect({effectName: ${args[1]}, uuid: ${args[0]}.actor.uuid }))\n`;
+        return `.thenDo(async () => game.dfreds.effectInterface.removeEffect({effectName: ${args[1]}, uuid: ${args[0]}.actor.uuid }))`;
       }
     });
 

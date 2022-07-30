@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { logger, setting } from "./helpers.js";
+import { calculateValueSync, logger, setting } from "./helpers.js";
 import { SETTINGS, moduleId } from "../constants.js";
 import { sectionSpecs, modifierSpecs, argSpecs } from "./Specs.js";
 import { calculateValue } from "./helpers.js"
@@ -72,7 +72,7 @@ let ${name} = await warpgate.crosshairs.show({
   interval: ${setting(SETTINGS.MANUAL_MODE)}
 });
 ${name} = { x: ${name}.x, y: ${name}.y };
-controlled.forEach(c => c.control());`;
+controlled.forEach(c => c.control({releaseOthers: false}));`;
         } else {
           val = `await warpgate.crosshairs.show({interval: ${setting(SETTINGS.MANUAL_MODE)}})`;
         }
@@ -85,7 +85,7 @@ controlled.forEach(c => c.control());`;
         }
         val = ret;
       } else if (val.startsWith("#target")) {
-        ret = `Array.from(game.user.targets)`;
+        let ret = `Array.from(game.user.targets)`;
         if (val.endsWith(".first")) {
           ret += '[0]';
         } else if (val.endsWith(".last")) {
@@ -117,6 +117,7 @@ controlled.forEach(c => c.control());`;
   }
 
   convertToCode() {
+    let stage = "beginning";
     let r = `// This macro was created by converting Director's sequence. Correctness of this code isn't guaranteed.\n`;
     r += `// The code isn't indentical to how Director executes sequences, but it should be a good base for modifications.\n`;
     if (this.variables.length > 0) {
@@ -132,27 +133,62 @@ controlled.forEach(c => c.control());`;
     }
 
     r += `\n//==== Sequence construction ====\n`;
-    r += `const sequence = new Sequence("${moduleId}")\n`;
+    r += `let sequence = new Sequence("${moduleId}")`;
     let i = 0;
-    for (const section of this.sections) {
-      const args = section.args.map((a, i) => this.getCodeForVal("", a, section._spec?.args[i]?.type)[0]);
+
+    for (const _section of this.sections) {
+      const section = Section.fromPlain(_section);
+      let isMulti = false;
+      let mode;
+      let targets;
+      for (const m of section.modifiers) {
+        if (m.type == "multiply") {
+          isMulti = true;
+          mode = m.args[1] || "on";
+          targets = m.args[0];
+        }
+      }
+      if (isMulti) {
+        section.modifiers = section.modifiers.filter(m => m.type != "multiply");
+        const mod = new Modifier(uuidv4(), mode);
+        mod.setType(mode, section.type);
+        mod.args[0] = "@_target";
+        section.modifiers.push(mod);
+        if (stage == "normal") r += ";";
+        r += `\n\nfor (const _target of ${this.getCodeForVal("", targets, "selection")[0]}) {`;
+        stage = "in_multi";
+      }
+
+      r += `\n// ${stage}`;
+
+      if (stage == "beginning") r += "\n\t";
+      if (stage == "in_multi") r += "\n\tsequence = sequence";
+      if (stage == "after_multi") {
+        r += "\nsequence = sequence";
+      }
+
+      const args = section.args.filter(a => a !== undefined && a !== null).map((a, i) => this.getCodeForVal("", a, section._spec?.args[i]?.type)[0]);
       let sectionName = section.type;
+      if (stage == "normal") r += "\n\t";
+      if (stage == "after_multi") {
+        stage = "normal";
+      }
       if (section.type == "effect") {
         const name = args[0] || `${this.title}-${i}`;
-        r += `\t.${section.type}()\n`;
-        r += `\t\t.origin("${this.id}")\n`;
-        r += `\t\t.name(${name})\n`;
+        r += `.${section.type}()`;
+        r += `\n\t\t.origin("${this.id}")`;
+        r += `\n\t\t.name(${name})`;
       } else {
         if (section._spec && "toCode" in section._spec) {
           r += section._spec.toCode(args);
         } else {
-          r += `\t.${sectionName}(${args.join(", ")})\n`;
+          r += `.${sectionName}(${args.join(", ")})`;
         }
       }
 
       for (const m of section.modifiers) {
         const args = [];
-        const pre_args = m.args?.map((a, i) => this.getCodeForVal("", a, m._spec?.args[i]?.type)[0]);
+        const pre_args = m.args?.filter(a => a !== undefined && a !== null).map((a, i) => this.getCodeForVal("", a, m._spec?.args[i]?.type)[0]);
         let n = 0;
         const options = {};
         for (const a of pre_args) {
@@ -169,12 +205,21 @@ controlled.forEach(c => c.control());`;
         if (Object.entries(options).length > 0) {
           args.push(JSON.stringify(options));
         }
-        r += `\t\t.${m.type}(${args.join(", ")})\n`;
+        r += `\n\t\t.${m.type}(${args.join(", ")})`;
       }
 
+      if (isMulti) {
+        r += `;\n}\n`
+        stage = "after_multi";
+      }
+
+      if (stage == "beginning" && i == 0) {
+        stage = "normal";
+      }
       i++;
     }
-    r += `.play();`
+    if (stage != "in_multi" && stage != "after_multi") r += ";";
+    r += `\nsequence.play();`
     return r;
   }
 
@@ -382,7 +427,7 @@ export class Section {
     if (!this._spec || !this._spec.args) return;
     for (const arg of this._spec?.args) {
       const spec = argSpecs.find(s => s.id == arg.type);
-      let value = spec.default;
+      let value = arg.default === undefined ? spec.default : arg.default;
       if (value === undefined && spec.options) {
         let ops = spec.options;
         if (typeof spec.options === "function") {
@@ -426,7 +471,7 @@ export class Modifier {
     if (!this._spec || !this._spec.args) return;
     for (const arg of this._spec?.args) {
       const spec = argSpecs.find(s => s.id == arg.type);
-      let value = spec.default;
+      let value = arg.default === undefined ? spec.default : arg.default;
       if (value === undefined && spec.options) {
         let ops = spec.options;
         if (typeof spec.options === "function") {
@@ -438,7 +483,7 @@ export class Modifier {
           value = ops[0];
         }
       }
-      if (value === undefined) {
+      if (value === undefined || arg.optional) {
         value = ""
       }
       this.args.push(value);

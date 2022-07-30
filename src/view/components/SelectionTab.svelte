@@ -6,6 +6,8 @@
    import { PlusIcon } from "@rgossiaux/svelte-heroicons/solid";
    import { setting } from "../../modules/settings.js";
    import { moduleId, SETTINGS } from "../../constants.js";
+   import { getContext } from "svelte";
+   import { getFlag } from "../../modules/helpers.js";
 
    function editObject(_, object) {
       object.document.sheet.render(true);
@@ -21,7 +23,6 @@
    let tokens = [];
    let thumbs = {};
 
-   import { getContext } from "svelte";
    const onTagClick = getContext("onTagClick");
 
    function onTagsSelected(event, i) {
@@ -39,7 +40,7 @@
 
    async function updateThumbs() {
       for (const obj of selection) {
-         const img = obj.document.texture.src;
+         const img = obj.document.texture?.src || obj.data.img;
          logger.info(img);
          if (!(img in thumbs)) {
             const thumb = await ImageHelper.createThumbnail(img, {
@@ -114,8 +115,22 @@
 <div class="ui-overflow-auto ui-max-h-[600px]">
    <div class="ui-flex ui-flex-col ui-p-3 ui-space-y-3 ui-justify-stretch">
       {#if selection.length == 0}
-         <div class="ui-justify-self-center ui-p-2">
-            <h3>Selection is empty</h3>
+         <div class="ui-alert ui-shadow-lg">
+            <div>
+               <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  class="ui-stroke-info ui-flex-shrink-0 ui-w-6 ui-h-6"
+                  ><path
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     stroke-width="2"
+                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  /></svg
+               >
+               <span class="ui-text-xl ui-text-slate-600">Selection is empty</span>
+            </div>
          </div>
       {/if}
       {#each selection as tile, i}
@@ -124,7 +139,7 @@
                <img
                   class="ui-h-[170px]"
                   style="border: none;"
-                  src={thumbs[tile.document.texture.src]}
+                  src={thumbs[tile.document.texture?.src || tile.data.img]}
                   alt="Selected image"
                />
             </figure>
@@ -132,7 +147,7 @@
                <h2 class="ui-card-title">
                   {#if !tile.name}
                      Tile: {tile.id}
-                     {#if tile.document.flags["monks-active-tiles"]?.actions?.length > 0}
+                     {#if getFlag(tile, "monks-active-tiles")?.actions?.length > 0}
                         <span class="ui-badge ui-badge-primary">MATT</span>
                      {/if}
                   {:else}

@@ -71,7 +71,12 @@
 
    function addModifier(section) {
       const e = new Modifier(uuidv4(), "");
-      e.setType(modifierSpecs.filter((m) => m.group == section.type)[0].id, section.type);
+      e.setType(
+         modifierSpecs
+            .filter((m) => m.group == section.type)
+            .filter((m) => m.multi || !section.modifiers.find((mod) => mod.type == m.id))[0].id,
+         section.type
+      );
       seq.sections.find((s) => s.id == section.id).modifiers.push(e);
       updateSequences();
    }
@@ -107,17 +112,19 @@
          if (value.value) {
             if (m.args[i] == value.value) return;
             m.args[i] = value.value;
+            updateSequences();
          } else {
             if (JSON.stringify(m.args[i]) == JSON.stringify(value)) return;
             m.args[i] = value;
+            updateSequences();
          }
       } else {
          if (JSON.stringify(m.args[i]) == JSON.stringify(value)) return;
          m.args[i] = value;
-      }
-      if (m.args[i] != null && value != undefined) {
          updateSequences();
       }
+      // if (m.args[i] != null && value != undefined) {
+      // }
    }
 
    function setModType(e, section, mod) {
@@ -145,9 +152,8 @@
    {#each seq.variables as variable (variable.id)}
       <VariableComponent {variable} on:remove={deleteVariable} on:change={updateVariable} />
    {/each}
-   <div />
 
-   <div class="ui-overflow-auto ui-max-h-[800px]" id="sequencer-content">
+   <div class="ui-overflow-auto ui-max-h-[900px]" id="sequencer-content">
       <Sortable items={seq.sections} let:item let:index on:change={sortSections} options={{ handle: ".handle" }}>
          <div class="ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-gap-2 ui-my-1">
             <div class="ui-flex ui-flex-row ui-justify-start ui-space-x-2">

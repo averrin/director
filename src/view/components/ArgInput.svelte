@@ -13,6 +13,8 @@
    import { getContext } from "svelte";
    const onTagClick = getContext("onTagClick");
 
+   let mode = "direct";
+
    export let id = uuidv4();
    export let value;
    export let type;
@@ -25,6 +27,12 @@
    export let widthAuto = false;
    export let justify = "start";
    export let extra;
+   export let optional = false;
+   export let defaultValue;
+
+   if (optional && (value === "" || value === undefined || value === null)) {
+      mode = "optional";
+   }
 
    let spec = argSpecs.find((s) => s.id == type);
    let lastVal = value;
@@ -34,9 +42,19 @@
       lastVal = value;
    }
 
+   function resetOptionalValue() {
+      value = undefined;
+      mode = "optional";
+      update();
+   }
+
    function fixEmpty() {
       if (value === undefined || value === null || (value === "" && "default" in spec && value !== spec.default)) {
-         resetValue();
+         if (defaultValue === undefined) {
+            resetValue();
+         } else {
+            value = defaultValue;
+         }
          update();
          return true;
       }
@@ -95,7 +113,6 @@
          }
       }
    }
-   let mode = "direct";
    if ((typeof value === "string" || value instanceof String) && value.startsWith("@")) {
       mode = "variable";
    }
@@ -156,9 +173,16 @@
 >
    <slot name="left" />
    {#if label != ""}
-      <span class="">{label}</span>
+      <span class="" class:ui-italic={optional}>{label}</span>
    {/if}
-   {#if mode == "direct"}
+   {#if mode == "optional"}
+      <div
+         class="ui-flex ui-flex-row ui-items-center"
+         style={!hideSign || label != "" ? "border: 1px solid #ccc;" : ""}
+      >
+         <input type="checkbox" class="ui-checkbox" on:click={() => (mode = "direct")} />
+      </div>
+   {:else if mode == "direct"}
       {#if !hideSign}
          <button
             class="ui-btn ui-btn-square ui-m-0 !ui-p-[10px]"
@@ -400,6 +424,12 @@
          listAutoWidth={false}
          isClearable={false}
       />
+   {/if}
+
+   {#if mode != "optional" && optional}
+      <button class="ui-btn ui-btn-square !ui-p-[8px]" on:click={resetOptionalValue}>
+         <FaTimes />
+      </button>
    {/if}
    <slot name="right" />
 </label>

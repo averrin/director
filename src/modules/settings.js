@@ -6,15 +6,33 @@ export let setting = key => {
 };
 
 export async function migrateFromString(key) {
-  const current = game.settings.get(moduleId, key);
-  if (typeof current === "string" || current instanceof String) {
-    await game.settings.set(moduleId, key, JSON.parse(current));
+  try {
+    let current = game.settings.get(moduleId, key);
+    if (typeof current === "string" || current instanceof String) {
+      current = JSON.parse(current);
+      await game.settings.set(moduleId, key, current);
+    }
+    if (typeof current[0] === "string" || current[0] instanceof String) {
+      current = JSON.parse(current[0]);
+      if (Array.isArray(current)) {
+        await game.settings.set(moduleId, key, current);
+      }
+    }
+  } catch (error) {
+
   }
 }
 
 const debouncedReload = debounce(() => window.location.reload(), 100);
 export function initSettings(app) {
   game.settings.register(moduleId, SETTINGS.SHOW, {
+    scope: "client",
+    config: false,
+    type: Boolean,
+    default: false,
+  });
+
+  game.settings.register(moduleId, SETTINGS.COLLAPSED, {
     scope: "client",
     config: false,
     type: Boolean,

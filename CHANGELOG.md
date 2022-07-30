@@ -5,15 +5,20 @@ All notable changes to this project will be documented in this file. Dates are d
 ## [Unreleased]
 Added:
   * Foundry v10 compatibility. Requires Sequencer's [Foundry_v10 branch](https://github.com/fantasycalendar/FoundryVTT-Sequencer/tree/Foundry_v10)
-  * `abs` argument for "property" hooks. Applies `Math.abs` before comparing with threshold
+  * `abs` argument for "property" hooks. Applies `Math.abs` before comparing with a threshold
   * `args[1]` of the "setInterval" hook now contains the count of successful calls
   * `animateProperty` / `loopProperty` modifiers for sequences
   * FxMaster integration
   * Setting icon from action's button
-  * `alt-D` shortcut for toggle Director window
   * `runAction` function for the API.
   * "copy oneliner" button for actions
   * `multiply` modifier for repeating section (effect or animation) for all targets
+  * Small changes in code generation
+  * Collapsed UI mode with actions toolbar (similar to AlphaHUD integration)
+  * `alt-D` shortcut for toggle Director window, `alt-c` for toggle collapsing
+  * You cannot add a duplicate modifier (there are some exceptions)
+  * Support of Sequencer 2.1.9
+  * A bunch of missed arguments for modifiers
 
 Fixed:
   * Wrong width of argument labels 
@@ -21,6 +26,11 @@ Fixed:
   * Sequencer's warning about reading db before it's populated
   * Many problems with arguments' inputs (i suppose, i also added some more bugs)
   * Fixed missing dependencies for v9
+  * Manual position picking reset controlled tokens to only the first one.
+
+Known bugs:
+  * Color picker for stroke color in text modifier is bugged
+  * Alpha in color pickers do nothing
 
 ## [0.7.2](https://github.com/averrin/director/compare/0.7.1...0.7.2)
 

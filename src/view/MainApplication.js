@@ -57,6 +57,10 @@ export default class MainApplication extends SvelteApplication {
     initIntegrations();
   }
 
+  toggleCollapsed() {
+    Hooks.call("DirectorToggleCollapse");
+  }
+
   toggle() {
     if (setting(SETTINGS.SHOW)) {
       this.hide();

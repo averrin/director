@@ -11,6 +11,7 @@ export default class Action {
     this.color = undefined;
     this.icon = undefined;
     this.name = "";
+    this.hidden = false;
     this.version = 1;
   }
 

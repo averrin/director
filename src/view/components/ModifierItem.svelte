@@ -12,12 +12,17 @@
 
    import { createEventDispatcher } from "svelte";
    const dispatch = createEventDispatcher();
+   let specs = modifierSpecs
+      .filter((m) => parent.type == m.group)
+      .filter((m) => m.multi || !parent.modifiers.find((mod) => mod.type == m.id));
 </script>
 
-<div class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-py-2 ui-px-4 ui-gap-2 ui-my-1">
+<div
+   class="ui-border-solid ui-border ui-border-zinc-200 ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-py-2 ui-px-4 ui-gap-2 ui-my-1"
+>
    <div class="ui-flex ui-flex-1 ui-gap-2 ui-flex-row ui-flex-wrap">
       <Select
-         items={modifierSpecs.filter((m) => parent.type == m.group)}
+         items={specs}
          groupBy={groupByCat}
          optionIdentifier="id"
          labelIdentifier="id"
@@ -36,6 +41,8 @@
                value={modifier.args[i]}
                on:change={(e) => dispatch("changeArg", [i, e.detail])}
                widthAuto={true}
+               optional={arg.optional}
+               defaultValue={arg.default}
             />
          {/each}
       {/if}
