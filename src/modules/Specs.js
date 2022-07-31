@@ -7,31 +7,31 @@ export const actionTypes = [
     id: 'toggle',
     label: 'Toggle visibility',
     group: 'Common',
-    execute: (object, action) => tools.toggle(object?.document || object),
+    execute: (object, action) => object && tools.toggle(object?.document || object),
   },
   {
     id: 'hide',
     label: 'Hide',
     group: 'Common',
-    execute: (object, action) => tools.hide(object?.document || object),
+    execute: (object, action) => object && tools.hide(object?.document || object),
   },
   {
     id: 'show',
     label: 'Show',
     group: 'Common',
-    execute: (object, action) => tools.show(object?.document || object),
+    execute: (object, action) => object && tools.show(object?.document || object),
   },
   {
     id: 'kill',
     label: 'Kill',
     group: 'Tokens',
-    execute: (object, action) => tools.kill(object?.document || object),
+    execute: (object, action) => object && tools.kill(object?.document || object),
   },
   {
     id: 'revive',
     label: 'Revive',
     group: 'Tokens',
-    execute: (object, action) => tools.revive(object?.document || object),
+    execute: (object, action) => object && tools.revive(object?.document || object),
   },
   {
     id: 'playSequence',
@@ -40,7 +40,9 @@ export const actionTypes = [
 
     execute: (object, action, event, seqVars) => {
       const overrides = seqVars || {};
-      overrides[action.args[1]?.name || action.args[1]] = object;
+      if (object) {
+        overrides[action.args[1]?.name || action.args[1]] = object;
+      }
       globalThis.Director.playSequence(action.args[0], overrides);
     },
     args: [{ type: "sequence", label: "sequence" }, { type: "sequence-vars", label: "var" }]
@@ -73,71 +75,117 @@ export function addAction(action) {
 
 export const sectionSpecs = [
   { id: 'effect', label: 'Effect', args: [{ type: 'string', label: 'name' }], group: "Sequencer", collapsible: true },
-  { id: 'animation', label: 'Animation', group: "Sequencer", collapsible: true },
+  {
+    id: 'animation', label: 'Animation', group: "Sequencer", collapsible: true,
+    multiplyMode: "on",
+  },
   { id: 'sound', label: 'Sound', group: "Sequencer", collapsible: true },
   { id: 'wait', label: 'Wait', args: [{ type: 'int', label: 'ms' }], group: "Sequencer", nonPlayable: true },
   { id: 'macro', label: 'Macro', args: [{ type: 'macro', label: 'name' }], group: "Sequencer" },
   { id: 'thenDo', label: 'thenDo', args: [{ type: 'code', label: 'func' }], group: "Sequencer" },
+  { id: 'addSequence', label: 'addSequence', args: [{ type: 'sequence', label: 'sequence' }], group: "Sequencer" },
 
   {
     id: 'toggle',
     label: 'Toggle visibility',
-    args: [{ type: 'placeable', label: 'target' }],
+    args: [{ type: 'placeable', label: 'target' }, { type: "int", label: "fadeDuration" }],
     group: "Actions",
-    thenDo: (args) => () => tools.toggle(args[0].document),
-    toCode: (args) => `\t.thenDo(async () => ${args[0]}.document.update({ hidden: !${args[0]}.document.data.hidden }))\n`,
+    multiplyMode: "self",
+    addSequence: (args) => {
+      let s = new globalThis.Sequence("director");
+      if (args[1] != 0) {
+        if (args[0].data.hidden || args[0].document?.data?.hidden) {
+          s = s.animation().on(args[0]).opacity(0)
+            .thenDo(() => tools.show(args[0].document || args[0]))
+            .animation().on(args[0]).fadeIn(args[1]);
+        } else {
+          s = s.animation().on(args[0]).fadeOut(args[1]).wait(args[1])
+            .thenDo(() => tools.hide(args[0].document || args[0])).wait(15)
+            .animation().on(args[0]).opacity(1);
+        }
+      } else {
+        s.thenDo(() => tools.toggle(args[0].document || args[0]));
+      }
+      return s;
+    },
+    toCode: (args) => `.thenDo(async () => ${args[0]}.document.update({ hidden: !${args[0]}.document.data.hidden }))`,
   },
   {
     id: 'show',
     label: 'Show',
-    args: [{ type: 'placeable', label: 'target' }],
+    args: [{ type: 'placeable', label: 'target' }, { type: "int", label: "fadeDuration" }],
     group: "Actions",
-    thenDo: (args) => () => tools.show(args[0].document),
-    toCode: (args) => `\t.thenDo(async () => ${args[0]}.document.update({ hidden: false }))\n`,
+    multiplyMode: "self",
+    addSequence: (args) => {
+      let s = new globalThis.Sequence("director");
+      if (args[1] > 0) {
+        s = s.animation().on(args[0]).opacity(0)
+          .thenDo(() => tools.show(args[0].document || args[0]))
+          .animation().on(args[0]).fadeIn(args[1]);
+      } else {
+        s.thenDo(() => tools.show(args[0].document || args[0]));
+      }
+      return s;
+    },
+    toCode: (args) => `.thenDo(async () => ${args[0]}.document.update({ hidden: false }))`,
   },
   {
     id: 'hide',
     label: 'Hide',
-    args: [{ type: 'placeable', label: 'target' }],
+    args: [{ type: 'placeable', label: 'target' }, { type: "int", label: "fadeDuration" }],
     group: "Actions",
-    thenDo: (args) => () => tools.hide(args[0].document),
-    toCode: (args) => `\t.thenDo(async () => ${args[0]}.document.update({ hidden: true }))\n`,
+    multiplyMode: "self",
+    addSequence: (args) => {
+      let s = new globalThis.Sequence("director");
+      if (args[1] > 0) {
+        s = s.animation().on(args[0]).fadeOut(args[1]).wait(args[1])
+          .thenDo(() => tools.hide(args[0].document || args[0])).wait(500)
+          .animation().on(args[0]).opacity(1);
+      } else {
+        s.thenDo(() => tools.hide(args[0].document || args[0]));
+      }
+      return s;
+    },
+    toCode: (args) => `.thenDo(async () => ${args[0]}.document.update({ hidden: true }))`,
   },
   {
     id: 'kill',
     label: 'Kill',
     args: [{ type: 'token', label: 'target' }],
     group: "Actions",
+    multiplyMode: "self",
     thenDo: (args) => () => tools.kill(args[0].document),
-    toCode: (args) => `\t.thenDo(async () => ${args[0]}.document.actor.update({
+    toCode: (args) => `.thenDo(async () => ${args[0]}.document.actor.update({
       "data.attributes.hp.value": 0,
-    }))\n`,
+    }))`,
   },
   {
     id: 'revive',
     label: 'Revive',
     args: [{ type: 'token', label: 'target' }],
     group: "Actions",
+    multiplyMode: "self",
     thenDo: (args) => () => tools.revive(args[0].document),
-    toCode: (args) => `\t.thenDo(async () => ${args[0]}.document.actor.update({
+    toCode: (args) => `.thenDo(async () => ${args[0]}.document.actor.update({
       "data.attributes.hp.value": ${args[0]}.document.actor.getRollData().attributes.hp.max,
-    }))\n`,
+    }))`,
   },
   {
     id: 'endEffect',
     label: 'End Effect',
     args: [{ type: 'effectSource', label: 'effect' }],
     group: "Sequencer",
+    multiplyMode: "self",
     toCode: (_args) => {
       const args = [..._args].flat();
       if (args[0] == "#sceneId") {
-        return `\t.thenDo(async () => Sequencer.EffectManager.endEffects())\n`;
+        return `.thenDo(async () => Sequencer.EffectManager.endEffects())`;
       } else if (args[0] == "#origin" && args.length > 1) {
-        return `\t.thenDo(async () => Sequencer.EffectManager.endEffects({ origin: ${args[1].id} }))\n`;
+        return `.thenDo(async () => Sequencer.EffectManager.endEffects({ origin: ${args[1].id} }))`;
       } else if (args.length >= 2) {
         const f = {};
         f[args[0].slice(1)] = args[1];
-        return `\t.thenDo(async () => Sequencer.EffectManager.endEffects(${JSON.stringify(f)}))\n`;
+        return `.thenDo(async () => Sequencer.EffectManager.endEffects(${JSON.stringify(f)}))`;
       }
       return ``;
     },
@@ -163,6 +211,13 @@ export function addSection(section) {
 }
 
 export const modifierSpecs = [
+
+  { id: 'multiply', group: 'toggle', args: [{ type: 'targets', label: 'targets' }], cat: "Special" },
+  { id: 'multiply', group: 'show', args: [{ type: 'targets', label: 'targets' }], cat: "Special" },
+  { id: 'multiply', group: 'hide', args: [{ type: 'targets', label: 'targets' }], cat: "Special" },
+  { id: 'multiply', group: 'kill', args: [{ type: 'targets', label: 'targets' }], cat: "Special" },
+  { id: 'multiply', group: 'revive', args: [{ type: 'targets', label: 'targets' }], cat: "Special" },
+
   //Effect
   { id: 'file', group: 'effect', args: [{ type: 'effect_file', label: 'file' }], cat: "Required" },
   { id: 'atLocation', group: 'effect', args: [{ type: 'position', label: 'pos' }], cat: "Required" },
@@ -534,7 +589,7 @@ export const hookSpecs = [
     name: "% of Actor's property change",
     parents: ["updateActor"],
     target: targetFromActor,
-    test: (target, prop, ts, prop2, actor, _, updates) => {
+    test: (target, prop, ts, abs, prop2, actor, _, updates) => {
       let d = getProperty(updates.prevData, prop) - getProperty(actor.getRollData(), prop);
       if (abs) d = Math.abs(d);
       return d / getProperty(updates.prevData, prop2) * 100 >= ts;
@@ -619,6 +674,7 @@ export const argSpecs = [
   },
   {
     id: "targets", options: [
+      { value: "", label: "No target", group: "General" },
       { value: "#controlled.all", label: "All Controlled", group: "Controlled" },
       { value: "#controlled.random", label: "Random Controlled", group: "Controlled" },
       { value: "#controlled.first", label: "First Controlled", group: "Controlled" },

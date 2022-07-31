@@ -20,7 +20,7 @@ function initActiveTilesIntegration() {
         label: 'Execute trigger',
         group: 'Active Tiles',
         execute: (object, action, event) => {
-          if (object.data.flags["monks-active-tiles"]) {
+          if (object && object.data.flags["monks-active-tiles"]) {
             globalThis.game.MonksActiveTiles.object = { document: object };
             globalThis.game.MonksActiveTiles.manuallyTrigger(event);
           }
@@ -78,6 +78,7 @@ function initTokenMagicIntegration() {
         label: 'Toggle Token Magic',
         group: 'Token Magic',
         execute: (object, action, event) => {
+          if (!object) return;
           object.getFlag = object.document.getFlag.bind(object.document);
           if (TokenMagic.hasFilterType(object, action.args[0])) {
             TokenMagic.deleteFilters(object, action.args[0]);
@@ -94,6 +95,7 @@ function initTokenMagicIntegration() {
         label: 'Add Token Magic',
         group: 'Token Magic',
         execute: (object, action, event) => {
+          if (!object) return;
           const filter = TokenMagic.getPreset(action.args[0]);
           TokenMagic.addUpdateFilters(object, filter);
         }, args: [{ type: 'token-magic', label: 'filter' }]
@@ -105,6 +107,7 @@ function initTokenMagicIntegration() {
         label: 'Remove Token Magic',
         group: 'Token Magic',
         execute: (object, action, event) => {
+          if (!object) return;
           TokenMagic.deleteFilters(object, action.args[0]);
         }, args: [{ type: 'token-magic', label: 'filter' }]
       });
@@ -125,7 +128,7 @@ function initFxMasterIntegration() {
         label: 'Set Weather',
         group: 'FxMaster',
         ignoreTarget: true,
-        execute: (object, action, event) => {
+        execute: (_, action, event) => {
           Hooks.call("fxmaster.switchWeather", { type: action.args[0], id: "weather", options: {} });
         }, args: [{ type: 'weather', label: 'weather' }]
       });
@@ -136,7 +139,7 @@ function initFxMasterIntegration() {
         label: 'Clear Weather',
         group: 'FxMaster',
         ignoreTarget: true,
-        execute: (object, action, event) => {
+        execute: (_, action, event) => {
           canvas.scene.unsetFlag("fxmaster", "effects");
         }, args: []
       });
@@ -218,7 +221,7 @@ function initConvenientEffectsIntegration() {
         label: 'Toggle Convenient Effect',
         group: 'Convenient Effects',
         execute: (object, action, event) => {
-          game.dfreds.effectInterface.toggleEffect(action.args[0], { uuids: [object.actor.uuid] });
+          object && game.dfreds.effectInterface.toggleEffect(action.args[0], { uuids: [object.actor.uuid] });
         }, args: [{ type: 'ce-effect', label: 'effect' }]
       });
 
@@ -228,7 +231,7 @@ function initConvenientEffectsIntegration() {
         label: 'Add Convenient Effect',
         group: 'Convenient Effects',
         execute: (object, action, event) => {
-          game.dfreds.effectInterface.addEffect({ effectName: action.args[0], uuid: object.actor.uuid });
+          object && game.dfreds.effectInterface.addEffect({ effectName: action.args[0], uuid: object.actor.uuid });
         },
         args: [{ type: 'ce-effect', label: 'effect' }]
       });
@@ -239,7 +242,7 @@ function initConvenientEffectsIntegration() {
         label: 'Remove Convenient Effect',
         group: 'Convenient Effects',
         execute: (object, action, event) => {
-          game.dfreds.effectInterface.removeEffect({ effectName: action.args[0], uuid: object.actor.uuid });
+          object && game.dfreds.effectInterface.removeEffect({ effectName: action.args[0], uuid: object.actor.uuid });
         }, args: [{ type: 'ce-effect', label: 'effect' }]
       });
 

@@ -144,6 +144,8 @@ export function calculateValueSync(val, type, seq) {
       let code = `'use strict'; try {${val}} catch(e) {}`;
       const f = new AsyncFunction(...Object.keys(vars), code)
       return () => f(...Object.values(vars));
+    } else if (type == "sequence") {
+      return Director.getSequence(val);
     }
   } else if (Array.isArray(val)) {
     if (type == "effectSource" || type == "hookData") {

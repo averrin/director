@@ -41,10 +41,12 @@ export default class Action {
     const spec = actionTypes.find(t => t.id == this.type.id);
     const value = override || this.value;
     let objects;
-    objects = await calculateValue(value, "selection");
+    if (!spec.ignoreTarget || value === "") {
+      objects = await calculateValue(value, "selection");
+    }
     if (!Array.isArray(objects)) objects = [objects];
     if (spec?.execute) {
-      if (spec.ignoreTarget) {
+      if (spec.ignoreTarget || value === "") {
         spec.execute(null, this, event, seqVars);
       } else {
         objects.forEach((o) => spec.execute(o, this, event, seqVars));

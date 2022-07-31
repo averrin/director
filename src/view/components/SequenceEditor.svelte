@@ -146,6 +146,12 @@
    }
 
    let specs = sectionSpecs;
+
+   function doShowAddMod(item) {
+      let m = modifierSpecs.filter((m) => item.type == m.group);
+      m = m.filter((m) => m.multi || !item.modifiers.find((mod) => mod.type == m.id));
+      return m.length > 0;
+   }
 </script>
 
 {#if seq}
@@ -247,7 +253,7 @@
                      vars={seq.variables}
                   />
                {/each}
-               {#if modifierSpecs.filter((m) => item.type == m.group).length > 0}
+               {#if doShowAddMod(item)}
                   <div class="ui-p-1">
                      <button class="ui-btn ui-btn-outline ui-btn-primary" on:click={(e) => addModifier(item)}
                         >Add modifier</button

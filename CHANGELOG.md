@@ -19,18 +19,22 @@ Added:
   * You cannot add a duplicate modifier (there are some exceptions)
   * Support of Sequencer 2.1.9
   * A bunch of missed arguments for modifiers
+  * `fadeDuration` for toggle/show/hide sections
+  * `addSequence` section
 
 Fixed:
   * Wrong width of argument labels 
   * A couple of rare problems in the hooks' calling
   * Sequencer's warning about reading db before it's populated
   * Many problems with arguments' inputs (i suppose, i also added some more bugs)
-  * Fixed missing dependencies for v9
+  * Missed dependencies for v9
   * Manual position picking reset controlled tokens to only the first one.
 
 Known bugs:
   * Color picker for stroke color in text modifier is bugged
   * Alpha in color pickers do nothing
+  * Toggle/show/hide sections ignores `fadeDuration` in export as code
+  * Non-sequencer sections (hide, kill, so on) with `multiply` cannot be played separately
 
 ## [0.7.2](https://github.com/averrin/director/compare/0.7.1...0.7.2)
 

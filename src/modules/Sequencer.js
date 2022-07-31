@@ -121,7 +121,7 @@ controlled.forEach(c => c.control({releaseOthers: false}));`;
     let r = `// This macro was created by converting Director's sequence. Correctness of this code isn't guaranteed.\n`;
     r += `// The code isn't indentical to how Director executes sequences, but it should be a good base for modifications.\n`;
     if (this.variables.length > 0) {
-      r += `\n//==== Variables (all of them, not only used) ====\n`;
+      r += `\n//==== Variables (all of them, not only used) ====//\n`;
     }
     for (const v of this.variables) {
       const [val, replace] = this.getCodeForVal(v.name, v.value, v.type);
@@ -132,7 +132,7 @@ controlled.forEach(c => c.control({releaseOthers: false}));`;
       }
     }
 
-    r += `\n//==== Sequence construction ====\n`;
+    r += `\n//==== Sequence construction ====//\n`;
     r += `let sequence = new Sequence("${moduleId}")`;
     let i = 0;
 
@@ -144,16 +144,20 @@ controlled.forEach(c => c.control({releaseOthers: false}));`;
       for (const m of section.modifiers) {
         if (m.type == "multiply") {
           isMulti = true;
-          mode = m.args[1] || "on";
+          mode = m.args[1] || section._spec.multiplyMode;
           targets = m.args[0];
         }
       }
       if (isMulti) {
         section.modifiers = section.modifiers.filter(m => m.type != "multiply");
-        const mod = new Modifier(uuidv4(), mode);
-        mod.setType(mode, section.type);
-        mod.args[0] = "@_target";
-        section.modifiers.push(mod);
+        if (mode) {
+          const mod = new Modifier(uuidv4(), mode);
+          mod.setType(mode, section.type);
+          mod.args[0] = "@_target";
+          section.modifiers.push(mod);
+        } else {
+          section.args[0] = "@_target";
+        }
         if (stage == "normal") r += ";";
         r += `\n\nfor (const _target of ${this.getCodeForVal("", targets, "selection")[0]}) {`;
         stage = "in_multi";
@@ -178,6 +182,8 @@ controlled.forEach(c => c.control({releaseOthers: false}));`;
         r += `.${section.type}()`;
         r += `\n\t\t.origin("${this.id}")`;
         r += `\n\t\t.name(${name})`;
+      } else if (section.type == "addSequence") {
+        r += `/* .${section.type}() */ // please combine sequences by yourself`;
       } else {
         if (section._spec && "toCode" in section._spec) {
           r += section._spec.toCode(args);
@@ -261,6 +267,11 @@ controlled.forEach(c => c.control({releaseOthers: false}));`;
           val = await v.getValue(this);
         }
       }
+      if (!obj._spec.args) {
+        n++;
+        result.push(undefined);
+        continue;
+      }
       const spec = obj._spec.args[n];
       if (val === undefined) {
         val = await calculateValue(a, spec.type, this);
@@ -292,7 +303,7 @@ controlled.forEach(c => c.control({releaseOthers: false}));`;
           if (m.type == "multiply") {
             isMulti = true;
             targets = await calculateValue(m.args[0], "selection");
-            mode = m.args[1] || "on";
+            mode = m.args[1] || section._spec.multiplyMode;
           }
         }
         if (!isMulti) {
@@ -302,10 +313,14 @@ controlled.forEach(c => c.control({releaseOthers: false}));`;
             const ns = Section.fromPlain(section);
             ns.id = uuidv4();
             ns.modifiers = ns.modifiers.filter(m => m.type != "multiply");
-            const mod = new Modifier(uuidv4(), mode);
-            mod.setType(mode, section.type);
-            mod.args[0] = target;
-            ns.modifiers.push(mod);
+            if (mode == "self") {
+              ns.args[0] = target;
+            } else {
+              const mod = new Modifier(uuidv4(), mode);
+              mod.setType(mode, section.type);
+              mod.args[0] = target;
+              ns.modifiers.push(mod);
+            }
             seq.push(ns);
           }
         }
@@ -319,6 +334,9 @@ controlled.forEach(c => c.control({releaseOthers: false}));`;
         if ("thenDo" in section._spec) {
           sectionName = "thenDo";
           args = [section._spec.thenDo(args)];
+        } else if ("addSequence" in section._spec) {
+          sectionName = "addSequence";
+          args = [section._spec.addSequence(args)];
         }
         let currentSection = s[sectionName](...args);
         if (section.type == "effect") {
@@ -424,6 +442,7 @@ export class Section {
     this.args = [];
     this.type = type;
     this._spec = sectionSpecs.find(s => s.id == this.type);
+    this.modifiers = [];
     if (!this._spec || !this._spec.args) return;
     for (const arg of this._spec?.args) {
       const spec = argSpecs.find(s => s.id == arg.type);

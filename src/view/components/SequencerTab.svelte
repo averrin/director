@@ -118,13 +118,13 @@
 <input type="checkbox" id="seq-modal" class="ui-modal-toggle" />
 <div class="ui-modal">
    <div class="ui-modal-box">
-      <h3 class="ui-py-4 ui-font-bold ui-text-lg">Edit sequence</h3>
+      <h3 class="ui-font-bold ui-text-lg">Edit sequence</h3>
 
       <div class="ui-form-control">
          <label class="ui-label" for="">
             <span class="ui-label-text">Title</span>
          </label>
-         <input type="text" placeholder="Title" bind:value={seq.title} class="ui-input ui-input-bordered" />
+         <input type="text" placeholder="Title" bind:value={seq.title} class="ui-input ui-input-bordered ui-input-lg" />
       </div>
 
       <div class="ui-modal-action">

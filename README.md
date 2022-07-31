@@ -17,9 +17,9 @@ Your actions are stored in the scene's data so that you can have many of them. T
 Director sometimes looks too complex, so read [Documentation](https://github.com/averrin/director/wiki/How-to-use.-With-examples.). It contains a couple of easy to go examples.
 
 ## Hints
+- [JB2A](https://foundryvtt.com/packages/JB2A_DnD5e/) is not required but HIGHLY recommended
 - you can drag and drop tags
 - right click on tag opens a color picker
-- right click on action item opens a color picker for its accent
 - if director fails to open, please try `Director.clearSceneData()` or `Director.clearGlobalData()` to clear data.
 - click on "visible/hidden" tag in a selection card toggles visibility
 - You can [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/averrin)
@@ -34,6 +34,7 @@ It's not going to be MATT's alternative, so actions are pretty basic
 - Stop Sequencer's effects
 - Manage Convenient Effects
 - Manage TokenMagicFX filters
+- Manage FxMaster weather effects
 
 ## Integrations
 * Tagger [required]
@@ -41,17 +42,20 @@ It's not going to be MATT's alternative, so actions are pretty basic
 * Monk's Active Tiles Triggers
 * Token Magic FX [optional Virtual Sequencer's section]
 * DFreds Convenient Effects [optional Virtual Sequencer's section]
+* FxMaster
 
 ## Plans
 - [ ] Documentation
 - [X] Extension API
+- [ ] Migrate to Active Effects Manager
 - [ ] Token Attacher integration
 - [ ] Warpgate mutations & summons integration
+- [ ] Support for templates, lights, doors and so on
 - [ ] Rolls support (variables, hooks)
 - [X] v10 support
 - [ ] Beginner / Expert UI mode
 - [ ] Better import / export
-- [ ] Better support of Sequencer's functions and types
+- [X] Better support of Sequencer's functions and types
 - [X] Better support for Token Magic FX
 - [X] Support for Convenient Effects
 - [ ] Hooks for ending effects of a sequence. E.g. to destroy DAE's effects.
