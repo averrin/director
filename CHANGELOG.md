@@ -3,6 +3,9 @@
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
 ## [Unreleased]
+
+## [0.8.0](https://github.com/averrin/director/compare/0.7.2...0.8.0)
+
 Added:
   * Foundry v10 compatibility. Requires Sequencer's [Foundry_v10 branch](https://github.com/fantasycalendar/FoundryVTT-Sequencer/tree/Foundry_v10)
   * `abs` argument for "property" hooks. Applies `Math.abs` before comparing with a threshold
