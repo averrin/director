@@ -236,3 +236,52 @@ export async function getIconNames(collection) {
 export function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+export function tintImage(src, tint) {
+  tint = _getRGBAArray(tint);
+
+  return new Promise((resolve, reject) => {
+    let canvas = document.createElement('canvas');
+    let context = canvas.getContext('2d');
+    let image = new Image();
+    image.crossOrigin = "Anonymous";
+    image.onload = () => {
+      canvas.width = image.width;
+      canvas.height = image.height;
+
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      let imgData = context.getImageData(0, 0, canvas.width, canvas.height);
+      let data = imgData.data;
+
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 0] || data[i + 1] || data[i + 2] || data[i + 3]) {
+          data[i + 0] = tint[0];
+          data[i + 1] = tint[1];
+          data[i + 2] = tint[2];
+          data[i + 3] = tint[3];
+        }
+      }
+      context.putImageData(imgData, 0, 0);
+      resolve({ url: canvas.toDataURL(), width: image.width, height: image.height });
+    };
+    image.onerror = error => reject(src, error);
+    image.src = src;
+
+  });
+}
+
+function _getRGBAArray(color) {
+  // Check input as rgba/rgb color
+  let m = /^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)$/.exec(color);
+  if (m) {
+    if (m[4]) return [m[1], m[2], m[3], m[4] * 255];
+    return [m[1], m[2], m[3], 255];
+  }
+
+  // Check input as hex 6-digit color
+  m = /^#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})$/.exec(color);
+  if (m) {
+    return [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16), 255];
+  }
+}

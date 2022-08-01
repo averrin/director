@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Dates are d
 
 ## [Unreleased]
 
+## [0.8.1](https://github.com/averrin/director/compare/0.8.0...0.8.1)
+Fixed:
+  * Changing variable type doesnt change list of available variables in arg inputs
+
+Added:
+  * Selection tab previews respects tint
+
 ## [0.8.0](https://github.com/averrin/director/compare/0.7.2...0.8.0)
 
 Added:

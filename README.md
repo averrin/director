@@ -45,21 +45,26 @@ It's not going to be MATT's alternative, so actions are pretty basic
 * FxMaster
 
 ## Plans
-- [ ] Documentation
-- [X] Extension API
+- [ ] Actual Documentation
+- [ ] Better `multiply`
 - [ ] Migrate to Active Effects Manager
+- [ ] Automated Animations integration
 - [ ] Token Attacher integration
 - [ ] Warpgate mutations & summons integration
 - [ ] Support for templates, lights, doors and so on
 - [ ] Rolls support (variables, hooks)
-- [X] v10 support
-- [ ] Beginner / Expert UI mode
 - [ ] Better import / export
+- [ ] Hooks for ending effects of a sequence. E.g. to destroy DAE's effects.
+- [ ] Better position/token/tile picker
+- [ ] Fix known bugs
+- [ ] MidiQOL hooks
+- [ ] Beginner / Expert UI mode
+- [X] v10 support
 - [X] Better support of Sequencer's functions and types
 - [X] Better support for Token Magic FX
 - [X] Support for Convenient Effects
-- [ ] Hooks for ending effects of a sequence. E.g. to destroy DAE's effects.
-- [ ] [Alpha HUD](https://github.com/averrin/alpha-hud) integrations. A scene widget with something like the hotbar.
+- [X] [Alpha HUD](https://github.com/averrin/alpha-hud) integrations. A scene widget with something like the hotbar.
+- [X] Extension API
 
 ## Images (quite outdated, see docs)
 ![toolbar](/assets/toolbar.png)

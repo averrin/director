@@ -7,7 +7,7 @@
    import { setting } from "../../modules/settings.js";
    import { moduleId, SETTINGS } from "../../constants.js";
    import { getContext } from "svelte";
-   import { getFlag } from "../../modules/helpers.js";
+   import { getFlag, tintImage } from "../../modules/helpers.js";
 
    function editObject(_, object) {
       object.document.sheet.render(true);
@@ -41,14 +41,17 @@
    async function updateThumbs() {
       for (const obj of selection) {
          const img = obj.document.texture?.src || obj.data.img;
-         logger.info(img);
          if (!(img in thumbs)) {
             const thumb = await ImageHelper.createThumbnail(img, {
                width: setting(SETTINGS.RESOLUTION),
                height: setting(SETTINGS.RESOLUTION),
             });
-            logger.info(thumb);
-            thumbs[img] = thumb.thumb;
+            if (obj.data.tint) {
+               const tint = await tintImage(thumb.thumb, obj.data.tint);
+               thumbs[img] = tint.url;
+            } else {
+               thumbs[img] = thumb.thumb;
+            }
          }
       }
    }

@@ -15,6 +15,7 @@
    function updateType(e) {
       variable.type = e.detail.id;
       variable = variable;
+      emitChange();
    }
 
    function emitChange(e) {
