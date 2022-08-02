@@ -161,7 +161,7 @@
 
    <div class="ui-overflow-auto ui-max-h-[900px]" id="sequencer-content">
       <Sortable items={seq.sections} let:item let:index on:change={sortSections} options={{ handle: ".handle" }}>
-         <div class="ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-gap-2 ui-my-1">
+         <div class="ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-gap-2 ui-my-1" id={item.id}>
             <div class="ui-flex ui-flex-row ui-justify-start ui-space-x-2">
                <div class="ui-flex-1 ui-flex ui-flex-row ui-justify-start ui-space-x-2">
                   <button

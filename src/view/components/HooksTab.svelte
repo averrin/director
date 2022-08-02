@@ -58,6 +58,7 @@
    {#each currentHooks as hook (hook.id)}
       <div
          class="ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-my-1 ui-items-start ui-gap-3 ui-justify-start"
+         id={hook.id}
       >
          <div class="ui-flex ui-flex-row ui-items-start ui-gap-3 ui-w-full">
             <ArgInput
@@ -101,25 +102,37 @@
          </div>
          {#if !hook.collapsed}
             <div class="ui-flex ui-flex-row ui-items-center ui-gap-3 ui-w-full ui-justify-start">
-               <ArgInput
-                  hideSign={true}
-                  bind:value={hook.target}
-                  type="targets"
-                  label="Target"
-                  on:change={saveHooks}
-                  widthAuto={true}
-               />
-               {#if hookSpecs.find((s) => s.id == hook.event)?.args}
-                  {#each hookSpecs.find((s) => s.id == hook.event)?.args as arg, i}
-                     <ArgInput
-                        hideSign={true}
-                        bind:value={hook.args[i]}
-                        type={arg.type}
-                        label={arg.label}
-                        on:change={saveHooks}
-                     />
-                  {/each}
-               {/if}
+               <div class="ui-flex ui-flex-row ui-items-center ui-gap-3 ui-flex-1">
+                  <ArgInput
+                     hideSign={true}
+                     bind:value={hook.target}
+                     type="targets"
+                     label="Target"
+                     on:change={saveHooks}
+                     widthAuto={true}
+                  />
+                  {#if hookSpecs.find((s) => s.id == hook.event)?.args}
+                     {#each hookSpecs.find((s) => s.id == hook.event)?.args as arg, i}
+                        <ArgInput
+                           hideSign={true}
+                           bind:value={hook.args[i]}
+                           type={arg.type}
+                           label={arg.label}
+                           on:change={saveHooks}
+                        />
+                     {/each}
+                  {/if}
+               </div>
+               <div class="ui-flex ui-flex-none">
+                  <ArgInput
+                     type="bool"
+                     label="global"
+                     bind:value={hook.global}
+                     hideSign={true}
+                     widthAuto={true}
+                     on:change={saveHooks}
+                  />
+               </div>
             </div>
          {/if}
       </div>

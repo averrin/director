@@ -34,6 +34,14 @@ export const actionTypes = [
     execute: (object, action) => object && tools.revive(object?.document || object),
   },
   {
+    id: 'macro',
+    label: 'Run Macro',
+    group: 'Macro',
+    args: [{ type: "macro", label: "macro" }],
+    execute: (object, action) => Array.from(globalThis.game.macros.values()).find(m => m.data.name == action.args[0]).execute({ actor: object?.actor, token: object }),
+  },
+
+  {
     id: 'playSequence',
     label: 'Play sequence',
     group: 'Sequences',

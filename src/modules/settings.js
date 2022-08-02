@@ -54,6 +54,20 @@ export function initSettings(app) {
     default: [],
   });
 
+  game.settings.register(moduleId, SETTINGS.ACTIONS, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: [],
+  });
+
+  game.settings.register(moduleId, SETTINGS.HOOKS, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: [],
+  });
+
   game.settings.register(moduleId, SETTINGS.TAG_COLORS, {
     scope: "world",
     config: false,

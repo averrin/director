@@ -15,6 +15,8 @@
    import HooksTab from "./components/HooksTab.svelte";
    import ImportTab from "./components/ImportTab.svelte";
    import FaPlay from "svelte-icons/fa/FaPlay.svelte";
+   import FaExpandArrowsAlt from "svelte-icons/fa/FaExpandArrowsAlt.svelte";
+   import FaCompressArrowsAlt from "svelte-icons/fa/FaCompressArrowsAlt.svelte";
 
    import { HsvPicker } from "svelte-color-picker";
 
@@ -102,8 +104,8 @@
 
 <ApplicationShell bind:elementRoot>
    <main class="director-ui">
-      <TagsBar {onTagClick} on:collapsed={toggleCollapsed} />
       {#if !collapsed}
+         <TagsBar {onTagClick} on:collapsed={toggleCollapsed} />
          <div class="ui-tabs ui-tabs-boxed">
             {#each availableTabs as t (t.title)}
                <!-- <div class="ui-indicator"> -->
@@ -133,31 +135,53 @@
             <ImportTab />
          {/if}
       {:else}
-         <div class="ui-flex ui-flex row ui-gap-2 ui-p-2 ui-items-center ui-justify-center">
-            {#each currentActions as item (item.id)}
-               {#if !item.hidden}
-                  <div class="ui-tooltip" data-tip={item.name || item.id}>
-                     <button
-                        class="ui-btn ui-btn-square"
-                        on:pointerdown|preventDefault|stopPropagation={() => null}
-                        on:click={(e) => run(e, item)}
-                        style:background-color={item.color}
-                        style:color={contrastColor(item.color)}
-                        class:!ui-p-[8px]={!item.icon}
+         <div class="ui-flex ui-flex row ui-gap-2 ui-p-2 ui-bg-base-100">
+            <div class="ui-flex ui-flex row flex-1 ui-items-center ui-justify-center ui-w-full">
+               {#each currentActions as item (item.id)}
+                  {#if !item.hidden}
+                     <div
+                        class="ui-tooltip ui-tooltip-left ui-tooltip-primary"
+                        data-tip={item.name || item.id}
+                        style="--tooltip-color: {item.color || '#46525D'}; --tooltip-text-color: {contrastColor(
+                           item.color
+                        )};"
                      >
-                        {#if item.icon}
-                           <iconify-icon
-                              style:font-size="2rem"
-                              icon={item.icon}
-                              style:color={contrastColor(item.color)}
-                           />
-                        {:else}
-                           <FaPlay />
-                        {/if}
-                     </button>
-                  </div>
-               {/if}
-            {/each}
+                        <button
+                           class="ui-btn ui-btn-square"
+                           on:pointerdown|preventDefault|stopPropagation={() => null}
+                           on:click={(e) => run(e, item)}
+                           style:background-color={item.color}
+                           style:color={contrastColor(item.color)}
+                           class:!ui-p-[8px]={!item.icon}
+                        >
+                           {#if item.icon}
+                              <iconify-icon
+                                 style:font-size="2rem"
+                                 icon={item.icon}
+                                 style:color={contrastColor(item.color)}
+                              />
+                           {:else}
+                              <FaPlay />
+                           {/if}
+                        </button>
+                     </div>
+                  {/if}
+               {/each}
+            </div>
+            <div class="ui-flex ui-flex-none">
+               <button
+                  title="toggle collapsed"
+                  class="ui-btn ui-btn-square ui-justify-self-end !ui-p-[8px]"
+                  class:ui-btn-outline={!collapsed}
+                  on:click={(e) => toggleCollapsed({ detail: !collapsed })}
+               >
+                  {#if collapsed}
+                     <FaExpandArrowsAlt />
+                  {:else}
+                     <FaCompressArrowsAlt />
+                  {/if}
+               </button>
+            </div>
          </div>
       {/if}
    </main>

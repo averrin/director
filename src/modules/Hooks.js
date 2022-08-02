@@ -11,6 +11,7 @@ export default class Hook {
     this.target = undefined;
     this.args = [];
     this.version = 1;
+    this.global = false;
   }
 
   static fromPlain(plain) {

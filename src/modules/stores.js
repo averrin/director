@@ -1,4 +1,4 @@
-import { moduleId, SETTINGS } from '../constants.js';
+import { moduleId, SETTINGS, FLAGS } from '../constants.js';
 import { writable } from 'svelte/store';
 import { DSequence } from "./Sequencer.js";
 import Action from "./Actions.js";
@@ -32,8 +32,8 @@ function updateSequences() {
   const global = game.settings.get(moduleId, SETTINGS.SEQUENCES);
   let inScene = [];
   if (globalThis.canvas.scene) {
-    inScene = hasFlag(globalThis.canvas.scene, "director-sequences")
-      ? getFlag(globalThis.canvas.scene, "director-sequences").filter((a) => a).map(a => DSequence.fromPlain(a))
+    inScene = hasFlag(globalThis.canvas.scene, FLAGS.SEQUENCES)
+      ? getFlag(globalThis.canvas.scene, FLAGS.SEQUENCES).filter((a) => a).map(a => DSequence.fromPlain(a))
       : [];
   }
   sequences.set(
@@ -54,7 +54,27 @@ export function initSequences() {
 }
 
 export const actions = writable([]);
+
+function loadActions(scene) {
+  const inScene = hasFlag(scene, FLAGS.ACTIONS)
+    ? getFlag(scene, FLAGS.ACTIONS)
+    : [];
+  const global = game.settings.get(moduleId, SETTINGS.ACTIONS);
+
+  actions.set([...global, ...inScene].flat().filter((a) => a).map(a => Action.fromPlain(a)));
+}
+
 export const hooks = writable([]);
+
+function loadHooks(scene) {
+  const inScene = hasFlag(scene, FLAGS.HOOKS)
+    ? getFlag(scene, FLAGS.HOOKS)
+    : [];
+  const global = game.settings.get(moduleId, SETTINGS.HOOKS);
+
+  hooks.set([...global, ...inScene].flat().filter((a) => a).map(a => Hook.fromPlain(a)));
+}
+
 let _scene;
 export function initCurrentScene() {
   currentScene.subscribe(async (result) => {
@@ -62,12 +82,8 @@ export function initCurrentScene() {
     if (!scene || scene == null || _scene == scene) return;
     _scene = scene;
 
-    hooks.set(hasFlag(scene, "director-hooks")
-      ? getFlag(scene, "director-hooks").filter((a) => a).map(a => Hook.fromPlain(a))
-      : []);
-    actions.set(hasFlag(scene, "director-actions")
-      ? getFlag(scene, "director-actions").filter((a) => a).map(a => Action.fromPlain(a))
-      : []);
+    loadHooks(scene);
+    loadActions(scene);
 
     await HookManager.onSceneChange(scene);
 
@@ -82,8 +98,11 @@ export function initActions() {
     currentScene.update(async (result) => {
       const scene = await result;
       if (!scene || scene == null) return scene;
-      if (getFlag(scene, "director-actions")?.filter((a) => a) != actions) {
-        scene.update({ "flags.director-actions": actions.map(a => a.toJSON()) });
+      if (getFlag(scene, FLAGS.ACTIONS)?.filter((a) => a) != actions) {
+        const updates = {};
+        updates[`flags.${FLAGS.ACTIONS}`] = actions.filter(a => !a.global).map(a => a.toJSON())
+        scene.update(updates);
+        game.settings.set(moduleId, SETTINGS.ACTIONS, actions.filter(a => a.global));
         await HookManager.onActionsChange(actions);
         globalThis.Hooks.call("DirectorUpdateActions", actions);
       }
@@ -99,8 +118,12 @@ export function initHooks() {
     currentScene.update(async (result) => {
       const scene = await result;
       if (!scene || scene == null) return scene;
-      if (getFlag(scene, "director-hooks")?.filter((a) => a) != hooks) {
-        scene.update({ "flags.director-hooks": hooks });
+      if (getFlag(scene, FLAGS.HOOKS)?.filter((a) => a) != hooks) {
+        const updates = {};
+        updates[`flags.${FLAGS.HOOKS}`] = hooks.filter(a => !a.global);
+        scene.update(updates);
+        game.settings.set(moduleId, SETTINGS.HOOKS, hooks.filter(a => a.global));
+
         await HookManager.onHooksChange(hooks);
         globalThis.Hooks.call("DirectorUpdateHooks", hooks);
       }

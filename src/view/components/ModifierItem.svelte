@@ -19,6 +19,7 @@
 
 <div
    class="ui-border-solid ui-border ui-border-zinc-200 ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-py-2 ui-px-4 ui-gap-2 ui-my-1"
+   id={modifier.id}
 >
    <div class="ui-flex ui-flex-1 ui-gap-2 ui-flex-row ui-flex-wrap">
       <Select

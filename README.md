@@ -46,7 +46,10 @@ It's not going to be MATT's alternative, so actions are pretty basic
 
 ## Plans
 - [ ] Actual Documentation
-- [ ] Better `multiply`
+- [ ] API for adding toolbar icon
+- [ ] "In scene" tags and icons for them
+- [ ] Better `multiply` (mode args, nested modifiers, e.g. playIf)
+- [ ] "Undo" for actions
 - [ ] Migrate to Active Effects Manager
 - [ ] Automated Animations integration
 - [ ] Token Attacher integration

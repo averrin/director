@@ -10,6 +10,12 @@ export function evalExpression(expr, ...args) {
 // import { foundry } from '../modules/foundry.js';
 // import { moduleId, SETTINGS } from '../constants.js';
 
+export const FLAGS = {
+  SEQUENCES: "director-sequences",
+  HOOKS: "director-hooks",
+  ACTIONS: "director-actions",
+}
+
 export const SETTINGS = {
   GLOBAL_TAGS: "global-tags",
   TAG_COLORS: "tag-colors",
@@ -17,6 +23,8 @@ export const SETTINGS = {
   UI_SCALE: "ui-scale",
   RESOLUTION: "resolution",
   SEQUENCES: "sequences",
+  ACTIONS: "actions",
+  HOOKS: "hooks",
   SHOW_SEQUENCER: "show-sequencer",
 
   MANUAL_MODE: "warpgate-mode",

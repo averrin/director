@@ -23,7 +23,10 @@
    }
 </script>
 
-<div class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-gap-2 ui-my-1 ui-items-center">
+<div
+   class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-gap-2 ui-my-1 ui-items-center"
+   id={variable.id}
+>
    <label class="ui-input-group ui-mx-1">
       <span style="min-width: 3rem !important;">
          <svg

@@ -13,6 +13,7 @@ export default class Action {
     this.name = "";
     this.hidden = false;
     this.version = 1;
+    this.global = false;
   }
 
   toJSON() {

@@ -73,6 +73,7 @@
 </script>
 
 <div
+   id={item.id}
    class="ui-border-2 ui-border-solid ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-items-center ui-my-1 ui-gap-3"
    style:border-color={item.color || "#ffffff"}
    on:pointerdown={(e) => onItemClickHandler(e, item)}

@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. Dates are d
 
 ## [Unreleased]
 
+## [0.8.2](https://github.com/averrin/director/compare/0.8.1...0.8.2)
+Added:
+  * More compact collapsed mode
+  * Actions and Hooks can be global
+
+Fixed:
+  * Tagger component acts weird sometimes if there are more than one instance on page
+
 ## [0.8.1](https://github.com/averrin/director/compare/0.8.0...0.8.1)
 Fixed:
   * Changing variable type doesnt change list of available variables in arg inputs

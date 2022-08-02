@@ -137,7 +137,7 @@
          </div>
       {/if}
       {#each selection as tile, i}
-         <div class="ui-card ui-card-side ui-bg-base-100 ui-shadow-xl">
+         <div class="ui-card ui-card-side ui-bg-base-100 ui-shadow-xl" id={tile.id}>
             <figure>
                <img
                   class="ui-h-[170px]"
