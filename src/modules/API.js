@@ -42,6 +42,15 @@ const API = {
     return seq;
   },
 
+  listActions: () => {
+    let acts;
+    actions.update(a => {
+      acts = a;
+      return a;
+    });
+    return acts;
+  },
+
   findSequence: (name) => {
     let seq;
     sequences.update(seqs => {

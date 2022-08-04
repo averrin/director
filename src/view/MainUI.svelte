@@ -24,6 +24,7 @@
 
    import { getContext, onDestroy, setContext } from "svelte";
    import Action from "../modules/Actions";
+   import { actionTypes } from "../modules/Specs";
    const { application } = getContext("external");
    const position = application.position;
    position.scale = game.settings.get(moduleId, SETTINGS.UI_SCALE);
@@ -50,7 +51,7 @@
 
    function createAction(_, tags) {
       actions.update((actions) => {
-         actions = [Action.fromPlain({ id: uuidv4(), value: tags, type: "" }), ...actions];
+         actions = [Action.fromPlain({ id: uuidv4(), value: tags, type: actionTypes[0] }), ...actions];
          return actions;
       });
       mode = "actions";

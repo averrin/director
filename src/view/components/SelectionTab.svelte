@@ -103,6 +103,7 @@
                   on:tags={(e) => globalThis.debounce(onTagsSelected(e, -1), 100)}
                   tags={tagsMutual}
                   colors={$tagColors}
+                  {onTagClick}
                />
             </div>
          </div>
@@ -157,15 +158,15 @@
                      Token: {tile.name}
                   {/if}
                   {#if true}
-                     <span class="ui-badge">{tile.width}x{tile.height}</span>
+                     <span class="ui-badge">{Math.round(tile.width)}x{Math.round(tile.height)}</span>
                   {/if}
                   <span
                      class="ui-badge"
-                     class:ui-badge-ghost={tile.hidden}
-                     class:ui-badge-success={!tile.hidden}
-                     on:click={() => tile.document.update({ hidden: !tile.hidden })}
+                     class:ui-badge-ghost={tile.hidden || tile.data.hidden}
+                     class:ui-badge-success={!tile.hidden || tile.data.hidden}
+                     on:click={() => tile.document.update({ hidden: !(tile.hidden || tile.data.hidden) })}
                   >
-                     {tile.hidden ? "hidden" : "visible"}
+                     {tile.hidden || tile.data.hidden ? "hidden" : "visible"}
                   </span>
                </h2>
 

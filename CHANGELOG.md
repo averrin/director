@@ -4,10 +4,20 @@ All notable changes to this project will be documented in this file. Dates are d
 
 ## [Unreleased]
 
+## [0.8.3](https://github.com/averrin/director/compare/0.8.2...0.8.3)
+Fixed:
+  * Broken by v10 show/hide in the Selection tab
+  * Toggle token magic doesn't work if targets are selected by Tagger
+  * Size in the Selection tab isn't rounded
+  * Tag color selection doesn't work in the mutual tag input
+  * "Create action" from the selection tab made it with "undefined" type
+
+
 ## [0.8.2](https://github.com/averrin/director/compare/0.8.1...0.8.2)
 Added:
   * More compact collapsed mode
   * Actions and Hooks can be global
+  * "Run Macro" action
 
 Fixed:
   * Tagger component acts weird sometimes if there are more than one instance on page

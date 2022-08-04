@@ -113,7 +113,14 @@
          <h3 class="ui-py-4 ui-font-bold ui-text-lg">Edit action</h3>
          <div class="ui-flex ui-flex-row ui-items-center ui-gap-2">
             <div class="ui-flex ui-flex-row ui-flex-1 ui-items-center ui-gap-2 ui-flex-wrap">
-               <ArgInput type="color" label="color" bind:value={editItem.color} hideSign={true} widthAuto={true} />
+               <ArgInput
+                  type="color"
+                  label="color"
+                  bind:value={editItem.color}
+                  hideSign={true}
+                  widthAuto={true}
+                  defaultValue="#46525D"
+               />
                <ArgInput type="icon" label="icon" bind:value={editItem.icon} hideSign={true} widthAuto={true} />
                <ArgInput
                   type="bool"

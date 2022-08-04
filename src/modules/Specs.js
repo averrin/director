@@ -727,7 +727,7 @@ export const argSpecs = [
   { id: "float", var_types: ["float", "int", "expression"], default: 0 },
   { id: "macro", var_types: ["macro", "string", "expression"] },
   { id: "string", var_types: ["string", "expression"] },
-  { id: "color", var_types: ["string", "color", "expression"] },
+  { id: "color", var_types: ["string", "color", "expression"], default: "#ffffff" },
   { id: "code", var_types: ["code", "string", "expression"] },
   { id: "expression", var_types: ["expression"] },
   {

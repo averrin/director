@@ -79,6 +79,9 @@ function initTokenMagicIntegration() {
         group: 'Token Magic',
         execute: (object, action, event) => {
           if (!object) return;
+          if (!object.document) {
+            object = object.object;
+          }
           object.getFlag = object.document.getFlag.bind(object.document);
           if (TokenMagic.hasFilterType(object, action.args[0])) {
             TokenMagic.deleteFilters(object, action.args[0]);
