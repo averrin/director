@@ -6,16 +6,56 @@ import Hook from "./Hooks.js";
 import HookManager from './HookManager.js';
 import { classToPlain } from 'class-transformer';
 import { getFlag, hasFlag } from './helpers.js';
+import { migrateOldTags } from './Tags.js';
+import Tag from './Tags.js';
 
 export const tokensStore = writable([]);
 export const tilesStore = writable([]);
 export const currentScene = writable(null);
 
 export const globalTags = writable([]);
+export const tagsStore = writable([]);
+
+function loadTags(scene) {
+  const global = game.settings.get(moduleId, SETTINGS.GLOBAL_TAGS);
+  let inScene;
+  if (scene) {
+    inScene = hasFlag(scene, FLAGS.TAGS)
+      ? getFlag(scene, FLAGS.TAGS).filter((a) => a)
+      : [];
+  }
+  globalTags.set([...global, ...inScene].flat());
+}
+
+function saveGlobalTags(tags, specs) {
+  const nSpecs = tags.filter(t => !specs.find(s => s.text == t)).map(t => new Tag(t));
+  if (nSpecs.length > 0) {
+    specs.push(...nSpecs);
+    tagsStore.set(specs);
+  }
+  game.settings.set(moduleId, SETTINGS.GLOBAL_TAGS, tags.filter(t => specs.find(s => s.text == t)?.global));
+  const updates = {};
+  updates[`flags.${FLAGS.TAGS}`] = tags.filter(t => !specs.find(s => s.text == t)?.global);
+  globalThis.canvas?.scene?.update(updates);
+}
+
 export function initGlobalTags() {
-  globalTags.set(game.settings.get(moduleId, SETTINGS.GLOBAL_TAGS));
+  let specs;
+  tagsStore.set(game.settings.get(moduleId, SETTINGS.TAGS).map(Tag.fromPlain).filter(a => a));
+  tagsStore.subscribe(async (tags) => {
+    specs = tags;
+    game.settings.set(moduleId, SETTINGS.TAGS, tags);
+    globalTags.update(t => {
+      if (t.length > 0) {
+        saveGlobalTags(t, tags);
+      }
+      return t;
+    })
+  });
+  loadTags(globalThis.canvas.scene);
+
   globalTags.subscribe(async (tags) => {
-    game.settings.set(moduleId, SETTINGS.GLOBAL_TAGS, tags);
+    saveGlobalTags(tags, specs);
   });
 }
 
@@ -84,6 +124,7 @@ export function initCurrentScene() {
 
     loadHooks(scene);
     loadActions(scene);
+    loadTags(scene);
 
     await HookManager.onSceneChange(scene);
 
@@ -132,9 +173,10 @@ export function initHooks() {
   });
 }
 
-export function initStores() {
+export async function initStores() {
   initCurrentScene();
   initActions();
+  await migrateOldTags();
   initGlobalTags();
   initTagColors();
   initSequences();

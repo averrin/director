@@ -14,9 +14,11 @@ export const FLAGS = {
   SEQUENCES: "director-sequences",
   HOOKS: "director-hooks",
   ACTIONS: "director-actions",
+  TAGS: "director-tags",
 }
 
 export const SETTINGS = {
+  TAGS: "tags",
   GLOBAL_TAGS: "global-tags",
   TAG_COLORS: "tag-colors",
   SHOW: "show",

@@ -170,6 +170,7 @@
    class="arg-input ui-min-w-fit ui-input-group ui-justify-{justify} ui-min-h-12"
    for=""
    class:!ui-w-auto={widthAuto}
+   id="{type}-{value}"
 >
    <slot name="left" />
    {#if label != ""}

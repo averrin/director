@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. Dates are d
 
 ## [Unreleased]
 
+## [0.8.4](https://github.com/averrin/director/compare/0.8.3...0.8.4)
+Added:
+  * Tag settings. In addition to a color, now you can choose an icon or set tag "local for scene"
+  * Indicator for actions with `ignoreTarget`
+
+Fixed:
+  * Switching action type doesn't change argument and its options
+
 ## [0.8.3](https://github.com/averrin/director/compare/0.8.2...0.8.3)
 Fixed:
   * Broken by v10 show/hide in the Selection tab
@@ -11,6 +19,7 @@ Fixed:
   * Size in the Selection tab isn't rounded
   * Tag color selection doesn't work in the mutual tag input
   * "Create action" from the selection tab made it with "undefined" type
+  * Default color for pickers isn't set
 
 
 ## [0.8.2](https://github.com/averrin/director/compare/0.8.1...0.8.2)

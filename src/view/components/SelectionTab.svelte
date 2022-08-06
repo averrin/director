@@ -116,7 +116,7 @@
    </div>
 {/if}
 
-<div class="ui-overflow-auto ui-max-h-[600px]">
+<div class="ui-overflow-auto ui-max-h-[900px]">
    <div class="ui-flex ui-flex-col ui-p-3 ui-space-y-3 ui-justify-stretch">
       {#if selection.length == 0}
          <div class="ui-alert ui-shadow-lg">

@@ -1,6 +1,6 @@
 <script>
    import Tags from "./Tags.svelte";
-   import { globalTags, tagColors } from "../../modules/stores.js";
+   import { globalTags, tagsStore } from "../../modules/stores.js";
    import FaFeatherAlt from "svelte-icons/fa/FaFeatherAlt.svelte";
    import FaDatabase from "svelte-icons/fa/FaDatabase.svelte";
    import FaFilm from "svelte-icons/fa/FaFilm.svelte";
@@ -28,18 +28,20 @@
 
 <div class="ui-navbar ui-bg-base-100 ui-gap-3">
    <div class="ui-flex ui-flex-1">
-      <Tags
-         allowPaste={true}
-         allowDrop={true}
-         onlyUnique={true}
-         splitWith={","}
-         placeholder="Tag"
-         on:tags={onTags}
-         tags={$globalTags}
-         colors={$tagColors}
-         borderRadius="0.5rem"
-         {onTagClick}
-      />
+      <div class="ui-w-full">
+         <Tags
+            allowPaste={true}
+            allowDrop={true}
+            onlyUnique={true}
+            splitWith={","}
+            placeholder="Tag"
+            on:tags={onTags}
+            tags={$globalTags}
+            borderRadius="0.5rem"
+            autoComplete={$tagsStore.map((t) => t.text)}
+            {onTagClick}
+         />
+      </div>
    </div>
    <div class="ui-flex ui-flex-row ui-gap-2 ui-flex-none">
       {#if globalThis.tokenAttacher}

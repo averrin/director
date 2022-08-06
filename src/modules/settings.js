@@ -46,6 +46,13 @@ export function initSettings(app) {
     default: [],
   });
 
+  game.settings.register(moduleId, SETTINGS.TAGS, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: [],
+  });
+
 
   game.settings.register(moduleId, SETTINGS.SEQUENCES, {
     scope: "world",
@@ -68,6 +75,7 @@ export function initSettings(app) {
     default: [],
   });
 
+  //depricated
   game.settings.register(moduleId, SETTINGS.TAG_COLORS, {
     scope: "world",
     config: false,

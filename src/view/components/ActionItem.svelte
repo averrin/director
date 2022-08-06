@@ -30,11 +30,14 @@
    export let itemClick;
 
    let types = actionTypes;
+   let spec = actionTypes.find((t) => t.id == item.type.id);
 
    function setType(e) {
       if (typeof e.detail !== "string" || item?.type?.id == e.detail) return;
       item.type = { ...actionTypes.find((t) => t.id == e.detail) };
       delete item.type.execute;
+      item.args = [];
+      spec = actionTypes.find((t) => t.id == item.type.id);
       dispatch("change", item);
    }
 
@@ -49,11 +52,6 @@
 
    let hook = currentHooks.find((h) => h.value == item.value);
 
-   function onItemClickHandler(event, item) {
-      if (event.which == 3) {
-         itemClick(item);
-      }
-   }
    if (!item.type) {
       item.type = types[0];
    }
@@ -69,6 +67,10 @@
       dispatch("change", item);
    }
 
+   function onChange() {
+      dispatch("change", item);
+   }
+
    const oneliner = `Director.runAction("${item.name || item.id}");`;
 </script>
 
@@ -76,7 +78,6 @@
    id={item.id}
    class="ui-border-2 ui-border-solid ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-items-center ui-my-1 ui-gap-3"
    style:border-color={item.color || "#ffffff"}
-   on:pointerdown={(e) => onItemClickHandler(e, item)}
 >
    <div class="ui-flex ui-flex-row ui-items-center ui-gap-3 ui-w-full ui-justify-start">
       <div class="ui-flex ui-flex-1 ui-gap-3">
@@ -110,7 +111,15 @@
             widthAuto={true}
             label="Type"
             on:change={setType}
-         />
+         >
+            <svelte:fragment slot="right">
+               {#if spec.ignoreTarget}
+                  <span style:color="#232323" title="targets are ignored" class="ui-h-12 ui-w-16">
+                     <iconify-icon style:font-size="2rem" icon="tabler:target-off" style:color="#444444" />
+                  </span>
+               {/if}
+            </svelte:fragment>
+         </ArgInput>
       </div>
       <div class="ui-btn-group ui-justify-self-end ui-flex-none">
          <button
@@ -164,6 +173,7 @@
                      bind:value={item.args[i]}
                      widthAuto={true}
                      label={arg.label}
+                     on:change={onChange}
                   />
                {/each}
             {/if}

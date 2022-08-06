@@ -1,8 +1,9 @@
 <script>
    // This is a modified version of https://github.com/agustinl/svelte-tags-input
-   import { createEventDispatcher } from "svelte";
+   import { createEventDispatcher, onDestroy } from "svelte";
    import { contrastColor } from "../../modules/helpers.js";
    import { XIcon } from "@rgossiaux/svelte-heroicons/solid";
+   import { tagsStore } from "../../modules/stores.js";
 
    const dispatch = createEventDispatcher();
 
@@ -34,11 +35,25 @@
    export let labelText;
    export let labelShow;
    export let colors = {};
+   export let icons = {};
    export let borderRadius;
 
    let layoutElement;
 
+   const unsub = tagsStore.subscribe((oTags) => {
+      for (const t of oTags) {
+         colors[t.text] = t.color;
+         icons[t.text] = t.icon;
+      }
+   });
+   onDestroy(unsub);
+
    $: tags = tags || [];
+   $: {
+      if (typeof tags[0] !== "string" && !(tags[0] instanceof String)) {
+         tags = tags.map((t) => t.text);
+      }
+   }
    $: addKeys = addKeys || [13];
    $: maxTags = maxTags || false;
    $: onlyUnique = onlyUnique || false;
@@ -372,13 +387,22 @@
    {#if tags.length > 0}
       {#each tags as tag, i (tag)}
          <span
-            class="svelte-tags-input-tag"
+            class="ui-badge ui-badge-lg svelte-tags-input-tag"
             draggable={true}
             on:dragstart={onDragStart}
             on:pointerdown={(e) => onTagClickHandler(e, tag)}
             style:background-color={colors[tag]}
             style:color={contrastColor(colors[tag])}
          >
+            {#if icons[tag]}
+               <iconify-icon
+                  style:font-size="1.5rem"
+                  style:margin-right="0.5rem"
+                  icon={icons[tag]}
+                  style:color={contrastColor(colors[tag])}
+               />
+            {/if}
+
             {#if typeof tag === "string"}
                {tag}
             {:else}
@@ -496,6 +520,7 @@
       border-radius: 6px;
       font-weight: bold;
       padding: 2px 8px;
+      height: unset !important;
    }
 
    /*.svelte-tags-input-tag:hover {
@@ -527,6 +552,7 @@
       max-height: 310px;
       overflow: scroll;
       overflow-x: auto;
+      z-index: 999;
    }
 
    .svelte-tags-input-matchs li {

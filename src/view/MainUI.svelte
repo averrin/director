@@ -17,10 +17,10 @@
    import FaPlay from "svelte-icons/fa/FaPlay.svelte";
    import FaExpandArrowsAlt from "svelte-icons/fa/FaExpandArrowsAlt.svelte";
    import FaCompressArrowsAlt from "svelte-icons/fa/FaCompressArrowsAlt.svelte";
+   import ArgInput from "./components/ArgInput.svelte";
 
-   import { HsvPicker } from "svelte-color-picker";
-
-   import { tagColors, actions } from "../modules/stores.js";
+   import { tagsStore, actions } from "../modules/stores.js";
+   import Tag from "../modules/Tags.js";
 
    import { getContext, onDestroy, setContext } from "svelte";
    import Action from "../modules/Actions";
@@ -30,7 +30,6 @@
    position.scale = game.settings.get(moduleId, SETTINGS.UI_SCALE);
 
    let pickerOpen = false;
-   let startColor;
 
    let currentActions;
    const unsubscribe3 = actions.subscribe(async (actions) => {
@@ -40,12 +39,15 @@
 
    let editTag;
    function onTagClick(e, tag) {
-      editTag = tag;
-      tagColors.update((tagColors) => {
-         startColor = editTag && editTag in tagColors ? tagColors[editTag].slice(0, 7) : "#232323";
-         pickerOpen = !pickerOpen;
-         return tagColors;
+      tagsStore.update((tags) => {
+         editTag = tags.find((t) => t.text == tag);
+         if (!editTag) {
+            editTag = new Tag(tag);
+            tags.push(editTag);
+         }
+         return tags;
       });
+      pickerOpen = !pickerOpen;
    }
    setContext("onTagClick", onTagClick);
 
@@ -55,16 +57,6 @@
          return actions;
       });
       mode = "actions";
-   }
-
-   function changeColor(e) {
-      if (editTag) {
-         const c = e.detail;
-         tagColors.update((cols) => {
-            cols[editTag] = rgb2hex(c).hex;
-            return cols;
-         });
-      }
    }
 
    let mode = setting(SETTINGS.SELECTED_TAB) || tabs[0].mode;
@@ -92,19 +84,74 @@
    function run(e, action) {
       Director.runAction(action.id);
    }
-</script>
 
-<input type="checkbox" id="color-modal" class="ui-modal-toggle" bind:checked={pickerOpen} />
-<label for="color-modal" class="ui-modal ui-cursor-pointer">
-   <label class="ui-modal-box ui-relative ui-w-fit" for="">
-      {#if pickerOpen}
-         <HsvPicker on:colorChange={changeColor} startColor={startColor.slice(0, 7)} />
-      {/if}
-   </label>
-</label>
+   function apply() {
+      tagsStore.update((tags) => {
+         const t = tags.find((t) => t.text == editTag.text);
+         t.color = editTag.color;
+         t.icon = editTag.icon;
+         t.global = editTag.global;
+         return tags;
+      });
+      pickerOpen = false;
+   }
+</script>
 
 <ApplicationShell bind:elementRoot>
    <main class="director-ui">
+      {#if editTag}
+         <input type="checkbox" id="color-modal-actions" class="ui-modal-toggle" bind:checked={pickerOpen} />
+         <label for="color-modal-actions" class="ui-modal ui-cursor-pointer">
+            <div class="ui-modal-box ui-w-11/12 ui-max-w-5xl">
+               <h3 class="ui-py-4 ui-font-bold ui-text-lg">Edit action</h3>
+               <div class="ui-flex ui-flex-row ui-items-center ui-gap-2">
+                  <div class="ui-flex ui-flex-row ui-flex-1 ui-items-center ui-gap-2 ui-flex-wrap">
+                     <ArgInput
+                        type="color"
+                        label="color"
+                        bind:value={editTag.color}
+                        hideSign={true}
+                        widthAuto={true}
+                        defaultValue="#46525D"
+                     />
+                     <ArgInput type="icon" label="icon" bind:value={editTag.icon} hideSign={true} widthAuto={true} />
+                     <ArgInput
+                        type="bool"
+                        label="global"
+                        bind:value={editTag.global}
+                        hideSign={true}
+                        widthAuto={true}
+                     />
+                     <!-- <ArgInput type="string" label="text" bind:value={editTag.text} hideSign={true} widthAuto={true}> -->
+                     <!--    <span slot="right">Text changing will create new tag</span> -->
+                     <!-- </ArgInput> -->
+                  </div>
+                  <div class="ui-flex ui-flex-none">
+                     <span
+                        class="ui-badge ui-badge-lg ui-p-4 !ui-text-2xl"
+                        style:background-color={editTag.color}
+                        style:color={contrastColor(editTag.color)}
+                     >
+                        {#if editTag.icon}
+                           <iconify-icon
+                              style:font-size="1.5rem"
+                              style:margin-right="0.5rem"
+                              icon={editTag.icon}
+                              style:color={contrastColor(editTag.color)}
+                           />
+                        {/if}
+
+                        {editTag.text}
+                     </span>
+                  </div>
+               </div>
+               <div class="ui-modal-action">
+                  <label for="seq-modal" class="ui-btn ui-btn-primary" on:click={(_) => apply()}>Save</label>
+               </div>
+            </div>
+         </label>
+      {/if}
+
       {#if !collapsed}
          <TagsBar {onTagClick} on:collapsed={toggleCollapsed} />
          <div class="ui-tabs ui-tabs-boxed">
