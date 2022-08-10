@@ -2,7 +2,6 @@
    // This is a modified version of https://github.com/agustinl/svelte-tags-input
    import { createEventDispatcher, onDestroy } from "svelte";
    import { contrastColor } from "../../modules/helpers.js";
-   import { XIcon } from "@rgossiaux/svelte-heroicons/solid";
    import { tagsStore } from "../../modules/stores.js";
 
    const dispatch = createEventDispatcher();
@@ -49,11 +48,6 @@
    onDestroy(unsub);
 
    $: tags = tags || [];
-   $: {
-      if (typeof tags[0] !== "string" && !(tags[0] instanceof String)) {
-         tags = tags.map((t) => t.text);
-      }
-   }
    $: addKeys = addKeys || [13];
    $: maxTags = maxTags || false;
    $: onlyUnique = onlyUnique || false;
@@ -409,8 +403,10 @@
                {tag[autoCompleteKey]}
             {/if}
             {#if !disable}
-               <XIcon
+               <iconify-icon
                   class="ui-h-4 ui-w-4 ui-mx-1 ui-mt-1 ui-cursor-pointer svelte-tags-input-tag-remove"
+                  icon="gridicons:cross"
+                  style:color={contrastColor(colors[tag])}
                   on:click={() => removeTag(i)}
                />
             {/if}

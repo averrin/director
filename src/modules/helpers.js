@@ -41,9 +41,6 @@ export function isLiving(token) {
   return getProperty(token?.document?.actor.getRollData(), "attributes.hp.max") > 0;
 }
 
-export let logger = consola.withTag(moduleId);
-logger._reporters[0].levelColorMap[3] = infoColor;
-
 export function findItems(token, itemsToFind) {
   // logger.info(`find items for: ${token.data.name}`, token, itemsToFind);
   const items = [];
@@ -57,15 +54,8 @@ export function findItems(token, itemsToFind) {
   return items;
 }
 
-export function rgb2hex({ r, g, b, a = 1 }) {
-  return {
-    hex:
-      "#" + [r, g, b, Math.round(a * 255) | 0].reduce((acc, v) => `${acc}${v.toString(16).padStart(2, "0")}`, ""),
-  };
-}
-
 export const tools = {
-  toggle: async (o) => await o.update({ hidden: !o.hidden }),
+  toggle: async (o) => await o.update({ hidden: !(o.hidden || o.data?.hidden) }),
   hide: async (o) => await o.update({ hidden: true }),
   show: async (o) => await o.update({ hidden: false }),
   kill: async (o) =>
@@ -183,6 +173,15 @@ export function evalExpression(expr, ...args) {
   let code = `try {return ${expr}} catch(e) {console.error(e); return false}`;
   const f = new Function("...args", code);
   return f(...args)
+}
+
+export let logger = consola.withTag(moduleId);
+logger._reporters[0].levelColorMap[3] = infoColor;
+export function rgb2hex({ r, g, b, a = 1 }) {
+  return {
+    hex:
+      "#" + [r, g, b, Math.round(a * 255) | 0].reduce((acc, v) => `${acc}${v.toString(16).padStart(2, "0")}`, ""),
+  };
 }
 
 export function contrastColor(color) {

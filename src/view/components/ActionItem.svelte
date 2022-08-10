@@ -30,14 +30,14 @@
    export let itemClick;
 
    let types = actionTypes;
-   let spec = actionTypes.find((t) => t.id == item.type.id);
+   let spec = actionTypes.find((t) => t.id == item?.type?.id);
 
    function setType(e) {
       if (typeof e.detail !== "string" || item?.type?.id == e.detail) return;
       item.type = { ...actionTypes.find((t) => t.id == e.detail) };
       delete item.type.execute;
       item.args = [];
-      spec = actionTypes.find((t) => t.id == item.type.id);
+      spec = actionTypes.find((t) => t.id == item?.type?.id);
       dispatch("change", item);
    }
 
@@ -113,7 +113,7 @@
             on:change={setType}
          >
             <svelte:fragment slot="right">
-               {#if spec.ignoreTarget}
+               {#if spec?.ignoreTarget}
                   <span style:color="#232323" title="targets are ignored" class="ui-h-12 ui-w-16">
                      <iconify-icon style:font-size="2rem" icon="tabler:target-off" style:color="#444444" />
                   </span>

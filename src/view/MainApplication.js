@@ -1,5 +1,4 @@
 import { SvelteApplication } from "@typhonjs-fvtt/runtime/svelte/application";
-// import { TJSGameSettings } from "@typhonjs-fvtt/runtime/svelte/store";
 import { moduleId, SETTINGS } from "../constants.js";
 // import { logger } from "../modules/helpers.js";
 import { setting } from "../modules/settings.js";
