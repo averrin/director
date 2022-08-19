@@ -170,7 +170,8 @@
    class="arg-input ui-min-w-fit ui-input-group ui-justify-{justify} ui-min-h-12"
    for=""
    class:!ui-w-auto={widthAuto}
-   id="{type}-{value}-{extra.id}"
+   id="{type}-{value}-{extra?.id}"
+   data-id={id}
 >
    <slot name="left" />
    {#if label != ""}
