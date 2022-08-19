@@ -515,12 +515,12 @@ export function addModifier(modifier) {
 }
 
 function targetFromActor(target, ...args) {
-  const tokensId = globalThis.canvas.scene.tokens.filter(t => t.actor.id == args[0].id).map(t => t.id);
-  return [args[0].id, ...tokensId].includes(target.id);
+  const tokensId = globalThis.canvas.scene.tokens.filter(t => t?.actor?.id == args[0].id).map(t => t?.id);
+  return [args[0].id, ...tokensId].includes(target?.id);
 
 }
 function targetFromToken(target, ...args) {
-  return [args[0].id].includes(target.id);
+  return [args[0].id].includes(target?.id);
 }
 
 export const hookSpecs = [
@@ -530,7 +530,7 @@ export const hookSpecs = [
     parents: ["updateActor"],
     target: targetFromActor,
     test: (target, ts, limit, actor, _, updates) => {
-      return (ts > 0 && updates.prevHp - actor.getRollData().attributes.hp.value >= ts) || actor.getRollData().attributes.hp.value / actor.getRollData().attributes.hp.max * 100 <= limit;
+      return (updates.prevHp - actor.getRollData().attributes.hp.value >= ts) || actor.getRollData().attributes.hp.value / actor.getRollData().attributes.hp.max * 100 <= limit;
     }, args: [{ type: "int", label: "threshold" }, { type: "int", label: "drop lower %" }]
   },
   {

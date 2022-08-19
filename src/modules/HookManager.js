@@ -80,7 +80,7 @@ class HookManager {
   isActionListen(a, hook) {
     if (!a.value || Array.isArray(a.value) || typeof a.value === "object" || a.value.startsWith("#")) return false;
     const h = this.#hooks.find(h => a.value == h.id);
-    return hook == h.getHookName();
+    return hook == h?.getHookName();
   }
 
   updateHandlers() {
