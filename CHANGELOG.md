@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
 ## [Unreleased]
+## [0.8.5](https://github.com/averrin/director/compare/0.8.4...0.8.5)
+  * Various fixes
 
 ## [0.8.4](https://github.com/averrin/director/compare/0.8.3...0.8.4)
 Added:
