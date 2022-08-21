@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
 ## [Unreleased]
+## [0.8.6 - 0.8.8](https://github.com/averrin/director/compare/0.8.5...0.8.8)
+  * Various fixes
+  * New action to call another action (only named)
+  * A little more compact UI
+
+Known bugs:
+  * The list of available actions for "Another action" doesnt update automatcally on changing action's name. Workaround: collapse and open again action, or switch tabs. 
+
 ## [0.8.5](https://github.com/averrin/director/compare/0.8.4...0.8.5)
   * Various fixes
 
