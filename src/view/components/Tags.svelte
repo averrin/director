@@ -2,7 +2,9 @@
    // This is a modified version of https://github.com/agustinl/svelte-tags-input
    import { createEventDispatcher, onDestroy } from "svelte";
    import { contrastColor } from "../../modules/helpers.js";
-   import { tagsStore } from "../../modules/stores.js";
+   import { getContext } from "svelte";
+   import Tag from "./Tag.svelte";
+   // import { tagsStore } from "../../modules/stores.js";
 
    const dispatch = createEventDispatcher();
 
@@ -35,19 +37,31 @@
    export let labelShow;
    export let colors = {};
    export let icons = {};
-   export let borderRadius;
+   export let borderRadius = undefined;
+   export let tagsStore = undefined;
 
    let layoutElement;
 
-   const unsub = tagsStore.subscribe((oTags) => {
-      for (const t of oTags) {
-         colors[t.text] = t.color;
-         icons[t.text] = t.icon;
-      }
-   });
-   onDestroy(unsub);
+   if (!tagsStore) {
+      tagsStore = getContext("tagsStore");
+   }
 
-   $: tags = tags || [];
+   if (tagsStore) {
+      const unsub = tagsStore.subscribe((oTags) => {
+         for (const t of oTags) {
+            colors[t.text] = t.color;
+            icons[t.text] = t.icon;
+         }
+      });
+      onDestroy(unsub);
+   }
+
+   tags = tags || [];
+   // $: {
+   //   if (typeof tags[0] !== "string" && !(tags[0] instanceof String)) {
+   //     tags = tags.map((t) => t.text);
+   // }
+   //   }
    $: addKeys = addKeys || [13];
    $: maxTags = maxTags || false;
    $: onlyUnique = onlyUnique || false;
@@ -168,7 +182,8 @@
       }
    }
 
-   function removeTag(i) {
+   function removeTag(tag) {
+      const i = tags.indexOf(tag);
       tags.splice(i, 1);
       tags = tags;
 
@@ -362,73 +377,62 @@
       return "sti_" + Math.random().toString(36).substring(2, 11);
    }
 
-   export let onTagClick;
+   export let onTagClick = undefined;
+   export let onTagRClick = undefined;
+
+   onTagClick = onTagClick || getContext("tagClick");
+   onTagRClick = onTagRClick || getContext("tagRClick");
    function onTagClickHandler(event, tag) {
-      if (event.which == 3) {
-         onTagClick(event, tag);
+      event.stopPropagation();
+      if (event.which == 1) {
+         onTagClick && onTagClick(event, tag);
+      } else if (event.which == 3) {
+         onTagRClick && onTagRClick(event, tag);
       }
    }
 </script>
 
 <div
-   class="svelte-tags-input-layout"
-   class:sti-layout-disable={disable}
+   class="svelte-tags-input-layout ui-flex ui-flex-row ui-gap-1 ui-items-center ui-justify-center ui-p-1"
+   class:sti-disabled={disable}
    bind:this={layoutElement}
    style:border-radius={borderRadius}
 >
    <label for={id} class={labelShow ? "" : "sr-only"}>{labelText}</label>
 
-   {#if tags.length > 0}
-      {#each tags as tag, i (tag)}
-         <span
-            class="ui-badge ui-badge-lg svelte-tags-input-tag"
-            draggable={true}
+   {#if tags?.length > 0}
+      {#each tags as tag, i (tag + i)}
+         <Tag
+            tag={{
+               text: typeof tag === "string" ? tag : tag[autoCompleteKey],
+               icon: icons[tag],
+               color: colors[tag],
+            }}
+            compact={disable}
+            on:remove={() => removeTag(tag)}
             on:dragstart={onDragStart}
             on:pointerdown={(e) => onTagClickHandler(e, tag)}
-            style:background-color={colors[tag]}
-            style:color={contrastColor(colors[tag])}
-         >
-            {#if icons[tag]}
-               <iconify-icon
-                  style:font-size="1.5rem"
-                  style:margin-right="0.5rem"
-                  icon={icons[tag]}
-                  style:color={contrastColor(colors[tag])}
-               />
-            {/if}
-
-            {#if typeof tag === "string"}
-               {tag}
-            {:else}
-               {tag[autoCompleteKey]}
-            {/if}
-            {#if !disable}
-               <iconify-icon
-                  class="ui-h-4 ui-w-4 ui-mx-1 ui-mt-1 ui-cursor-pointer svelte-tags-input-tag-remove"
-                  icon="gridicons:cross"
-                  style:color={contrastColor(colors[tag])}
-                  on:click={() => removeTag(i)}
-               />
-            {/if}
-         </span>
+         />
       {/each}
    {/if}
-   <input
-      type="text"
-      {id}
-      {name}
-      bind:value={tag}
-      on:keydown={setTag}
-      on:keyup={getMatchElements}
-      on:paste={onPaste}
-      on:drop={onDrop}
-      on:focus={onFocus}
-      on:blur={(e) => onBlur(e, tag)}
-      on:click={onClick}
-      class="svelte-tags-input"
-      {placeholder}
-      disabled={disable}
-   />
+   {#if !disable}
+      <input
+         type="text"
+         {id}
+         {name}
+         bind:value={tag}
+         on:keydown={setTag}
+         on:keyup={getMatchElements}
+         on:paste={onPaste}
+         on:drop={onDrop}
+         on:focus={onFocus}
+         on:blur={(e) => onBlur(e, tag)}
+         on:click={onClick}
+         class="svelte-tags-input !ui-rounded"
+         {placeholder}
+         disabled={disable}
+      />
+   {/if}
 </div>
 
 {#if autoComplete && arrelementsmatch.length > 0}
@@ -447,7 +451,7 @@
    </div>
 {/if}
 
-<style>
+<style lang="scss">
    /* CSS svelte-tags-input */
 
    .svelte-tags-input,
@@ -456,7 +460,8 @@
    .svelte-tags-input-layout label {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans",
          "Droid Sans", "Helvetica Neue", sans-serif;
-      font-size: 1.2rem;
+      /* font-size: 1.2rem; */
+      font-size: 0.8rem;
       padding: 2px 5px;
    }
 
@@ -477,13 +482,19 @@
       -webkit-box-align: center;
       -ms-flex-align: center;
       align-items: center;
-      padding: 0px 5px 5px 5px;
       border: solid 1px #ccc;
       background: #fff;
 
       width: 100%;
       /* border-radius: 6px; */
       height: 42px;
+
+      height: 100%;
+      align-items: stretch;
+      input {
+         display: flex;
+         height: unset !important;
+      }
    }
 
    /* svelte-tags-input */
@@ -493,9 +504,8 @@
       -ms-flex: 1;
       flex: 1;
       margin: 0;
-      margin-top: 5px;
 
-      border: solid 1px #ccc;
+      border: none;
       background: #fff;
    }
 
@@ -509,14 +519,13 @@
       display: flex;
       white-space: nowrap;
       list-style: none;
-      background: #242424;
+      background: hsl(var(--n) / var(--tw-bg-opacity));
       color: #fff;
-      margin-right: 5px;
-      margin-top: 5px;
       border-radius: 6px;
       font-weight: bold;
-      padding: 2px 8px;
+      padding: 0px 0.4rem;
       height: unset !important;
+      align-items: center;
    }
 
    /*.svelte-tags-input-tag:hover {
@@ -525,7 +534,6 @@
 
    .svelte-tags-input-tag-remove {
       cursor: pointer;
-      margin-left: 6px;
       font-size: 16px;
    }
 
@@ -543,7 +551,7 @@
       margin: 3px 0;
       padding: 0px;
       background: #fff;
-      border: solid 1px #ccc;
+      /* border: solid 1px #ccc; */
       border-radius: 2px;
       max-height: 310px;
       overflow: scroll;
@@ -595,5 +603,13 @@
       clip: rect(0, 0, 0, 0);
       white-space: nowrap;
       border: 0;
+   }
+   .sti-disabled {
+      border: none !important;
+      background-color: transparent !important;
+   }
+   .sti-disabled span {
+      font-size: 0.8rem !important;
+      padding: 0px 0.4rem !important;
    }
 </style>

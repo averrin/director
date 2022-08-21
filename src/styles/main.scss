@@ -36,7 +36,7 @@
         max-width: 600px;
         border-radius: var(--rounded-btn, 0.5rem);
         background: #fff !important;
-        height: 3rem !important;
+        height: 2.5rem !important;
 
         input, .selection {
           font-size: 1rem !important;
@@ -79,7 +79,7 @@
 
     .ui-input-lg {
         border-color: #ddd !important;
-        height: 3rem !important;
+        height: 2.5rem !important;
     }
 
     .ui-text-base {
@@ -101,6 +101,16 @@
     button > i {
         margin: 0px !important;
     }
+
+    .ui-btn {
+      height: 2.5rem !important;
+      min-height: 2.5rem !important;
+    }
+    .ui-btn-square {
+      width: 2.5rem !important;
+      height: 2.5rem !important;
+}
+
     .ui-tabs {
         justify-content: center;
     }
@@ -112,7 +122,7 @@
     .ui-toggle {
         flex-shrink: 0 !important;
         flex-basis: auto !important;
-        width: 3rem !important;
+        width: 2.5rem !important;
         height: 1.5rem !important;
     }
 

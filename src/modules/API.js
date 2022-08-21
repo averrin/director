@@ -2,16 +2,14 @@ import { moduleId, SETTINGS } from '../constants.js';
 import { addArgSpec, addModifier, addSection, addHook, addAction } from "./Specs.js";
 import { sequences, actions } from "./stores.js";
 import { DSequence } from "./Sequencer.js";
+import { get } from "svelte/store";
 
 const API = {
   addArgSpec, addModifier, addSection, addHook, addAction,
 
   getSequence: async (name, overrides) => {
     let seq;
-    sequences.update(seqs => {
-      seq = seqs.find(s => s.title == name || s.id == name);
-      return seqs;
-    });
+    seq = get(sequences).find(s => s.title == name || s.id == name);
     if (!seq) {
       logger.error(`Sequence ${name} not found`);
       return null;
@@ -24,48 +22,26 @@ const API = {
 
   runAction: (id) => {
     let action;
-    actions.update(a => {
-      action = a.find(action => action.id == id || action.name == id);
-      return a;
-    });
+    action = get(actions).find(action => action.id == id || action.name == id);
     if (action) {
       action.run(new MouseEvent(""))
     }
   },
 
   listSequences: () => {
-    let seq;
-    sequences.update(seqs => {
-      seq = seqs;
-      return seqs;
-    });
-    return seq;
+    return get(sequences);
   },
 
   listActions: () => {
-    let acts;
-    actions.update(a => {
-      acts = a;
-      return a;
-    });
-    return acts;
+    return get(actions);
   },
 
   findSequence: (name) => {
-    let seq;
-    sequences.update(seqs => {
-      seq = seqs.find(s => s.title == name || s.id == name);
-      return seqs;
-    });
-    return seq;
+    return get(sequences).find(s => s.title == name || s.id == name);
   },
 
   playSequence: (name, overrides) => {
-    let seq;
-    sequences.update(seqs => {
-      seq = seqs.find(s => s.title == name || s.id == name);
-      return seqs;
-    });
+    let seq = get(sequences).find(s => s.title == name || s.id == name);
     if (!seq) {
       logger.error(`Sequence ${name} not found`);
     } else {

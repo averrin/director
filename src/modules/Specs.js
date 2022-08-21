@@ -33,6 +33,14 @@ export const actionTypes = [
     group: 'Tokens',
     execute: (object, action) => object && tools.revive(object?.document || object),
   },
+
+  {
+    id: 'another-action',
+    label: 'Another Action',
+    group: 'Macro',
+    args: [{ type: "action", label: "action" }],
+    execute: (object, action) => Director.runAction(action.args[0]),
+  },
   {
     id: 'macro',
     label: 'Run Macro',
@@ -733,6 +741,12 @@ export const argSpecs = [
   {
     id: "sequence", var_types: ["sequence"], options: (_) => {
       return Director.listSequences().map(s => { return { value: s.id, label: s.title } });
+    }
+    , control: "select"
+  },
+  {
+    id: "action", var_types: ["action"], options: (_) => {
+      return Director.listActions().filter(a => a.name != "").map(s => { return { value: s.id, label: s.name } });
     }
     , control: "select"
   },

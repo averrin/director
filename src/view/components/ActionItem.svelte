@@ -92,11 +92,11 @@
             <svelte:fragment slot="right">
                {#if item.valueType == "hook" && hook}
                   {#if !hook?.enabled}
-                     <span style:color="indianred" title="hook is disabled" class="ui-h-12 ui-w-16">
+                     <span style:color="indianred" title="hook is disabled" class="ui-h-[2.5rem] ui-w-16">
                         <FaExclamationTriangle />
                      </span>
                   {:else}
-                     <span style:color="#232323" title="hook is enabled" class="ui-h-12 ui-w-16">
+                     <span style:color="#232323" title="hook is enabled" class="ui-h-[2.5rem] ui-w-16">
                         <GiFishingHook />
                      </span>
                   {/if}

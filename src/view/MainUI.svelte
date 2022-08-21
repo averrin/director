@@ -19,10 +19,13 @@
    import FaCompressArrowsAlt from "svelte-icons/fa/FaCompressArrowsAlt.svelte";
    import ArgInput from "./components/ArgInput.svelte";
 
-   import { tagsStore, actions } from "../modules/stores.js";
-   import Tag from "../modules/Tags.js";
-
    import { getContext, onDestroy, setContext } from "svelte";
+   import { tagsStore, actions } from "../modules/stores.js";
+   setContext("tagsStore", tagsStore);
+
+   import Tag from "../modules/Tags.js";
+   import TagComponent from "./components/Tag.svelte";
+
    import Action from "../modules/Actions";
    import { actionTypes } from "../modules/Specs";
    const { application } = getContext("external");
@@ -49,7 +52,7 @@
       });
       pickerOpen = !pickerOpen;
    }
-   setContext("onTagClick", onTagClick);
+   setContext("tagRClick", onTagClick);
 
    function createAction(_, tags) {
       actions.update((actions) => {
@@ -127,22 +130,7 @@
                      <!-- </ArgInput> -->
                   </div>
                   <div class="ui-flex ui-flex-none">
-                     <span
-                        class="ui-badge ui-badge-lg ui-p-4 !ui-text-2xl"
-                        style:background-color={editTag.color}
-                        style:color={contrastColor(editTag.color)}
-                     >
-                        {#if editTag.icon}
-                           <iconify-icon
-                              style:font-size="1.5rem"
-                              style:margin-right="0.5rem"
-                              icon={editTag.icon}
-                              style:color={contrastColor(editTag.color)}
-                           />
-                        {/if}
-
-                        {editTag.text}
-                     </span>
+                     <TagComponent tag={editTag} />
                   </div>
                </div>
                <div class="ui-modal-action">
@@ -157,7 +145,7 @@
          <div class="ui-tabs ui-tabs-boxed">
             {#each availableTabs as t (t.title)}
                <!-- <div class="ui-indicator"> -->
-               <a class="ui-tab ui-tab-lg" on:click={() => selectMode(t)} class:ui-tab-active={t.mode == mode}>
+               <a class="ui-tab ui-tab-md" on:click={() => selectMode(t)} class:ui-tab-active={t.mode == mode}>
                   {t.title}
                   {#if t.badge}
                      {@html t.badge}

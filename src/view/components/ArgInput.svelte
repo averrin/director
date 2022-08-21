@@ -167,7 +167,7 @@
 {/if}
 
 <label
-   class="arg-input ui-min-w-fit ui-input-group ui-justify-{justify} ui-min-h-12"
+   class="arg-input ui-min-w-fit ui-input-group ui-justify-{justify} ui-min-h-[2.5rem]"
    for=""
    class:!ui-w-auto={widthAuto}
    id="{type}-{value}-{extra?.id}"
