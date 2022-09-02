@@ -1,4 +1,6 @@
-import { capitalize } from "./helpers";
+import { capitalize } from "crew-components/helpers";
+import { argSpecs as _argSpecs } from "./Specs.js";
+import { argSpecs } from "crew-components/specs";
 
 export default function initIntegrations() {
   initActiveTilesIntegration();
@@ -7,6 +9,8 @@ export default function initIntegrations() {
   initFxMasterIntegration();
 
   Hooks.call("DirectorInitIntegrations");
+
+  argSpecs.push(..._argSpecs);
 }
 
 const AsyncFunction = Object.getPrototypeOf(async function() { }).constructor;

@@ -1,13 +1,26 @@
 <script>
-   import { tilesStore, tokensStore, globalTags, tagColors } from "../../modules/stores.js";
-   import { onDestroy } from "svelte";
-   import Tags from "./Tags.svelte";
+   import { tilesStore, tokensStore, globalTags, tagColors, wallsStore, lightsStore } from "../../modules/stores.js";
+   import { onDestroy, tick } from "svelte";
+   import Tags from "crew-components/Tags";
+   import IconButton from "crew-components/IconButton";
 
-   import { PlusIcon } from "@rgossiaux/svelte-heroicons/solid";
    import { setting } from "../../modules/settings.js";
    import { moduleId, SETTINGS } from "../../constants.js";
    import { getContext } from "svelte";
-   import { getFlag, tintImage } from "../../modules/helpers.js";
+   import { getFlag, tintImage } from "crew-components/helpers";
+
+   const { application } = getContext("external");
+   const position = application.position;
+   const { height } = position.stores;
+   let contentH = $height;
+
+   let selection;
+   onDestroy(
+      height.subscribe((h) => {
+         if (!selection || selection.length == 0) return;
+         contentH = h - 210;
+      })
+   );
 
    function editObject(_, object) {
       object.document.sheet.render(true);
@@ -18,9 +31,10 @@
    let tagsSelected;
    let tagsMutual;
    let tagsMutualOld;
-   let selection;
    let tiles = [];
    let tokens = [];
+   let walls = [];
+   let lights = [];
    let thumbs = {};
 
    const onTagClick = getContext("onTagClick");
@@ -50,7 +64,7 @@
                const tint = await tintImage(thumb.thumb, obj.data.tint);
                thumbs[img] = tint.url;
             } else {
-               thumbs[img] = thumb.thumb;
+               thumbs[img] = thumb?.thumb;
             }
          }
       }
@@ -67,21 +81,38 @@
       tagsMutualOld = [...tagsMutual];
    }
 
+   async function update() {
+      selection = [...tiles, ...tokens, ...walls, ...lights];
+      updateMutual();
+      tick().then(() => {
+         height.set(document.getElementById("selection-content").clientHeight + 210);
+      });
+      await updateThumbs();
+   }
+
    const unsubscribe = tilesStore.subscribe(async (value) => {
       tiles = value;
-      selection = [...tiles, ...tokens];
-      updateMutual();
-      await updateThumbs();
+      update();
    });
    onDestroy(unsubscribe);
 
    const unsubscribe2 = tokensStore.subscribe(async (value) => {
       tokens = value;
-      selection = [...tiles, ...tokens];
-      updateMutual();
-      await updateThumbs();
+      update();
    });
    onDestroy(unsubscribe2);
+
+   const unsubscribe3 = wallsStore.subscribe(async (value) => {
+      walls = value;
+      update();
+   });
+   onDestroy(unsubscribe3);
+
+   const unsubscribe4 = lightsStore.subscribe(async (value) => {
+      lights = value;
+      update();
+   });
+   onDestroy(unsubscribe4);
 </script>
 
 {#if selection.length > 1}
@@ -89,7 +120,7 @@
       <div
          class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-items-center ui-space-x-2 ui-cursor-move ui-my-1"
       >
-         <div class="ui-input-group">
+         <div class="ui-input-group ui-input-group-md">
             <span class="!ui-w-32">Mutual tags</span>
             <div class="ui-w-full">
                <Tags
@@ -108,19 +139,17 @@
             </div>
          </div>
          <div class="ui-flex-none">
-            <button class="ui-btn-square ui-btn ui-btn-primary" on:click={(e) => createAction(e, tagsMutual)}>
-               <PlusIcon />
-            </button>
+            <IconButton type="primary" on:click={(e) => createAction(e, tagsMutual)} size="md" icon="fa-solid:plus" />
          </div>
       </div>
    </div>
 {/if}
 
-<div class="ui-overflow-auto ui-max-h-[900px]">
-   <div class="ui-flex ui-flex-col ui-p-3 ui-space-y-3 ui-justify-stretch">
+<div class="ui-overflow-x-auto" style="height: {contentH}px;">
+   <div class="ui-flex ui-flex-col ui-p-3 ui-gap-2 ui-justify-stretch" id="selection-content">
       {#if selection.length == 0}
          <div class="ui-alert ui-shadow-lg">
-            <div>
+            <div class="ui-flex ui-flex-row ui-items-center ui-gap-2">
                <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -139,23 +168,29 @@
       {/if}
       {#each selection as tile, i}
          <div class="ui-card ui-card-side ui-bg-base-100 ui-shadow-xl" id={tile.id}>
-            <figure>
-               <img
-                  class="ui-h-[170px]"
-                  style="border: none;"
-                  src={thumbs[tile.document.texture?.src || tile.data.img]}
-                  alt="Selected image"
-               />
-            </figure>
-            <div class="ui-card-body">
-               <h2 class="ui-card-title">
-                  {#if !tile.name}
+            {#if thumbs[tile.document.texture?.src || tile.data.img]}
+               <figure>
+                  <img
+                     class="ui-h-[170px]"
+                     style="border: none;"
+                     src={thumbs[tile.document.texture?.src || tile.data.img]}
+                     alt="Selected image"
+                  />
+               </figure>
+            {/if}
+            <div class="ui-card-body ui-p-4">
+               <div class="ui-text-lg">
+                  {#if tile instanceof Tile}
                      Tile: {tile.id}
                      {#if getFlag(tile, "monks-active-tiles")?.actions?.length > 0}
                         <span class="ui-badge ui-badge-primary">MATT</span>
                      {/if}
-                  {:else}
+                  {:else if tile instanceof Token}
                      Token: {tile.name}
+                  {:else if tile instanceof Wall}
+                     {tile.document?.door > 0 || tile?.data?.door > 0 ? "Door" : "Wall"}: {tile.id}
+                  {:else if tile instanceof AmbientLight}
+                     Light: {tile.id}
                   {/if}
                   {#if true}
                      <span class="ui-badge">{Math.round(tile.width)}x{Math.round(tile.height)}</span>
@@ -168,9 +203,9 @@
                   >
                      {tile.hidden || tile.data.hidden ? "hidden" : "visible"}
                   </span>
-               </h2>
+               </div>
 
-               <p>
+               <div class="ui-group ui-group-md">
                   <Tags
                      allowPaste={true}
                      allowDrop={true}
@@ -183,10 +218,11 @@
                      tags={tagsSelected[i]}
                      colors={$tagColors}
                      {onTagClick}
+                     borderRadius=".5rem"
                   />
-               </p>
+               </div>
 
-               <div class="ui-card-actions ui-justify-end ui-flex-row">
+               <div class="ui-card-actions ui-justify-end ui-flex-row ui-group ui-group-md">
                   <button class="ui-w-32 ui-btn" on:click={(e) => editObject(e, tile)}>Edit</button>
                   <button class="ui-w-32 ui-btn ui-btn-outline ui-btn-warning" on:click={(e) => tile.release()}
                      >Deselect</button

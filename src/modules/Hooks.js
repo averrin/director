@@ -1,5 +1,5 @@
 import { plainToClass } from 'class-transformer';
-import { logger } from './helpers.js';
+import { logger } from "crew-components/helpers";
 import { hookSpecs } from './Specs.js';
 
 export default class Hook {

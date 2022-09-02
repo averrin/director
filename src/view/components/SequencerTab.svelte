@@ -1,17 +1,21 @@
 <script>
    import SequenceEditor from "./SequenceEditor.svelte";
    import { sequences } from "../../modules/stores";
-   import { onDestroy } from "svelte";
+   import { onDestroy, getContext } from "svelte";
    import Select from "svelte-select";
-   import { DSequence, Variable } from "../../modules/Sequencer.js";
+   import { Section, DSequence, Variable } from "../../modules/Sequencer.js";
    import { v4 as uuidv4 } from "uuid";
-   import CopyToClipboard from "svelte-copy-to-clipboard";
-   import FaRegCopy from "svelte-icons/fa/FaRegCopy.svelte";
-   import FaCode from "svelte-icons/fa/FaCode.svelte";
-   import ArgInput from "./ArgInput.svelte";
+   import ArgInput from "crew-components/ArgInput";
+   import CopyButton from "crew-components/CopyButton";
    import exportFromJSON from "export-from-json";
-   import { setting } from "../../modules/helpers.js";
+   import { setting } from "crew-components/helpers";
    import { moduleId, SETTINGS } from "../../constants.js";
+
+   const { application } = getContext("external");
+   const position = application.position;
+   const { height } = position.stores;
+   let contentH = $height;
+   onDestroy(height.subscribe((h) => (contentH = h - 124)));
 
    let seq = undefined;
    let fullCode = "";
@@ -99,7 +103,7 @@
       updateSequences();
    }
 
-   function updateSequences() {
+   async function updateSequences() {
       sequences.update((seqs) => {
          seq = DSequence.fromPlain(seq);
          const i = seqs.indexOf(seqs.find((s) => s.id == seq.id));
@@ -111,13 +115,43 @@
          seq = seqs.find((s) => s.id == seq.id);
          return seqs;
       });
+      openModal = false;
    }
+
+   async function stop() {
+      seq.stop();
+   }
+   let preloading = false;
+   async function preload() {
+      preloading = true;
+      await seq.preload();
+      preloading = false;
+   }
+
+   async function play() {
+      updateSequences();
+      seq.play();
+   }
+
+   async function addSection() {
+      const e = new Section(uuidv4(), "wait");
+      seq.sections.push(e);
+      await updateSequences();
+      var objDiv = document.getElementById("seq-container");
+      objDiv.scrollTop = objDiv.scrollHeight;
+   }
+   let openModal = false;
 </script>
 
 <!-- Put this part before </body> tag -->
-<input type="checkbox" id="seq-modal" class="ui-modal-toggle" />
-<div class="ui-modal">
-   <div class="ui-modal-box">
+<input type="checkbox" id="seq-modal" class="ui-modal-toggle" on:click={(_) => (openModal = !openModal)} />
+<label
+   for="seq-modal"
+   class="ui-modal ui-items-center"
+   class:modal-open={openModal}
+   style="pointer-events: all !important;"
+>
+   <div class="ui-modal-box ui-max-h-64 ui-bg-base-100 ui-w-11/12 ui-max-w-5xl">
       <h3 class="ui-font-bold ui-text-lg">Edit sequence</h3>
 
       <div class="ui-form-control">
@@ -127,22 +161,24 @@
          <input type="text" placeholder="Title" bind:value={seq.title} class="ui-input ui-input-bordered ui-input-lg" />
       </div>
 
-      <div class="ui-modal-action">
+      <div class="ui-modal-action ui-group ui-group-md ui-flex ui-flex-row ui-gap-1">
          <label for="seq-modal" class="ui-btn ui-btn-error" on:click={deleteSeq}>Delete</label>
          <label for="seq-modal" class="ui-btn ui-btn-accent" on:click={duplicateSeq}>Duplicate</label>
          {#if !setting(SETTINGS.HIDE_IMPORT)}
             <label for="seq-modal" class="ui-btn ui-btn-accent" on:click={exportSeq}>Export</label>
          {/if}
          <label for="seq-modal" class="ui-btn">Close</label>
-         <label for="seq-modal" class="ui-btn ui-btn-primary" on:click={updateSequences}>Save</label>
+         <div class="ui-btn ui-btn-primary" on:click={updateSequences}>Save</div>
       </div>
    </div>
-</div>
+</label>
 
-<div class="ui-p-2">
-   <div class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-my-1 ui-items-center ui-gap-1">
+<div style="height: {contentH}px;">
+   <div
+      class="ui-flex ui-m-2 ui-flex-row ui-bg-base-100 ui-rounded-xl ui-shadow-lg ui-p-2 ui-my-1 ui-items-center ui-gap-1"
+   >
       <div class="ui-flex-1 ui-flex ui-flex-row">
-         <label class="ui-input-group !ui-w-fit" for="">
+         <label class="ui-input-group ui-input-group-md !ui-w-fit" for="">
             <Select
                items={$sequences}
                optionIdentifier="id"
@@ -151,29 +187,13 @@
                bind:value={seq}
                listAutoWidth={false}
             />
-            <CopyToClipboard
-               text={oneliner}
-               on:copy={(_) => globalThis.ui.notifications.info("Oneliner copied!")}
-               let:copy
-            >
-               <button class="ui-btn ui-btn-square ui-p-2 ui-btn-outline ui-m-0" on:click|preventDefault={copy}>
-                  <FaRegCopy />
-               </button>
-            </CopyToClipboard>
-            <CopyToClipboard
-               text={fullCode}
-               on:copy={(_) => globalThis.ui.notifications.info("Full code copied!")}
-               let:copy
-            >
-               <button class="ui-btn ui-btn-square ui-p-2 ui-btn-outline ui-m-0" on:click|preventDefault={copy}>
-                  <FaCode />
-               </button>
-            </CopyToClipboard>
-            <label for="seq-modal" class="ui-btn ui-modal-button">Edit</label>
+            <CopyButton text={oneliner} notification="Oneliner copied!" title="Copy oneliner" icon="fa-solid:copy" />
+            <CopyButton text={fullCode} notification="Full code copied!" title="Copy full code" icon="fa-solid:code" />
+            <div class="ui-btn ui-modal-button !ui-px-2" on:click={(_) => (openModal = !openModal)}>Edit</div>
          </label>
          <div class="ui-mx-3">
             <ArgInput
-               label="In scene"
+               label="In&nbsp;Scene"
                type="bool"
                bind:value={seq.inScene}
                hideSign={true}
@@ -182,15 +202,27 @@
          </div>
       </div>
 
-      <div class="ui-btn-group ui-flex-none">
-         <button class="ui-btn ui-btn-outline ui-w-32 ui-btn-accent" on:click={(e) => addVariable()}
-            >Add variable</button
-         >
-         <button class="ui-btn ui-btn-outline ui-btn-primary ui-w-36" on:click={(_) => addSeq()}> Add Sequence </button>
+      <div class="ui-btn-group ui-btn-group-md ui-flex-none">
+         <button class="ui-btn ui-w-32 ui-btn-accent" on:click={(e) => addVariable()}>Add variable</button>
+         <button class="ui-btn ui-btn-primary ui-w-36" on:click={(_) => addSeq()}> Add Sequence </button>
       </div>
    </div>
 
    {#if seq}
-      <SequenceEditor {seq} />
+      <div id="seq-container" class="ui-overflow-auto ui-px-2" style="height: {contentH - 180}px;">
+         <SequenceEditor {seq} />
+      </div>
+
+      <div class="ui-bg-base-100 ui-p-2 ui-gap-2 ui-flex ui-flex-col">
+         <button class="ui-btn ui-btn-outline ui-btn-md ui-w-full" on:click={(e) => addSection()}>Add section</button>
+
+         <div class="ui-btn-group ui-btn-group-md ui-w-full ui-justify-center ui-items-start">
+            <button class="ui-btn ui-btn-outline ui-w-[33%]" class:ui-loading={preloading} on:click={preload}
+               >preload</button
+            >
+            <button class="ui-btn ui-btn-error ui-btn-outline ui-w-1/3" on:click={stop}>stop persists</button>
+            <button class="ui-btn ui-w-1/3" on:click={play}>play</button>
+         </div>
+      </div>
    {/if}
 </div>

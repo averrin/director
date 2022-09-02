@@ -1,25 +1,15 @@
 <script>
-   import Select from "svelte-select";
-   import { XIcon } from "@rgossiaux/svelte-heroicons/solid";
-   import { actionTypes, argSpecs } from "../../modules/Specs.js";
-   import ArgInput from "./ArgInput.svelte";
-   import { sequences, hooks } from "../../modules/stores.js";
-   import FaBan from "svelte-icons/fa/FaBan.svelte";
-   import { contrastColor } from "../../modules/helpers.js";
-   import FaExpandArrowsAlt from "svelte-icons/fa/FaExpandArrowsAlt.svelte";
-   import FaCompressArrowsAlt from "svelte-icons/fa/FaCompressArrowsAlt.svelte";
-   import FaExpand from "svelte-icons/fa/FaExpand.svelte";
-   import FaPlay from "svelte-icons/fa/FaPlay.svelte";
-   import GiFishingHook from "svelte-icons/gi/GiFishingHook.svelte";
-   import FaExclamationTriangle from "svelte-icons/fa/FaExclamationTriangle.svelte";
-   import FaArrowsAlt from "svelte-icons/fa/FaArrowsAlt.svelte";
-   import FaTimes from "svelte-icons/fa/FaTimes.svelte";
-   import FaEdit from "svelte-icons/fa/FaEdit.svelte";
+   import { actionTypes } from "../../modules/Specs.js";
+   import ArgInput from "crew-components/ArgInput";
+   import IconButton from "crew-components/IconButton";
+   import CopyButton from "crew-components/CopyButton";
+   import CollapseButton from "crew-components/CollapseButton";
+   import RemoveButton from "crew-components/RemoveButton";
+   import { hooks } from "../../modules/stores.js";
+   import { contrastColor } from "crew-components/helpers";
    import { loadIcon } from "iconify-icon";
    import { createEventDispatcher } from "svelte";
    const dispatch = createEventDispatcher();
-   import CopyToClipboard from "svelte-copy-to-clipboard";
-   import FaRegCopy from "svelte-icons/fa/FaRegCopy.svelte";
 
    export let item;
    if (item.icon) loadIcon(item.icon);
@@ -76,29 +66,37 @@
 
 <div
    id={item.id}
-   class="ui-border-2 ui-border-solid ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-items-center ui-my-1 ui-gap-3"
+   class="ui-border-2 ui-border-solid ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-items-center ui-gap-2 ui-mb-1"
    style:border-color={item.color || "#ffffff"}
 >
    <div class="ui-flex ui-flex-row ui-items-center ui-gap-3 ui-w-full ui-justify-start">
-      <div class="ui-flex ui-flex-1 ui-gap-3">
-         <button
-            class="ui-btn ui-btn-square ui-btn-ghost handle ui-justify-self-start ui-cursor-move"
-            style="color: #46525d; padding: 8px"
+      <div class="ui-flex ui-flex-1 ui-gap-3 ui-group ui-group-md">
+         <IconButton
             title="move"
-         >
-            <FaArrowsAlt />
-         </button>
+            style="color: #46525d"
+            icon="fa-solid:arrows-alt"
+            cls="handle"
+            type="ghost ui-cursor-move"
+         />
          <ArgInput hideSign={true} type="string" bind:value={item.name} widthAuto={true} label="Name">
             <svelte:fragment slot="right">
                {#if item.valueType == "hook" && hook}
                   {#if !hook?.enabled}
-                     <span style:color="indianred" title="hook is disabled" class="ui-h-[2.5rem] ui-w-16">
-                        <FaExclamationTriangle />
-                     </span>
+                     <IconButton
+                        style="color: indianred"
+                        icon="fa-solid:exclamation-triangle"
+                        type="ghost"
+                        title="hook is disabled"
+                        cls="ui-border"
+                     />
                   {:else}
-                     <span style:color="#232323" title="hook is enabled" class="ui-h-[2.5rem] ui-w-16">
-                        <GiFishingHook />
-                     </span>
+                     <IconButton
+                        style="color: #232323"
+                        icon="openmoji:hook"
+                        type="ghost"
+                        title="hook is enabled"
+                        cls="ui-border"
+                     />
                   {/if}
                {/if}
             </svelte:fragment>
@@ -114,38 +112,30 @@
          >
             <svelte:fragment slot="right">
                {#if spec?.ignoreTarget}
-                  <span style:color="#232323" title="targets are ignored" class="ui-h-12 ui-w-16">
-                     <iconify-icon style:font-size="2rem" icon="tabler:target-off" style:color="#444444" />
-                  </span>
+                  <IconButton
+                     style="color: #232323"
+                     icon="tabler:target-off"
+                     type="ghost"
+                     title="targets are ignored"
+                     cls="ui-border"
+                  />
                {/if}
             </svelte:fragment>
          </ArgInput>
       </div>
-      <div class="ui-btn-group ui-justify-self-end ui-flex-none">
-         <button
-            title="toggle collapsed"
-            class="ui-btn ui-btn-square ui-justify-self-end !ui-p-[8px]"
-            class:ui-btn-outline={!item.collapsed}
-            on:click={(e) => toggleCollapsed(item)}
-         >
-            {#if item.collapsed}
-               <FaExpandArrowsAlt />
-            {:else}
-               <FaCompressArrowsAlt />
-            {/if}
-         </button>
+      <div class="ui-btn-group ui-btn-group-md ui-justify-self-end ui-flex-none">
+         <CollapseButton on:click={(e) => toggleCollapsed(item)} collapsed={item.collapsed} />
          <button
             title="execute action"
-            class="ui-btn ui-btn-square"
+            class="ui-btn ui-btn-md ui-btn-square"
             on:click={(e) => item.run(e)}
             style:background-color={item.color}
             style:color={contrastColor(item.color)}
-            class:!ui-p-[8px]={!item.icon}
          >
             {#if item.icon}
                <iconify-icon style:font-size="2rem" icon={item.icon} style:color={contrastColor(item.color)} />
             {:else}
-               <FaPlay />
+               <iconify-icon class="ui-text-lg" icon="fa-solid:play" />
             {/if}
          </button>
       </div>
@@ -162,6 +152,7 @@
                selectFull={true}
                widthAuto={true}
                additionalItems={currentHooks}
+               size="xs"
             />
 
             {#if item?.type?.args}
@@ -174,46 +165,27 @@
                      widthAuto={true}
                      label={arg.label}
                      on:change={onChange}
+                     size="xs"
                   />
                {/each}
             {/if}
          </div>
 
-         <div class="ui-btn-group ui-justify-self-end ui-flex-none">
-            <button
-               title="edit"
-               class="ui-btn ui-btn-square ui-btn-outline !ui-p-[8px]"
-               on:click={(_) => itemClick(item)}
-            >
-               <FaEdit />
-            </button>
-
-            <CopyToClipboard
+         <div class="ui-btn-group ui-btn-group-xs ui-justify-self-end ui-flex-none">
+            <IconButton title="edit" on:click={(_) => itemClick(item)} icon="fa-solid:edit" />
+            <CopyButton
+               type="outline"
+               title="Copy oneliner"
                text={oneliner}
-               on:copy={(_) => globalThis.ui.notifications.info("Oneliner copied!")}
-               let:copy
-            >
-               <button class="ui-btn ui-btn-square ui-p-2 ui-btn-outline ui-m-0" on:click|preventDefault={copy}>
-                  <FaRegCopy />
-               </button>
-            </CopyToClipboard>
+               notification="Oneliner copied!"
+               icon="fa6-solid:copy"
+            />
 
             {#if Array.isArray(item.value) || item.value?.startsWith("#")}
-               <button
-                  title="select target"
-                  class="ui-btn ui-btn-square ui-btn-outline !ui-p-[8px]"
-                  on:click={(e) => selectAction(e, item.id)}
-               >
-                  <FaExpand />
-               </button>
+               <IconButton title="select target" on:click={(e) => selectAction(e, item.id)} icon="fa-solid:expand" />
             {/if}
 
-            <button
-               class="ui-btn ui-btn-outline ui-btn-error ui-btn-square !ui-p-[8px]"
-               on:click={(e) => deleteAction(e, item.id)}
-            >
-               <FaTimes />
-            </button>
+            <RemoveButton on:click={(e) => deleteAction(item?.id)} />
          </div>
       </div>
    {/if}

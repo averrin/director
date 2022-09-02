@@ -154,7 +154,7 @@
    }
 </script>
 
-<div bind:this={targetEl}>
+<div bind:this={targetEl} class="ui-flex ui-flex-col">
    {#each items as item, index (item.id)}
       <slot {item} {index} />
    {/each}

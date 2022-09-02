@@ -5,13 +5,16 @@ import Action from "./Actions.js";
 import Hook from "./Hooks.js";
 import HookManager from './HookManager.js';
 import { classToPlain } from 'class-transformer';
-import { getFlag, hasFlag } from './helpers.js';
+import { getFlag, hasFlag } from 'crew-components/helpers';
 import { migrateOldTags } from './Tags.js';
 import Tag from './Tags.js';
 
 export const tokensStore = writable([]);
 export const tilesStore = writable([]);
+export const wallsStore = writable([]);
+export const lightsStore = writable([]);
 export const currentScene = writable(null);
+export const theme = writable("light");
 
 export const globalTags = writable([]);
 export const tagsStore = writable([]);
@@ -174,6 +177,8 @@ export function initHooks() {
 }
 
 export async function initStores() {
+  theme.set(game.settings.get(moduleId, SETTINGS.THEME));
+
   initCurrentScene();
   initActions();
   await migrateOldTags();

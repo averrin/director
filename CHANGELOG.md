@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
 ## [Unreleased]
+## [0.8.8 - 0.9.0](https://github.com/averrin/director/compare/0.8.8...0.9.0)
+  * Rebuilt GUI. Synced with Alpha Suit
+
+Added:
+  * Walls and Lights in the Selection tab (useful for tag assigning). For lights you need something like "Select tool everywhere".
+  * Destroy action (also good for walls and lights)
+  * {#}-notation for tags for targets
+
 ## [0.8.6 - 0.8.8](https://github.com/averrin/director/compare/0.8.5...0.8.8)
   * Various fixes
   * New action to call another action (only named)

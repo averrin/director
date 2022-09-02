@@ -62,33 +62,39 @@
    }
 </script>
 
-<Dropzone on:drop={handleFilesSelect} />
-{#if files.accepted.length > 0}
-   <div class="ui-flex ui-flex-col ui-gap-1 ui-p-2">
-      {#each files.accepted as item}
-         <div
-            class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-gap-2 ui-my-1 ui-items-center"
-         >
-            <div class="ui-flex-1 ui-px-4 ui-text-xl">
-               {item.name}
+<div class="ui-h-full">
+   <Dropzone on:drop={handleFilesSelect} />
+   {#if files.accepted.length > 0}
+      <div class="ui-flex ui-flex-col ui-gap-1 ui-p-2">
+         {#each files.accepted as item}
+            <div
+               class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-gap-2 ui-my-1 ui-items-center"
+            >
+               <div class="ui-flex ui-flex-1 ui-px-4 ui-text-xl">
+                  {item.name}
+               </div>
+               <div class="ui-flex-none">
+                  <div class="ui-flex ui-flex-row ui-gap-2 ui-items-center ui-p-2">
+                     {#if item.dirType == "actions"}
+                        <span style:color={"#777"}> import&nbsp;as </span>
+                        <button class="ui-btn ui-btn-md ui-w-auto" on:click={(e) => importFile(item)}
+                           >{item.count} Actions</button
+                        >
+                     {:else if item.dirType == "hooks"}
+                        <span style:color={"#777"}> import&nbsp;as </span>
+                        <button class="ui-btn ui-btn-md ui-w-auto" on:click={(e) => importFile(item)}
+                           >{item.count} Hooks</button
+                        >
+                     {:else if item.dirType == "sequence"}
+                        <span style:color={"#777"}> import&nbsp;as </span>
+                        <button class="ui-btn ui-btn-md ui-w-auto" on:click={(e) => importFile(item)}>Sequence</button>
+                     {:else}
+                        <span style:color={"darkred"}> file wasn't recognized </span>
+                     {/if}
+                  </div>
+               </div>
             </div>
-            <div class="ui-flex-none">
-               {#if item.dirType == "actions"}
-                  <span style:color={"#777"}> import as </span>
-                  <button class="ui-btn ui-w-fit ui-mx-2" on:click={(e) => importFile(item)}
-                     >{item.count} Actions</button
-                  >
-               {:else if item.dirType == "hooks"}
-                  <span style:color={"#777"}> import as </span>
-                  <button class="ui-btn ui-w-fit ui-mx-2" on:click={(e) => importFile(item)}>{item.count} Hooks</button>
-               {:else if item.dirType == "sequence"}
-                  <span style:color={"#777"}> import as </span>
-                  <button class="ui-btn ui-w-fit ui-mx-2" on:click={(e) => importFile(item)}>Sequence</button>
-               {:else}
-                  <span style:color={"darkred"}> file wasn't recognized </span>
-               {/if}
-            </div>
-         </div>
-      {/each}
-   </div>
-{/if}
+         {/each}
+      </div>
+   {/if}
+</div>

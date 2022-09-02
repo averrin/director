@@ -1,7 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
-import { calculateValueSync, logger, setting } from "./helpers.js";
+import { logger, setting } from "crew-components/helpers";
 import { SETTINGS, moduleId } from "../constants.js";
-import { sectionSpecs, modifierSpecs, argSpecs } from "./Specs.js";
+import { sectionSpecs, modifierSpecs } from "./Specs.js";
+import { argSpecs } from "crew-components/specs";
 import { calculateValue } from "./helpers.js"
 
 import { plainToClass, serialize, deserialize, classToPlain } from 'class-transformer';
@@ -490,7 +491,7 @@ export class Modifier {
     if (!this._spec || !this._spec.args) return;
     for (const arg of this._spec?.args) {
       const spec = argSpecs.find(s => s.id == arg.type);
-      let value = arg.default === undefined ? spec.default : arg.default;
+      let value = arg.default === undefined ? spec?.default : arg.default;
       if (value === undefined && spec.options) {
         let ops = spec.options;
         if (typeof spec.options === "function") {

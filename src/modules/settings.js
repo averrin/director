@@ -127,6 +127,20 @@ export function initSettings(app) {
     onChange: debouncedReload
   });
 
+  game.settings.register(moduleId, SETTINGS.THEME, {
+    name: "UI theme",
+    hint: "",
+    scope: "client",
+    config: false,
+    choices: {
+      'light': "Light",
+      'dark': "Dark",
+    },
+    default: "light",
+    type: String,
+    onChange: debouncedReload
+  });
+
   game.settings.register(moduleId, SETTINGS.MANUAL_MODE, {
     name: "Position picker snapping mode",
     hint: "",

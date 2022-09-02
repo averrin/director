@@ -2,38 +2,21 @@
    export let seq;
 
    import { sequences } from "../../modules/stores";
-   import { sectionSpecs, modifierSpecs, argSpecs } from "../../modules/Specs.js";
+   import { sectionSpecs, modifierSpecs } from "../../modules/Specs.js";
+   import { argSpecs } from "crew-components/specs";
    import { Section, Modifier, DSequence, Variable } from "../../modules/Sequencer.js";
    // import { logger } from "../../modules/helpers.js";
    import { v4 as uuidv4 } from "uuid";
    import Select from "svelte-select";
    import Sortable from "./Sortable.svelte";
    import VariableComponent from "./Variable.svelte";
-   import ArgInput from "./ArgInput.svelte";
+   import ArgInput from "crew-components/ArgInput";
+   import IconButton from "crew-components/IconButton";
+   import RemoveButton from "crew-components/RemoveButton";
+   import CollapseButton from "crew-components/CollapseButton";
    import ModifierItem from "./ModifierItem.svelte";
 
-   import FaArrowsAlt from "svelte-icons/fa/FaArrowsAlt.svelte";
-   import FaPlay from "svelte-icons/fa/FaPlay.svelte";
-   import FaExpandArrowsAlt from "svelte-icons/fa/FaExpandArrowsAlt.svelte";
-   import FaCompressArrowsAlt from "svelte-icons/fa/FaCompressArrowsAlt.svelte";
-   import FaRegCopy from "svelte-icons/fa/FaRegCopy.svelte";
-   import FaTimes from "svelte-icons/fa/FaTimes.svelte";
-
    const groupBy = (i) => i.group;
-   async function stop() {
-      seq.stop();
-   }
-   let preloading = false;
-   async function preload() {
-      preloading = true;
-      await seq.preload();
-      preloading = false;
-   }
-
-   async function play() {
-      updateSequences();
-      seq.play();
-   }
 
    function copySection(section) {
       const ns = Section.fromPlain(section);
@@ -45,14 +28,6 @@
    async function playSection(section) {
       updateSequences();
       seq.playSection(section.id);
-   }
-
-   async function addSection() {
-      const e = new Section(uuidv4(), "wait");
-      seq.sections.push(e);
-      await updateSequences();
-      var objDiv = document.getElementById("sequencer-content");
-      objDiv.scrollTop = objDiv.scrollHeight;
    }
 
    async function updateSequences() {
@@ -159,18 +134,18 @@
       <VariableComponent {variable} on:remove={deleteVariable} on:change={updateVariable} />
    {/each}
 
-   <div class="ui-overflow-auto ui-max-h-[900px]" id="sequencer-content">
+   <div class="ui-h-full" id="sequencer-content">
       <Sortable items={seq.sections} let:item let:index on:change={sortSections} options={{ handle: ".handle" }}>
-         <div class="ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-gap-2 ui-my-1" id={item.id}>
-            <div class="ui-flex ui-flex-row ui-justify-start ui-space-x-2">
-               <div class="ui-flex-1 ui-flex ui-flex-row ui-justify-start ui-space-x-2">
-                  <button
-                     class="ui-btn ui-btn-square ui-btn-ghost handle ui-justify-self-start ui-cursor-move"
-                     style="color: #46525d; padding: 8px"
+         <div class="ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-gap-2 ui-mb-1" id={item.id}>
+            <div class="ui-flex ui-flex-row ui-justify-start ui-gap-2 ui-items-stretch">
+               <div class="ui-flex-1 ui-flex ui-flex-row ui-justify-start ui-gap-2 ui-group ui-group-md">
+                  <IconButton
                      title="move"
-                  >
-                     <FaArrowsAlt />
-                  </button>
+                     style="color: #46525d"
+                     icon="fa-solid:arrows-alt"
+                     cls="handle"
+                     type="ghost ui-cursor-move"
+                  />
                   <Select
                      items={specs}
                      {groupBy}
@@ -195,53 +170,27 @@
                      {/each}
                   {/if}
                </div>
-               <div class="ui-flex-none ui-btn-group">
+               <div class="ui-flex-none ui-btn-group ui-btn-group-md">
                   {#if item._spec.collapsible}
-                     <button
-                        title="toggle collapsed"
-                        style="padding: 8px"
-                        class="ui-btn ui-btn-square ui-justify-self-end"
-                        class:ui-btn-outline={!item.collapsed}
-                        on:click={(e) => toggleCollapsed(item)}
-                     >
-                        {#if item.collapsed}
-                           <FaExpandArrowsAlt />
-                        {:else}
-                           <FaCompressArrowsAlt />
-                        {/if}
-                     </button>
+                     <CollapseButton on:click={(e) => toggleCollapsed(item)} collapsed={item.collapsed} />
                   {/if}
 
-                  <button
-                     title="duplicate"
-                     class="ui-btn ui-btn-square ui-p-2 ui-btn-outline ui-m-0"
-                     on:click={(e) => copySection(item)}
-                  >
-                     <FaRegCopy />
-                  </button>
+                  <IconButton title="duplicate" on:click={(e) => copySection(item)} icon="fa-solid:copy" />
                   {#if !item._spec.nonPlayable}
-                     <button
+                     <IconButton
                         title="play section"
-                        style="padding: 8px"
-                        class="ui-btn ui-btn-outline ui-btn-square ui-justify-self-end"
+                        icon="fa-solid:play"
                         on:click={(e) => playSection(item)}
-                     >
-                        <FaPlay />
-                     </button>
+                        type="primary"
+                     />
                   {/if}
-                  <button
-                     title="delete section"
-                     class="ui-btn ui-btn-outline ui-btn-error ui-btn-square ui-justify-self-end !ui-p-[8px]"
-                     on:click={(e) => deleteSection(item)}
-                  >
-                     <FaTimes />
-                  </button>
+                  <RemoveButton on:click={(e) => deleteSection(item)} />
                </div>
             </div>
 
             {#if !item.collapsed}
                {#if item.modifiers.length > 0}
-                  <div class="ui-divider">Modifiers</div>
+                  <div class="ui-divider ui-m-1">Modifiers</div>
                {/if}
                {#each item.modifiers as modifier (modifier.id)}
                   <ModifierItem
@@ -255,7 +204,7 @@
                {/each}
                {#if doShowAddMod(item)}
                   <div class="ui-p-1">
-                     <button class="ui-btn ui-btn-outline ui-btn-primary" on:click={(e) => addModifier(item)}
+                     <button class="ui-btn ui-btn-outline ui-btn-md ui-btn-primary" on:click={(e) => addModifier(item)}
                         >Add modifier</button
                      >
                   </div>
@@ -263,17 +212,5 @@
             {/if}
          </div>
       </Sortable>
-   </div>
-
-   <div>
-      <button class="ui-my-2 ui-btn ui-btn-outline ui-btn-primary ui-w-full" on:click={(e) => addSection()}
-         >Add section</button
-      >
-   </div>
-
-   <div class="ui-btn-group ui-w-full ui-justify-center">
-      <button class="ui-btn ui-btn-outline ui-w-[33%]" class:ui-loading={preloading} on:click={preload}>preload</button>
-      <button class="ui-btn ui-btn-error ui-btn-outline ui-w-[33%]" on:click={stop}>stop persists</button>
-      <button class="ui-btn ui-w-[33%]" on:click={play}>play</button>
    </div>
 {/if}

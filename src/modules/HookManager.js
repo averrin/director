@@ -1,4 +1,5 @@
-import { logger, calculateValueSync, evalExpression } from './helpers.js';
+import { calculateValueSync, evalExpression } from './helpers.js';
+import { logger } from "crew-components/helpers";
 import { moduleId, SETTINGS } from '../constants.js';
 import { hookSpecs } from "./Specs.js";
 
@@ -26,7 +27,7 @@ class HookManager {
       const parent = _parent;
       for (const hook of this.#hooks) {
         const spec = hookSpecs.find(s => s.id == hook.event);
-        if (!spec.parents.includes(parent)) continue;
+        if (!spec?.parents?.includes(parent)) continue;
         if (!hook.enabled || !hook.event || !hook.target) continue;
         let targets = calculateValueSync(hook.target);
         if (!targets) return;

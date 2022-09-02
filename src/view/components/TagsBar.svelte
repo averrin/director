@@ -1,12 +1,9 @@
 <script>
-   import Tags from "./Tags.svelte";
+   import Tags from "crew-components/Tags";
+   import IconButton from "crew-components/IconButton";
    import { globalTags, tagsStore } from "../../modules/stores.js";
-   import FaFeatherAlt from "svelte-icons/fa/FaFeatherAlt.svelte";
-   import FaDatabase from "svelte-icons/fa/FaDatabase.svelte";
-   import FaFilm from "svelte-icons/fa/FaFilm.svelte";
-   import FaExpandArrowsAlt from "svelte-icons/fa/FaExpandArrowsAlt.svelte";
-   import FaCompressArrowsAlt from "svelte-icons/fa/FaCompressArrowsAlt.svelte";
    import { SETTINGS } from "../../constants.js";
+   import { setting } from "crew-components/helpers";
    import { createEventDispatcher } from "svelte";
    const dispatch = createEventDispatcher();
 
@@ -14,10 +11,6 @@
       const tags = event.detail.tags.filter((t) => t.trim() != "");
       globalTags.set(tags);
    }
-
-   import { getContext } from "svelte";
-   import { setting } from "../../modules/helpers";
-   const onTagClick = getContext("onTagClick");
 
    let collapsed = setting(SETTINGS.COLLAPSED);
    function toggleCollapsed() {
@@ -39,38 +32,32 @@
             tags={$globalTags}
             borderRadius="0.5rem"
             autoComplete={$tagsStore.map((t) => t.text)}
-            {onTagClick}
          />
       </div>
    </div>
-   <div class="ui-flex ui-flex-row ui-gap-2 ui-flex-none">
+   <div class="ui-flex ui-flex-row ui-gap-2 ui-flex-none ui-group-md ui-group">
       {#if globalThis.tokenAttacher}
-         <button class="ui-btn ui-btn-square !ui-p-[8px]" on:click={globalThis.tokenAttacher.toggleQuickEditMode}>
-            <FaFeatherAlt />
-         </button>
+         <IconButton on:click={globalThis.tokenAttacher.toggleQuickEditMode} icon="fa-solid:feather-alt" />
       {/if}
       <div class="ui-btn-group">
-         <button
-            class="ui-btn ui-btn-square !ui-p-[8px]"
+         <IconButton
+            type="primary"
             on:click={() => new globalThis.Sequencer.DatabaseViewer().render(true)}
-         >
-            <FaDatabase />
-         </button>
-         <button class="ui-btn ui-btn-square !ui-p-[8px]" on:click={globalThis.Sequencer.EffectManager.show}>
-            <FaFilm />
-         </button>
+            icon="fa-solid:database"
+         />
+         <IconButton type="primary" on:click={globalThis.Sequencer.EffectManager.show} icon="fa-solid:film" />
       </div>
 
       <button
          title="toggle collapsed"
-         class="ui-btn ui-btn-square ui-justify-self-end !ui-p-[8px]"
+         class="ui-btn ui-btn-square"
          class:ui-btn-outline={!collapsed}
          on:click={(e) => toggleCollapsed()}
       >
          {#if collapsed}
-            <FaExpandArrowsAlt />
+            <iconify-icon icon="fa-solid:expand-arrows-alt" class="ui-text-xl" />
          {:else}
-            <FaCompressArrowsAlt />
+            <iconify-icon icon="fa-solid:compress-arrows-alt" class="ui-text-xl" />
          {/if}
       </button>
    </div>

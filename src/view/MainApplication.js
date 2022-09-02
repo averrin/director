@@ -1,8 +1,7 @@
 import { SvelteApplication } from "@typhonjs-fvtt/runtime/svelte/application";
 import { moduleId, SETTINGS } from "../constants.js";
-// import { logger } from "../modules/helpers.js";
 import { setting } from "../modules/settings.js";
-import { tilesStore, tokensStore, currentScene, initStores, sequences } from "../modules/stores.js";
+import { tilesStore, wallsStore, tokensStore, currentScene, initStores, sequences, lightsStore } from "../modules/stores.js";
 import { DSequence } from "../modules/Sequencer.js";
 import initIntegrations from "../modules/Integrations.js";
 import { initAPI } from "../modules/API.js";
@@ -13,7 +12,20 @@ import { getControlledTiles } from "../modules/helpers.js";
 export default class MainApplication extends SvelteApplication {
   // #gameSettings = new TJSGameSettings();
 
-  #HOOKS = ["controlToken", "updateToken", "controlTile", "updateTile"];
+  #HOOKS = [
+    "controlToken",
+    "updateToken",
+    "destroyToken",
+    "controlTile",
+    "updateTile",
+    "destroyTile",
+    "controlWall",
+    "destroyWall",
+    "controlAmbientLight",
+    "updateWall",
+    "updateAmbientLight",
+    "destroyAmbientLight",
+  ];
 
   constructor() {
     super({ widgetId: "selected" });
@@ -33,7 +45,7 @@ export default class MainApplication extends SvelteApplication {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "director",
       width: "600",
-      height: "auto",
+      height: "800",
       resizable: true,
       minimizable: true,
       zIndex: 95,
@@ -80,6 +92,8 @@ export default class MainApplication extends SvelteApplication {
   onSelectionUpdate() {
     tokensStore.set(canvas.tokens.controlled);
     tilesStore.set(getControlledTiles());
+    wallsStore.set(canvas.walls.controlled);
+    lightsStore.set(canvas.lighting.controlled);
     currentScene.set(canvas.scene);
   }
 }

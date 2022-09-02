@@ -1,10 +1,14 @@
 import MainApplication from './view/MainApplication.js';
 import 'reflect-metadata';
 
-import { moduleId, SETTINGS } from "./constants.js";
+import { moduleId, SETTINGS, infoColor } from "./constants.js";
 import { initSettings, migrateFromString, setting } from "./modules/settings.js";
-import { logger } from "./modules/helpers.js";
+import { logger } from "crew-components/helpers";
 import { initFoundry } from './modules/foundry.js';
+import initHelpers from "crew-components/helpers";
+initHelpers(moduleId, infoColor, SETTINGS);
+import HelpActions from "./view/help/HelpActions.html?raw"
+// console.log(HelpActions)
 
 
 const app = new MainApplication();
@@ -30,6 +34,32 @@ Hooks.once('init', async () => {
       app.toggleCollapsed();
     }
   });
+
+  if (game.modules.get("alpha-suit")?.active) {
+    AlphaSuit.addTool({
+      name: "alpha-director",
+      title: "Toggle Director",
+      icon: "twemoji:clapper-board",
+      onClick: () => {
+        app.toggle();
+      },
+    })
+
+    AlphaSuit.addHelp({
+      id: "h-director",
+      name: "Director",
+      icon: "twemoji:clapper-board",
+      content: [
+        {
+          id: "director-actions",
+          name: "Actions",
+          icon: "fluent:document-48-filled",
+          // component: HelpActions
+          content: HelpActions
+        },
+      ]
+    })
+  }
 });
 
 Hooks.on('getSceneControlButtons', (buttons) => {

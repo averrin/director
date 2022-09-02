@@ -14,10 +14,10 @@
   "changelog": "https://github.com/averrin/director/releases/latest/",
   "version": "1.0.0",
   "esmodules": [
-    "dist/director.js"
+    "index.js"
   ],
   "styles": [
-    "dist/director.css"
+    "style.css"
   ],
   "languages": [
     {

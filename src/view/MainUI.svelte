@@ -2,10 +2,14 @@
 
 <script>
    export let elementRoot;
-   import "../styles/main.scss";
+   import "crew-components/styles/foundry-fixes.scss";
+   import "crew-components/styles/alpha-ui.scss";
+   import "crew-components/styles/global.scss";
+   import "crew-components/styles/themes.scss";
+   import "../main.scss";
    import { v4 as uuidv4 } from "uuid";
 
-   import { setting, rgb2hex, contrastColor } from "../modules/helpers.js";
+   import { setting, contrastColor } from "crew-components/helpers";
    import { moduleId, SETTINGS, tabs } from "../constants.js";
    import { ApplicationShell } from "@typhonjs-fvtt/runtime/svelte/component/core";
    import ActionsTab from "./components/ActionsTab.svelte";
@@ -14,25 +18,20 @@
    import SequencerTab from "./components/SequencerTab.svelte";
    import HooksTab from "./components/HooksTab.svelte";
    import ImportTab from "./components/ImportTab.svelte";
-   import FaPlay from "svelte-icons/fa/FaPlay.svelte";
-   import FaExpandArrowsAlt from "svelte-icons/fa/FaExpandArrowsAlt.svelte";
-   import FaCompressArrowsAlt from "svelte-icons/fa/FaCompressArrowsAlt.svelte";
-   import ArgInput from "./components/ArgInput.svelte";
+   import TagSettings from "crew-components/TagSettings";
+   import CollapseButton from "crew-components/CollapseButton";
 
-   import { getContext, onDestroy, setContext } from "svelte";
-   import { tagsStore, actions } from "../modules/stores.js";
+   import { getContext, onDestroy, setContext, tick } from "svelte";
+   import { tagsStore, actions, theme } from "../modules/stores.js";
    setContext("tagsStore", tagsStore);
 
-   import Tag from "../modules/Tags.js";
-   import TagComponent from "./components/Tag.svelte";
+   import Tag from "crew-components/tags";
 
    import Action from "../modules/Actions";
    import { actionTypes } from "../modules/Specs";
    const { application } = getContext("external");
    const position = application.position;
    position.scale = game.settings.get(moduleId, SETTINGS.UI_SCALE);
-
-   let pickerOpen = false;
 
    let currentActions;
    const unsubscribe3 = actions.subscribe(async (actions) => {
@@ -41,18 +40,14 @@
    onDestroy(unsubscribe3);
 
    let editTag;
-   function onTagClick(e, tag) {
-      tagsStore.update((tags) => {
-         editTag = tags.find((t) => t.text == tag);
-         if (!editTag) {
-            editTag = new Tag(tag);
-            tags.push(editTag);
-         }
-         return tags;
-      });
-      pickerOpen = !pickerOpen;
+   function onTagRClick(e, tag) {
+      editTag = $tagsStore.find((t) => t.text == tag);
+      if (!editTag) {
+         editTag = new Tag(tag);
+      }
+      logger.info(e, tag, editTag);
    }
-   setContext("tagRClick", onTagClick);
+   setContext("tagRClick", onTagRClick);
 
    function createAction(_, tags) {
       actions.update((actions) => {
@@ -72,10 +67,15 @@
       availableTabs = availableTabs.filter((t) => t.mode != "import");
    }
 
+   const { height } = position.stores;
+
    let collapsed = setting(SETTINGS.COLLAPSED);
    function toggleCollapsed(e) {
+      // tick().then((_) => {
+      height.set(e.detail ? document.getElementById("action-bar").clientHeight + 32 : 800);
       collapsed = e.detail;
       globalThis.game.settings.set(moduleId, SETTINGS.COLLAPSED, collapsed);
+      // });
    }
 
    const h = Hooks.on("DirectorToggleCollapse", () => {
@@ -87,62 +87,14 @@
    function run(e, action) {
       Director.runAction(action.id);
    }
-
-   function apply() {
-      tagsStore.update((tags) => {
-         const t = tags.find((t) => t.text == editTag.text);
-         t.color = editTag.color;
-         t.icon = editTag.icon;
-         t.global = editTag.global;
-         return tags;
-      });
-      pickerOpen = false;
-   }
 </script>
 
 <ApplicationShell bind:elementRoot>
-   <main class="director-ui">
-      {#if editTag}
-         <input type="checkbox" id="color-modal-actions" class="ui-modal-toggle" bind:checked={pickerOpen} />
-         <label for="color-modal-actions" class="ui-modal ui-cursor-pointer">
-            <div class="ui-modal-box ui-w-11/12 ui-max-w-5xl">
-               <h3 class="ui-py-4 ui-font-bold ui-text-lg">Edit action</h3>
-               <div class="ui-flex ui-flex-row ui-items-center ui-gap-2">
-                  <div class="ui-flex ui-flex-row ui-flex-1 ui-items-center ui-gap-2 ui-flex-wrap">
-                     <ArgInput
-                        type="color"
-                        label="color"
-                        bind:value={editTag.color}
-                        hideSign={true}
-                        widthAuto={true}
-                        defaultValue="#46525D"
-                     />
-                     <ArgInput type="icon" label="icon" bind:value={editTag.icon} hideSign={true} widthAuto={true} />
-                     <ArgInput
-                        type="bool"
-                        label="global"
-                        bind:value={editTag.global}
-                        hideSign={true}
-                        widthAuto={true}
-                     />
-                     <!-- <ArgInput type="string" label="text" bind:value={editTag.text} hideSign={true} widthAuto={true}> -->
-                     <!--    <span slot="right">Text changing will create new tag</span> -->
-                     <!-- </ArgInput> -->
-                  </div>
-                  <div class="ui-flex ui-flex-none">
-                     <TagComponent tag={editTag} />
-                  </div>
-               </div>
-               <div class="ui-modal-action">
-                  <label for="seq-modal" class="ui-btn ui-btn-primary" on:click={(_) => apply()}>Save</label>
-               </div>
-            </div>
-         </label>
-      {/if}
-
+   <main class="alpha-ui" data-theme={$theme}>
+      <TagSettings {editTag} showGlobalSetting={true} />
       {#if !collapsed}
-         <TagsBar {onTagClick} on:collapsed={toggleCollapsed} />
-         <div class="ui-tabs ui-tabs-boxed">
+         <TagsBar on:collapsed={toggleCollapsed} />
+         <div class="ui-tabs ui-tabs-boxed ui-rounded-none">
             {#each availableTabs as t (t.title)}
                <!-- <div class="ui-indicator"> -->
                <a class="ui-tab ui-tab-md" on:click={() => selectMode(t)} class:ui-tab-active={t.mode == mode}>
@@ -171,8 +123,10 @@
             <ImportTab />
          {/if}
       {:else}
-         <div class="ui-flex ui-flex row ui-gap-2 ui-p-2 ui-bg-base-100">
-            <div class="ui-flex ui-flex row flex-1 ui-items-center ui-justify-center ui-w-full">
+         <div class="ui-flex ui-flex row ui-gap-2 ui-p-2 ui-bg-base-100" id="action-bar">
+            <div
+               class="ui-flex ui-flex ui-flex-row flex-1 ui-items-center ui-justify-center ui-w-full ui-gap-1 ui-group ui-group-md"
+            >
                {#each currentActions as item (item.id)}
                   {#if !item.hidden}
                      <div
@@ -189,34 +143,20 @@
                            style:background-color={item.color}
                            style:color={contrastColor(item.color)}
                            class:!ui-p-[8px]={!item.icon}
+                           title={item.name || item.id}
                         >
-                           {#if item.icon}
-                              <iconify-icon
-                                 style:font-size="2rem"
-                                 icon={item.icon}
-                                 style:color={contrastColor(item.color)}
-                              />
-                           {:else}
-                              <FaPlay />
-                           {/if}
+                           <iconify-icon
+                              style:font-size="2rem"
+                              icon={item.icon || "fa-solid:play"}
+                              style:color={contrastColor(item.color)}
+                           />
                         </button>
                      </div>
                   {/if}
                {/each}
             </div>
-            <div class="ui-flex ui-flex-none">
-               <button
-                  title="toggle collapsed"
-                  class="ui-btn ui-btn-square ui-justify-self-end !ui-p-[8px]"
-                  class:ui-btn-outline={!collapsed}
-                  on:click={(e) => toggleCollapsed({ detail: !collapsed })}
-               >
-                  {#if collapsed}
-                     <FaExpandArrowsAlt />
-                  {:else}
-                     <FaCompressArrowsAlt />
-                  {/if}
-               </button>
+            <div class="ui-flex ui-flex-none ui-group ui-group-md">
+               <CollapseButton on:click={(e) => toggleCollapsed({ detail: !collapsed })} {collapsed} />
             </div>
          </div>
       {/if}

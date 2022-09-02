@@ -38,6 +38,7 @@ export const SETTINGS = {
 
   KEY_SHOW: "key-show",
   KEY_COLLAPSE: "key-collapsed",
+  THEME: "theme",
 };
 
 export const HOOKS = [

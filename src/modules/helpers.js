@@ -1,9 +1,5 @@
-import { moduleId, SETTINGS, infoColor } from '../constants.js';
-import consola from 'consola/src/browser'
-
-export let setting = key => {
-  return game.settings.get(moduleId, key);
-};
+import { setting } from "crew-components/helpers"
+import { moduleId, SETTINGS } from "../constants.js"
 
 export function hasTrackers() {
   const showTracking = game.settings.get(moduleId, SETTINGS.SHOW_TRACKING);
@@ -141,6 +137,9 @@ export function calculateValueSync(val, type, seq) {
     if (type == "effectSource" || type == "hookData") {
       return val;
     } else {
+      val = val.map(tag => {
+        return new RegExp("^" + tag.replace("{#}", "([1-9]+[0-9]*)") + "$")
+      })
       val = globalThis.Tagger.getByTag(val);
       if (type != "selection") {
         if (val.length > 0) val = globalThis.Sequencer.Helpers.random_array_element(val);
@@ -175,8 +174,6 @@ export function evalExpression(expr, ...args) {
   return f(...args)
 }
 
-export let logger = consola.withTag(moduleId);
-logger._reporters[0].levelColorMap[3] = infoColor;
 export function rgb2hex({ r, g, b, a = 1 }) {
   return {
     hex:
@@ -184,103 +181,10 @@ export function rgb2hex({ r, g, b, a = 1 }) {
   };
 }
 
-export function contrastColor(color) {
-  if (!color || color == "") return "#eeeeeeff";
-  const pRed = 0.299;
-  const pGreen = 0.587;
-  const pBlue = 0.114;
-  const rgb = foundry.utils.hexToRGB(parseInt(color.slice(1).substring(0, 6), 16));
-
-  const contrast = Math.sqrt(pRed * rgb[0] ** 2 + pGreen * rgb[1] ** 2 + pBlue * rgb[2] ** 2);
-  return contrast > 0.5 ? "#232323ff" : "#eeeeeeff";
-}
-
 export function getControlledTiles() {
   if (game.version < 10) {
     return canvas.background.controlled;
   } else {
     return canvas.tiles.controlled;
-  }
-}
-
-export function hasFlag(obj, flag) {
-  if (game.version < 10) {
-    return flag in obj.data.flags;
-  } else {
-    return flag in obj.flags;
-  }
-}
-
-export function getFlag(obj, flag) {
-  if (game.version < 10) {
-    return obj.data.flags[flag];
-  } else {
-    return obj.flags[flag];
-  }
-}
-
-let _cachedIcons = {};
-export async function getIconNames(collection) {
-  if (_cachedIcons[collection]) return _cachedIcons[collection];
-  const url = `https://api.iconify.design/collection?prefix=${collection}`
-  const res = await fetch(url).then(r => r.json());
-  _cachedIcons[collection] = [...res.uncategorized];
-  for (const [_, i] of Object.entries(res.categories)) {
-    _cachedIcons[collection].push(...i);
-  }
-  return _cachedIcons[collection];
-
-}
-
-export function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-export function tintImage(src, tint) {
-  tint = _getRGBAArray(tint);
-
-  return new Promise((resolve, reject) => {
-    let canvas = document.createElement('canvas');
-    let context = canvas.getContext('2d');
-    let image = new Image();
-    image.crossOrigin = "Anonymous";
-    image.onload = () => {
-      canvas.width = image.width;
-      canvas.height = image.height;
-
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-      let imgData = context.getImageData(0, 0, canvas.width, canvas.height);
-      let data = imgData.data;
-
-      for (let i = 0; i < data.length; i += 4) {
-        if (data[i + 0] || data[i + 1] || data[i + 2] || data[i + 3]) {
-          data[i + 0] = tint[0];
-          data[i + 1] = tint[1];
-          data[i + 2] = tint[2];
-          data[i + 3] = tint[3];
-        }
-      }
-      context.putImageData(imgData, 0, 0);
-      resolve({ url: canvas.toDataURL(), width: image.width, height: image.height });
-    };
-    image.onerror = error => reject(src, error);
-    image.src = src;
-
-  });
-}
-
-function _getRGBAArray(color) {
-  // Check input as rgba/rgb color
-  let m = /^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)$/.exec(color);
-  if (m) {
-    if (m[4]) return [m[1], m[2], m[3], m[4] * 255];
-    return [m[1], m[2], m[3], 255];
-  }
-
-  // Check input as hex 6-digit color
-  m = /^#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})$/.exec(color);
-  if (m) {
-    return [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16), 255];
   }
 }

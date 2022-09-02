@@ -76,5 +76,6 @@ It's not going to be MATT's alternative, so actions are pretty basic
 ![sequencer](/assets/sequencer.png)
 
 ## My modules
+- [Alpha Suit](https://github.com/averrin/alpha-suit)
 - [Alpha HUD](https://github.com/averrin/alpha-hud)
 - [Merchant Control](https://github.com/averrin/merchant-control)
