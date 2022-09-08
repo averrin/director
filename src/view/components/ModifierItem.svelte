@@ -20,12 +20,13 @@
 </script>
 
 <div
-   class="ui-border-solid ui-border ui-border-zinc-200 ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-py-2 ui-px-4 ui-gap-2 ui-items-center"
+   class="ui-border-solid ui-border ui-border-base-300 ui-flex ui-flex-row ui-bg-base-100 ui-rounded-xl ui-shadow-lg ui-py-2 ui-px-4 ui-gap-2 ui-items-center"
    id={modifier.id}
 >
    <div class="ui-flex ui-flex-1 ui-gap-2 ui-flex-row ui-flex-wrap ui-items-center ui-force-md ui-min-h-8">
       <div class="ui-input-group-xs">
          <Select
+            isSearchable={true}
             items={specs}
             groupBy={groupByCat}
             optionIdentifier="id"
@@ -38,6 +39,7 @@
       {#if modifier._spec?.args}
          {#each modifier._spec.args as arg, i}
             <ArgInput
+               hideSign={false}
                extra={modifier}
                vars={vars.filter((v) => argSpecs.find((s) => s.id == arg.type).var_types?.includes(v.type))}
                label={arg.label}

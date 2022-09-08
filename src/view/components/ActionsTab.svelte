@@ -9,7 +9,6 @@
    import { SETTINGS } from "../../constants.js";
    import ArgInput from "crew-components/ArgInput";
    import IconButton from "crew-components/IconButton";
-   import FaPlay from "svelte-icons/fa/FaPlay.svelte";
    import { setting, contrastColor, getIconNames } from "crew-components/helpers";
    import { onDestroy, getContext, tick } from "svelte";
 

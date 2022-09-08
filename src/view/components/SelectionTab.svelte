@@ -118,7 +118,7 @@
 {#if selection.length > 1}
    <div class="ui-p-2">
       <div
-         class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-items-center ui-space-x-2 ui-cursor-move ui-my-1"
+         class="ui-flex ui-flex-row ui-bg-base-100 ui-rounded-xl ui-shadow-lg ui-p-2 ui-items-center ui-space-x-2 ui-cursor-move ui-my-1"
       >
          <div class="ui-input-group ui-input-group-md">
             <span class="!ui-w-32">Mutual tags</span>
@@ -146,7 +146,7 @@
 {/if}
 
 <div class="ui-overflow-x-auto" style="height: {contentH}px;">
-   <div class="ui-flex ui-flex-col ui-p-3 ui-gap-2 ui-justify-stretch" id="selection-content">
+   <div class="ui-text-base-content ui-flex ui-flex-col ui-p-3 ui-gap-2 ui-justify-stretch" id="selection-content">
       {#if selection.length == 0}
          <div class="ui-alert ui-shadow-lg">
             <div class="ui-flex ui-flex-row ui-items-center ui-gap-2">
@@ -162,7 +162,7 @@
                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   /></svg
                >
-               <span class="ui-text-xl ui-text-slate-600">Selection is empty</span>
+               <span class="ui-text-xl ui-text-base-content">Selection is empty</span>
             </div>
          </div>
       {/if}

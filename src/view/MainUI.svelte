@@ -90,7 +90,7 @@
 </script>
 
 <ApplicationShell bind:elementRoot>
-   <main class="alpha-ui" data-theme={$theme}>
+   <main class="alpha-ui ui-bg-base-100" data-theme={$theme}>
       <TagSettings {editTag} showGlobalSetting={true} />
       {#if !collapsed}
          <TagsBar on:collapsed={toggleCollapsed} />

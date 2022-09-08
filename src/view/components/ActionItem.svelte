@@ -64,10 +64,11 @@
    const oneliner = `Director.runAction("${item.name || item.id}");`;
 </script>
 
+{#if item}
 <div
    id={item.id}
-   class="ui-border-2 ui-border-solid ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-items-center ui-gap-2 ui-mb-1"
-   style:border-color={item.color || "#ffffff"}
+   class="ui-border-2 ui-border-solid ui-flex ui-flex-col ui-bg-base-100 ui-rounded-xl ui-shadow-lg ui-p-2 ui-items-center ui-gap-2 ui-mb-1"
+   style:border-color={item.color || "hsl(var(--b3))"}
 >
    <div class="ui-flex ui-flex-row ui-items-center ui-gap-3 ui-w-full ui-justify-start">
       <div class="ui-flex ui-flex-1 ui-gap-3 ui-group ui-group-md">
@@ -190,3 +191,4 @@
       </div>
    {/if}
 </div>
+{/if}

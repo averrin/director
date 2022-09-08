@@ -8,7 +8,7 @@
   "contributors": [
     "Averrin - Averrin#0374"
   ],
-  "version": "0.7.0",
+  "version": "0.0.0-development",
   "dependencies": {
     "@typhonjs-fvtt/runtime": "^0.0.19",
     "class-transformer": "^0.5.1",
@@ -34,6 +34,7 @@
     "@typhonjs-config/eslint-config": "^0.3.0",
     "@typhonjs-fvtt/eslint-config-foundry.js": "^0.8.0",
     "eslint": "^8",
+    "semantic-release": "^19.0.5",
     "svelte-dnd-action": "^0.9.19",
     "svelte-preprocess": "^4.10.0",
     "svelte-windicss-preprocess": "^4.2.8",
@@ -48,6 +49,11 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
-    "eslint": "eslint ."
+    "eslint": "eslint .",
+    "semantic-release": "semantic-release"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/averrin/director.git"
   }
 }

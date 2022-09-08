@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
 ## [Unreleased]
+## [0.9.0 - 0.9.1](https://github.com/averrin/director/compare/0.9.0...0.9.1)
+Added:
+  * Dark theme
+  * Smal QoLs
+
+Fixed:
+  * Tag dragging is suppresed by "remove, but keep text"
+  * Various ArgInput bugs
+
+
 ## [0.8.8 - 0.9.0](https://github.com/averrin/director/compare/0.8.8...0.9.0)
   * Rebuilt GUI. Synced with Alpha Suit
 
@@ -17,7 +27,7 @@ Added:
   * A little more compact UI
 
 Known bugs:
-  * The list of available actions for "Another action" doesnt update automatcally on changing action's name. Workaround: collapse and open again action, or switch tabs. 
+  * The list of available actions for "Another action" doesnt update automatcally on changing action's name. Workaround: collapse and open again action, or switch tabs.
 
 ## [0.8.5](https://github.com/averrin/director/compare/0.8.4...0.8.5)
   * Various fixes
@@ -78,7 +88,7 @@ Added:
   * `addSequence` section
 
 Fixed:
-  * Wrong width of argument labels 
+  * Wrong width of argument labels
   * A couple of rare problems in the hooks' calling
   * Sequencer's warning about reading db before it's populated
   * Many problems with arguments' inputs (i suppose, i also added some more bugs)
@@ -99,7 +109,7 @@ Fixed:
 ## [0.7.1](https://github.com/averrin/director/compare/0.7.0...0.7.1)
 
 Fixed:
-  * Using variables as effects name causes "@varname" during converting to code 
+  * Using variables as effects name causes "@varname" during converting to code
 
 ## [0.7.0](https://github.com/averrin/director/compare/0.6.1...0.7.0)
 

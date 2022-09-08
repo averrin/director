@@ -65,10 +65,10 @@
 <div class="ui-h-full">
    <Dropzone on:drop={handleFilesSelect} />
    {#if files.accepted.length > 0}
-      <div class="ui-flex ui-flex-col ui-gap-1 ui-p-2">
+      <div class="ui-flex ui-flex-col ui-gap-1 ui-p-2 ui-text-base-content">
          {#each files.accepted as item}
             <div
-               class="ui-flex ui-flex-row ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-gap-2 ui-my-1 ui-items-center"
+               class="ui-flex ui-flex-row ui-bg-base-100 ui-rounded-xl ui-shadow-lg ui-p-2 ui-gap-2 ui-my-1 ui-items-center"
             >
                <div class="ui-flex ui-flex-1 ui-px-4 ui-text-xl">
                   {item.name}

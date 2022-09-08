@@ -58,7 +58,7 @@
    </div>
    {#each currentHooks as hook (hook.id)}
       <div
-         class="ui-flex ui-flex-col ui-bg-white ui-rounded-xl ui-shadow-lg ui-p-2 ui-my-1 ui-items-start ui-gap-2 ui-justify-start"
+         class="ui-flex ui-flex-col ui-bg-base-100 ui-rounded-xl ui-shadow-lg ui-p-2 ui-my-1 ui-items-start ui-gap-2 ui-justify-start"
          id={hook.id}
       >
          <div class="ui-flex ui-flex-row ui-items-start ui-gap-3 ui-w-full ui-group">

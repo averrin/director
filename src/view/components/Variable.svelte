@@ -49,6 +49,7 @@
       </label>
 
       <Select
+         isSearchable={true}
          items={argSpecs}
          optionIdentifier="id"
          labelIdentifier="id"

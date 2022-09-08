@@ -5,12 +5,6 @@ import { setting } from "./settings.js";
 
 export const actionTypes = [
   {
-    id: 'destroy',
-    label: 'Destroy object',
-    group: 'Common',
-    execute: (object, action) => object && ((object.destroy && object.destroy()) || object.object?.destroy()),
-  },
-  {
     id: 'toggle',
     label: 'Toggle visibility',
     group: 'Common',
@@ -27,6 +21,12 @@ export const actionTypes = [
     label: 'Show',
     group: 'Common',
     execute: (object, action) => object && tools.show(object?.document || object),
+  },
+  {
+    id: 'destroy',
+    label: 'Destroy object',
+    group: 'Common',
+    execute: (object, action) => object && ((object.destroy && object.destroy()) || object.object?.destroy()),
   },
   {
     id: 'kill',
@@ -243,7 +243,7 @@ export const modifierSpecs = [
 
   //Effect
   { id: 'file', group: 'effect', args: [{ type: 'effect_file', label: 'file' }], cat: "Required" },
-  { id: 'atLocation', group: 'effect', args: [{ type: 'position', label: 'pos' }], cat: "Required" },
+  { id: 'atLocation', group: 'effect', args: [{ type: 'position', label: 'pos' }, {type: 'offset', label: 'offset', option: true}], cat: "Required" },
   //{ id: 'name', group: 'effect', args: [{ type: 'string', label: 'name' }], cat: "Generic" },
   {
     id: 'animateProperty', group: 'effect', args: [
@@ -319,7 +319,7 @@ export const modifierSpecs = [
       { type: 'bool', label: 'bindAlpha', option: true, default: true },
       { type: 'bool', label: 'followRotation', option: true, default: true },
       { type: 'float', label: 'randomOffset', option: true },
-
+{type: 'offset', label: 'offset', option: true},
     ], cat: 'Move'
   },
   { id: 'moveTowards', group: 'effect', args: [{ type: 'position', label: 'pos' }, { type: "ease", label: "ease", option: true }], cat: 'Move' },
@@ -341,6 +341,11 @@ export const modifierSpecs = [
       { type: 'bool', label: 'gridUnits', option: true },
     ], cat: 'Move'
   },
+  {
+    id: 'spriteScale', group: 'effect', args: [
+      { type: 'offset', label: 'scale' },
+    ], cat: 'Move'
+  },
 
   { id: 'from', group: 'effect', args: [{ type: 'placeable', label: 'placeable' }], cat: 'Generic' },
 
@@ -351,7 +356,7 @@ export const modifierSpecs = [
       { type: 'int', label: 'duration', option: true },
       { type: "ease", label: "ease", option: true },
       { type: 'int', label: 'delay', option: true },
-      { type: 'int', label: 'offset', option: true },
+      { type: 'int', label: 'rotationOffset', option: true },
     ], cat: 'Rotate'
   },
   {
@@ -471,7 +476,7 @@ export const modifierSpecs = [
       { type: 'int', label: 'duration', option: true },
       { type: "ease", label: "ease", option: true },
       { type: 'int', label: 'delay', option: true },
-      { type: 'int', label: 'offset', option: true },
+      { type: 'int', label: 'rotationOffset', option: true },
     ],
     cat: 'Rotate'
   },
