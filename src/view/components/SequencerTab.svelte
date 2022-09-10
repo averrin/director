@@ -203,7 +203,7 @@
       </div>
 
       <div class="ui-btn-group ui-btn-group-md ui-flex-none">
-         <button class="ui-btn ui-w-32 ui-btn-accent" on:click={(e) => addVariable()}>Add variable</button>
+         <button class="ui-btn ui-w-32 ui-btn-primary" on:click={(e) => addVariable()}>Add variable</button>
          <button class="ui-btn ui-btn-primary ui-w-36" on:click={(_) => addSeq()}> Add Sequence </button>
       </div>
    </div>

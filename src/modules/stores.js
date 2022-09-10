@@ -1,11 +1,11 @@
 import { moduleId, SETTINGS, FLAGS } from '../constants.js';
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 import { DSequence } from "./Sequencer.js";
 import Action from "./Actions.js";
 import Hook from "./Hooks.js";
 import HookManager from './HookManager.js';
 import { classToPlain } from 'class-transformer';
-import { getFlag, hasFlag } from 'crew-components/helpers';
+import { getFlag, hasFlag, logger } from 'crew-components/helpers';
 import { migrateOldTags } from './Tags.js';
 import Tag from './Tags.js';
 
@@ -99,12 +99,14 @@ export function initSequences() {
 export const actions = writable([]);
 
 function loadActions(scene) {
+  logger.info(hasFlag(scene, FLAGS.ACTIONS), getFlag(scene, FLAGS.ACTIONS));
   const inScene = hasFlag(scene, FLAGS.ACTIONS)
     ? getFlag(scene, FLAGS.ACTIONS)
     : [];
   const global = game.settings.get(moduleId, SETTINGS.ACTIONS);
 
-  actions.set([...global, ...inScene].flat().filter((a) => a).map(a => Action.fromPlain(a)));
+  const aa = [...global, ...inScene].flat().filter((a) => a).map(a => Action.fromPlain(a));
+  actions.set(aa);
 }
 
 export const hooks = writable([]);
@@ -122,9 +124,10 @@ let _scene;
 export function initCurrentScene() {
   currentScene.subscribe(async (result) => {
     const scene = await result;
-    if (!scene || scene == null || _scene == scene) return;
+    if (!scene || scene === null || _scene === scene) return;
     _scene = scene;
 
+      logger.info(`update current scene: ${scene.name}`);
     loadHooks(scene);
     loadActions(scene);
     loadTags(scene);
@@ -139,8 +142,7 @@ export function initActions() {
   actions.subscribe(async (result) => {
     const actions = await result;
     if (!actions) return;
-    currentScene.update(async (result) => {
-      const scene = await result;
+    const scene = get(currentScene);
       if (!scene || scene == null) return scene;
       if (getFlag(scene, FLAGS.ACTIONS)?.filter((a) => a) != actions) {
         const updates = {};
@@ -150,8 +152,6 @@ export function initActions() {
         await HookManager.onActionsChange(actions);
         globalThis.Hooks.call("DirectorUpdateActions", actions);
       }
-      return scene;
-    });
   });
 }
 
@@ -159,8 +159,7 @@ export function initHooks() {
   hooks.subscribe(async (result) => {
     const hooks = await result;
     if (!hooks) return;
-    currentScene.update(async (result) => {
-      const scene = await result;
+    const scene = get(currentScene);
       if (!scene || scene == null) return scene;
       if (getFlag(scene, FLAGS.HOOKS)?.filter((a) => a) != hooks) {
         const updates = {};
@@ -171,8 +170,6 @@ export function initHooks() {
         await HookManager.onHooksChange(hooks);
         globalThis.Hooks.call("DirectorUpdateHooks", hooks);
       }
-      return scene;
-    });
   });
 }
 

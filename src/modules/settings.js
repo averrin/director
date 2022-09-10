@@ -1,5 +1,6 @@
 import { moduleId, SETTINGS } from '../constants.js';
 import { foundry } from './foundry.js';
+import {theme} from "./stores.js"
 
 export let setting = key => {
   return game.settings.get(moduleId, key);
@@ -138,7 +139,7 @@ export function initSettings(app) {
     },
     default: "light",
     type: String,
-    onChange: debouncedReload
+    onChange: v => theme.set(v)
   });
 
   game.settings.register(moduleId, SETTINGS.MANUAL_MODE, {

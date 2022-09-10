@@ -6,12 +6,12 @@ All notable changes to this project will be documented in this file. Dates are d
 ## [0.9.0 - 0.9.1](https://github.com/averrin/director/compare/0.9.0...0.9.1)
 Added:
   * Dark theme
-  * Smal QoLs
+  * Small QoLs
 
 Fixed:
   * Tag dragging is suppresed by "remove, but keep text"
   * Various ArgInput bugs
-
+  * Stupid bug prevents saving actions and hooks into scene for v9
 
 ## [0.8.8 - 0.9.0](https://github.com/averrin/director/compare/0.8.8...0.9.0)
   * Rebuilt GUI. Synced with Alpha Suit

@@ -37,7 +37,7 @@ export default class MainApplication extends SvelteApplication {
     });
 
     Hooks.on("canvasInit", () => {
-      Hooks.once("renderCombatTracker", this.onSelectionUpdate.bind(this));
+      Hooks.once("renderCombatTracker", this.onSceneUpdate.bind(this));
     });
   }
 
@@ -94,6 +94,9 @@ export default class MainApplication extends SvelteApplication {
     tilesStore.set(getControlledTiles());
     wallsStore.set(canvas.walls.controlled);
     lightsStore.set(canvas.lighting.controlled);
+  }
+  onSceneUpdate() {
+    logger.info("update scene")
     currentScene.set(canvas.scene);
   }
 }

@@ -53,8 +53,31 @@ Hooks.once('init', async () => {
         {
           id: "director-actions",
           name: "Actions",
-          icon: "fluent:document-48-filled",
-          // component: HelpActions
+          icon: "fa-solid:play",
+          content: HelpActions
+        },
+        {
+          id: "director-hooks",
+          name: "Hooks",
+          icon: "openmoji:hook",
+          content: HelpActions
+        },
+        {
+          id: "director-selection",
+          name: "Selection",
+          icon: "carbon:select-window",
+          content: HelpActions
+        },
+        {
+          id: "director-sequencer",
+          name: "Sequencer",
+          icon: "fa-solid:film",
+          content: HelpActions
+        },
+        {
+          id: "director-import",
+          name: "Import",
+          icon: "bxs:file-import",
           content: HelpActions
         },
       ]
