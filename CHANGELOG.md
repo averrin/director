@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
 ## [Unreleased]
+## [0.9.1 - 0.9.2](https://github.com/averrin/director/compare/0.9.1...0.9.2)
+Fixed:
+  * Stupid bug prevents saving actions and hooks into scene for v9
+  * Dark theme hover buttons' color
+
 ## [0.9.0 - 0.9.1](https://github.com/averrin/director/compare/0.9.0...0.9.1)
 Added:
   * Dark theme
@@ -11,7 +16,6 @@ Added:
 Fixed:
   * Tag dragging is suppresed by "remove, but keep text"
   * Various ArgInput bugs
-  * Stupid bug prevents saving actions and hooks into scene for v9
 
 ## [0.8.8 - 0.9.0](https://github.com/averrin/director/compare/0.8.8...0.9.0)
   * Rebuilt GUI. Synced with Alpha Suit
