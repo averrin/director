@@ -136,7 +136,10 @@
 
    <div class="ui-h-full" id="sequencer-content">
       <Sortable items={seq.sections} let:item let:index on:change={sortSections} options={{ handle: ".handle" }}>
-         <div class="ui-flex ui-flex-col ui-bg-base-100 ui-rounded-xl ui-shadow-lg ui-p-2 ui-gap-2 ui-mb-1" id={item.id}>
+         <div
+            class="ui-flex ui-flex-col ui-bg-base-100 ui-rounded-xl ui-shadow-lg ui-p-2 ui-gap-2 ui-mb-1"
+            id={item.id}
+         >
             <div class="ui-flex ui-flex-row ui-justify-start ui-gap-2 ui-items-stretch">
                <div class="ui-flex-1 ui-flex ui-flex-row ui-justify-start ui-gap-2 ui-group ui-group-md">
                   <IconButton
@@ -157,7 +160,7 @@
                   {#if item._spec?.args}
                      {#each item._spec.args as arg, i}
                         <ArgInput
-                          hideSign={false}
+                           hideSign={false}
                            extra={item}
                            vars={seq.variables.filter((v) =>
                               argSpecs.find((s) => s.id == arg.type).var_types.includes(v.type)
@@ -199,6 +202,7 @@
                      parent={item}
                      on:changeType={(e) => setModType(e, item, modifier)}
                      on:changeArg={(e) => setModArg(e, modifier, ...e.detail)}
+                     on:change={updateSequences}
                      on:delete={(e) => deleteModifier(item, e.detail)}
                      vars={seq.variables}
                      variables={true}

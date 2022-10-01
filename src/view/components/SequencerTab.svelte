@@ -115,7 +115,6 @@
          seq = seqs.find((s) => s.id == seq.id);
          return seqs;
       });
-      openModal = false;
    }
 
    async function stop() {
@@ -168,7 +167,7 @@
             <label for="seq-modal" class="ui-btn ui-btn-accent" on:click={exportSeq}>Export</label>
          {/if}
          <label for="seq-modal" class="ui-btn">Close</label>
-         <div class="ui-btn ui-btn-primary" on:click={updateSequences}>Save</div>
+         <label for="seq-modal" class="ui-btn ui-btn-primary" on:click={updateSequences}>Save</label>
       </div>
    </div>
 </label>

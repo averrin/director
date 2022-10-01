@@ -1,83 +1,83 @@
 {
-  "title": "Director",
-  "description": "Control your scenes!",
-  "authors": [
-    {
-      "name": "Averrin",
-      "url": "https://github.com/averrin",
-      "discord": "Averrin#0374"
-    }
-  ],
-  "url": "https://github.com/averrin/director",
-  "readme": "https://github.com/averrin/director/blob/master/README.md",
-  "bugs": "https://github.com/averrin/director/issues",
-  "changelog": "https://github.com/averrin/director/releases/latest/",
-  "version": "1.0.0",
-  "esmodules": [
-    "index.js"
-  ],
-  "styles": [
-    "style.css"
-  ],
-  "languages": [
-    {
-      "lang": "en",
-      "name": "English",
-      "path": "lang/en.json"
-    }
-  ],
-  "manifest": "https://github.com/averrin/director/releases/latest/download/module.json",
-  "download": "https://github.com/averrin/director/releases/download/0.2.0/module.zip",
-  "id": "director",
-  "name": "director",
-  "relationships": {
-    "requires": [
-      {
-        "id": "tagger",
-        "type": "module",
-        "compatibility": {}
-      },
-      {
-        "id": "sequencer",
-        "type": "module",
-        "compatibility": {}
-      },
-      {
-        "id": "socketlib",
-        "type": "module",
-        "compatibility": {}
-      },
-      {
-        "id": "warpgate",
-        "type": "module",
-        "compatibility": {}
-      }
-    ]
-  },
-  "dependencies": [
-    {
-      "name": "tagger",
-      "type": "module",
-      "compatibility": {}
+    "title": "Director",
+    "description": "Control your scenes!",
+    "authors": [
+        {
+            "name": "Averrin",
+            "url": "https://github.com/averrin",
+            "discord": "Averrin#0374"
+        }
+    ],
+    "url": "https://github.com/averrin/director",
+    "readme": "https://github.com/averrin/director/blob/master/README.md",
+    "bugs": "https://github.com/averrin/director/issues",
+    "changelog": "https://github.com/averrin/director/releases/latest/",
+    "version": "0.10.0-dev",
+    "esmodules": [
+        "index.js"
+    ],
+    "styles": [
+        "style.css"
+    ],
+    "languages": [
+        {
+            "lang": "en",
+            "name": "English",
+            "path": "lang/en.json"
+        }
+    ],
+    "manifest": "https://github.com/averrin/director/releases/latest/download/module.json",
+    "download": "https://github.com/averrin/director/releases/download/0.10.0-dev/module.zip",
+    "id": "director",
+    "name": "director",
+    "relationships": {
+        "requires": [
+            {
+                "id": "tagger",
+                "type": "module",
+                "compatibility": {}
+            },
+            {
+                "id": "sequencer",
+                "type": "module",
+                "compatibility": {}
+            },
+            {
+                "id": "socketlib",
+                "type": "module",
+                "compatibility": {}
+            },
+            {
+                "id": "warpgate",
+                "type": "module",
+                "compatibility": {}
+            }
+        ]
     },
-    {
-      "name": "sequencer",
-      "type": "module",
-      "compatibility": {}
-    },
-    {
-      "name": "socketlib",
-      "type": "module",
-      "compatibility": {}
-    },
-    {
-      "name": "warpgate",
-      "type": "module",
-      "compatibility": {}
+    "dependencies": [
+        {
+            "name": "tagger",
+            "type": "module",
+            "compatibility": {}
+        },
+        {
+            "name": "sequencer",
+            "type": "module",
+            "compatibility": {}
+        },
+        {
+            "name": "socketlib",
+            "type": "module",
+            "compatibility": {}
+        },
+        {
+            "name": "warpgate",
+            "type": "module",
+            "compatibility": {}
+        }
+    ],
+    "compatibility": {
+        "minimum": "0.8.6",
+        "verified": "9"
     }
-  ],
-  "compatibility": {
-    "minimum": "0.8.6",
-    "verified": "9"
-  }
 }

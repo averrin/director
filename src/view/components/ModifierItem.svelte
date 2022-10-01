@@ -56,7 +56,8 @@
       {/if}
    </div>
 
-   <div class="ui-flex ui-flex-none ui-btn-group-xs">
+   <div class="ui-flex ui-flex-none ui-group-xs ui-gap-2">
+      <ArgInput type="bool" bind:value={modifier.enabled} size="xs" on:change={(e) => dispatch("change")} />
       <RemoveButton on:click={(e) => dispatch("delete", modifier)} size="xs" />
    </div>
 </div>

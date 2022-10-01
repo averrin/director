@@ -1,6 +1,8 @@
 import { moduleId, SETTINGS } from '../constants.js';
 import { foundry } from './foundry.js';
-import {theme} from "./stores.js"
+import { theme } from "./stores.js"
+import { setIconCollection } from "crew-components/specs"
+setIconCollection("game-icons")
 
 export let setting = key => {
   return game.settings.get(moduleId, key);
@@ -168,11 +170,12 @@ export function initSettings(app) {
 
   game.settings.register(moduleId, SETTINGS.ICON_COLLECTION, {
     name: "Icon collection for actions",
-    hint: "Examples: mdi, material-symbols, openmoji. More: https://icon-sets.iconify.design",
+    hint: "Examples: game-icons, mdi, material-symbols, openmoji. More: https://icon-sets.iconify.design",
     scope: "client",
     config: true,
-    default: "mdi",
+    default: "game-icons",
     type: String,
+    onChange: v => setIconCollection(v)
   });
 
   // game.settings.registerMenu(moduleId, {

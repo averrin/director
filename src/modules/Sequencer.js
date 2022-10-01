@@ -347,6 +347,7 @@ controlled.forEach(c => c.control({releaseOthers: false}));`;
         }
         let currentModifier;
         for (const m of section.modifiers) {
+          if (m.enabled === false) continue;
           const args = await this.makeArgs(m);
           let modName = m.type;
           if (currentModifier) {
@@ -481,6 +482,7 @@ export class Modifier {
     this.setType(type)
     this.args = args || [];
     this.version = 1;
+    this.enabled = true;
   }
   setType(type, sectionType) {
     this._spec = modifierSpecs.filter(s => s.group == sectionType).find(s => s.id == type);

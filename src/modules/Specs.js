@@ -243,7 +243,7 @@ export const modifierSpecs = [
 
   //Effect
   { id: 'file', group: 'effect', args: [{ type: 'effect_file', label: 'file' }], cat: "Required" },
-  { id: 'atLocation', group: 'effect', args: [{ type: 'position', label: 'pos' }, {type: 'offset', label: 'offset', option: true}], cat: "Required" },
+  { id: 'atLocation', group: 'effect', args: [{ type: 'position', label: 'pos' }, { type: 'offset', label: 'offset', option: true }], cat: "Required" },
   //{ id: 'name', group: 'effect', args: [{ type: 'string', label: 'name' }], cat: "Generic" },
   {
     id: 'animateProperty', group: 'effect', args: [
@@ -319,7 +319,7 @@ export const modifierSpecs = [
       { type: 'bool', label: 'bindAlpha', option: true, default: true },
       { type: 'bool', label: 'followRotation', option: true, default: true },
       { type: 'float', label: 'randomOffset', option: true },
-{type: 'offset', label: 'offset', option: true},
+      { type: 'offset', label: 'offset', option: true },
     ], cat: 'Move'
   },
   { id: 'moveTowards', group: 'effect', args: [{ type: 'position', label: 'pos' }, { type: "ease", label: "ease", option: true }], cat: 'Move' },
@@ -662,7 +662,6 @@ export function addHook(hook) {
 export const argSpecs = [
   {
     id: "effect_file", var_types: ["effect_file", "expression"], options: (value) => {
-
       let files = [];
       try {
         if (value && value.startsWith("jb2a")) {
@@ -679,7 +678,7 @@ export const argSpecs = [
       } catch (e) {
         //filepath
       }
-      return files;
+      return [value, ...files];
     }
   },
   {

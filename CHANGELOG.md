@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
 ## [Unreleased]
+## [0.9.2 - 0.9.3](https://github.com/averrin/director/compare/0.9.2...0.9.3)
+Fixed:
+  * Selects don't react on clicks on text of the selected element
+  * Small UI issues
+
+Added:
+  * You can disable sequencer's modifier to skip its execution without removing. It's useful when you are using one sequence for several effects with different scale or rotation
+  * Game Icons collection for tags and actions icons (`game-icons` value for the corresponding setting)
+
 ## [0.9.1 - 0.9.2](https://github.com/averrin/director/compare/0.9.1...0.9.2)
 Fixed:
   * Stupid bug prevents saving actions and hooks into scene for v9

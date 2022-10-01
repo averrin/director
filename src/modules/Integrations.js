@@ -1,4 +1,4 @@
-import { capitalize } from "crew-components/helpers";
+import { capitalize, logger } from "crew-components/helpers";
 import { argSpecs as _argSpecs } from "./Specs.js";
 import { argSpecs } from "crew-components/specs";
 
@@ -9,6 +9,7 @@ export default function initIntegrations() {
   initFxMasterIntegration();
 
   Hooks.call("DirectorInitIntegrations");
+  logger.info("Init Director integrations")
 
   argSpecs.push(..._argSpecs);
 }
