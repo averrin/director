@@ -163,7 +163,7 @@
             effect.section = section;
             logger.info(effect);
          } else {
-            if (delay >= 1000) {
+            if (delay <= 1000) {
                detectEffect(sid, delay * 2);
             } else {
                ui.notifications.error("Something went wrong.");
