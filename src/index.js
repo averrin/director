@@ -1,4 +1,3 @@
-import MainApplication from './view/MainApplication.js';
 import 'reflect-metadata';
 
 import { moduleId, SETTINGS, infoColor } from "./constants.js";
@@ -6,12 +5,23 @@ import { initSettings, migrateFromString, setting } from "./modules/settings.js"
 import { logger } from "crew-components/helpers";
 import { initFoundry } from './modules/foundry.js';
 import initHelpers from "crew-components/helpers";
+import { editingEffect, initStores } from "./modules/stores";
+import { initStores as helperStores } from "crew-components/stores";
 initHelpers(moduleId, infoColor, SETTINGS);
 import HelpActions from "./view/help/HelpActions.html?raw"
 // console.log(HelpActions)
 
+import CreateApplication from "crew-components/AlphaApplication"
+import MainUI from "./view/MainUI.svelte"
+import EffectEditor from "./view/EffectEditor.svelte"
+const effectEditor = new (CreateApplication("effect-editor", "Effect Editor [BETA]", EffectEditor, 800))();
+const app = new (CreateApplication("director", "Director", MainUI))();
 
-const app = new MainApplication();
+
+import initIntegrations from "./modules/Integrations.js";
+import { initAPI } from "./modules/API.js";
+
+
 
 Hooks.once('init', async () => {
   initFoundry();
@@ -109,8 +119,22 @@ Hooks.once('sequencerReady', async () => {
     await migrateFromString(SETTINGS.SEQUENCES);
     await migrateFromString(SETTINGS.TAG_COLORS);
 
-    await app.start();
-    if (setting(SETTINGS.SHOW)) app.show();
+    helperStores()
+
+    initStores();
+    initAPI();
+    Director.openEffectEditor = (e) => {
+      if (e) {
+        editingEffect.set(e);
+      }
+      effectEditor.show();
+    }
+    Director.closeEffectEditor = _ => effectEditor.hide();
+    initIntegrations();
+
+    app.start();
+
+    effectEditor.start(true);
 
     logger.info("Started!")
   }

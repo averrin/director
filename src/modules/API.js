@@ -7,6 +7,8 @@ import { get } from "svelte/store";
 const API = {
   addArgSpec, addModifier, addSection, addHook, addAction,
 
+  SETTINGS, moduleId,
+
   getSequence: async (name, overrides) => {
     let seq;
     seq = get(sequences).find(s => s.title == name || s.id == name);

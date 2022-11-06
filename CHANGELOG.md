@@ -3,7 +3,25 @@
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
 ## [Unreleased]
-## [0.9.2 - 0.9.3](https://github.com/averrin/director/compare/0.9.2...0.9.3)
+## [0.9.4 - 1.0.0](https://github.com/averrin/director/compare/0.9.4...1.0.0)
+Important:
+  * Drops v9 compatibility (based on new Sequencer versions), updated to match Sequencer 2.3.15 (e.g. `tieToDocuments`)
+  * New "Effects" tab
+  * Dropping effects on canvas handler (auto-attaching, edit sequence)
+
+Added:
+  * Position/token picker, "linked" mode for `scale` modifier
+
+Premium:
+  * Ability to edit/focus/preload effects
+  * All effect modifiers (like attachTo/stretchTo/loopProperty)
+  * Unlimited saved effects
+  * Instant effects on drop (skipping editor)
+
+Known bug/limitation
+  * After effect recreation (scene switching, foundry refreshing), playing effects lost its saved sequence (animation, attach and so on). Effects are still laying correctly, but editing is not complete and saving is disabled. [Sequencer issue here](https://github.com/fantasycalendar/FoundryVTT-Sequencer/issues/111), please thumb it up!
+
+## [0.9.2 - 0.9.4](https://github.com/averrin/director/compare/0.9.2...0.9.4)
 Fixed:
   * Selects don't react on clicks on text of the selected element
   * Small UI issues

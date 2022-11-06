@@ -1,6 +1,5 @@
 import { moduleId, SETTINGS } from '../constants.js';
 import { foundry } from './foundry.js';
-import { theme } from "./stores.js"
 import { setIconCollection } from "crew-components/specs"
 setIconCollection("game-icons")
 
@@ -50,6 +49,13 @@ export function initSettings(app) {
   });
 
   game.settings.register(moduleId, SETTINGS.TAGS, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: [],
+  });
+
+  game.settings.register(moduleId, SETTINGS.SAVED_EFFECTS, {
     scope: "world",
     config: false,
     type: Array,
@@ -106,11 +112,8 @@ export function initSettings(app) {
     config: true,
     type: Number,
     default: 1,
-    onChange: value => {
-      debouncedReload();
-    },
     range: {
-      min: 0.1,
+      min: 0.25,
       max: 2,
       step: 0.01
     }
@@ -118,7 +121,7 @@ export function initSettings(app) {
   game.settings.register(moduleId, SETTINGS.RESOLUTION, {
     name: "Selected image resolution",
     hint: "Higher is better quality but slower",
-    scope: "world",
+    scope: "client",
     config: true,
     range: {
       min: 30,
@@ -127,7 +130,6 @@ export function initSettings(app) {
     },
     default: 200,
     type: Number,
-    onChange: debouncedReload
   });
 
   game.settings.register(moduleId, SETTINGS.THEME, {
@@ -141,7 +143,6 @@ export function initSettings(app) {
     },
     default: "light",
     type: String,
-    onChange: v => theme.set(v)
   });
 
   game.settings.register(moduleId, SETTINGS.MANUAL_MODE, {
@@ -155,14 +156,14 @@ export function initSettings(app) {
       '1': "Intersections",
       '2': "Intersections and centers"
     },
-    default: 2,
-    type: Number,
+    default: "2",
+    type: String,
   });
 
   game.settings.register(moduleId, SETTINGS.HIDE_IMPORT, {
     name: "Disable import/export feature",
     hint: "Just hide buttons if you don't need it",
-    scope: "world",
+    scope: "client",
     config: true,
     default: false,
     type: Boolean,
@@ -178,8 +179,48 @@ export function initSettings(app) {
     onChange: v => setIconCollection(v)
   });
 
-  // game.settings.registerMenu(moduleId, {
-  //   name: 'Hotkeys',
-  //   type: Hotkeys.createConfig('Hotkeys', [`${moduleId}.general`]),
-  // });
+  game.settings.register(moduleId, SETTINGS.DROPPED_TILES_TO_EFFECTS, {
+    name: "Tile drop integration",
+    hint: "Enable adding dropped tiles to effects",
+    scope: "client",
+    config: true,
+    default: true,
+    type: Boolean,
+  });
+
+  game.settings.register(moduleId, SETTINGS.PATCH_SEQ_DB_DROP, {
+    name: "Patch Sequencer's Database Viewer",
+    hint: "Adding ability to drag and drop db entries as effects",
+    scope: "client",
+    config: true,
+    default: true,
+    type: Boolean,
+  });
+
+  game.settings.register(moduleId, SETTINGS.CTRL_BLOCK_DIRECTOR, {
+    name: "Hold CTRL to add dropped tile as tile instead of effect",
+    hint: "Works only with Alpha File Manager",
+    scope: "client",
+    config: false,
+    default: true,
+    type: Boolean,
+  });
+
+  game.settings.register(moduleId, SETTINGS.SHIFT_INSTANT_EFFECT, {
+    name: "Hold ALT to add dropped tile instantly without editor",
+    hint: "Works only with Alpha File Manager. Default: persistant effect, hold CTRL to mke it temporary",
+    scope: "client",
+    config: false,
+    default: false,
+    type: Boolean,
+  });
+
+  game.settings.register(moduleId, SETTINGS.HIDE_GIZMOS, {
+    name: "Hide Effect Editor gizmos",
+    hint: "I mean sliders for rotation and scale.",
+    scope: "client",
+    config: true,
+    default: false,
+    type: Boolean,
+  });
 }

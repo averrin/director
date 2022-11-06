@@ -1,17 +1,16 @@
 <svelte:options accessors={true} />
 
 <script>
+   import AlphaShell from "crew-components/AlphaShell";
+   export let id = "director";
+
    export let elementRoot;
-   import "crew-components/styles/foundry-fixes.scss";
-   import "crew-components/styles/alpha-ui.scss";
-   import "crew-components/styles/global.scss";
-   import "crew-components/styles/themes.scss";
    import "../main.scss";
    import { v4 as uuidv4 } from "uuid";
 
+   import { isPremium } from "crew-components/premium";
    import { setting, contrastColor } from "crew-components/helpers";
    import { moduleId, SETTINGS, tabs } from "../constants.js";
-   import { ApplicationShell } from "@typhonjs-fvtt/runtime/svelte/component/core";
    import ActionsTab from "./components/ActionsTab.svelte";
    import TagsBar from "./components/TagsBar.svelte";
    import SelectionTab from "./components/SelectionTab.svelte";
@@ -20,9 +19,11 @@
    import ImportTab from "./components/ImportTab.svelte";
    import TagSettings from "crew-components/TagSettings";
    import CollapseButton from "crew-components/CollapseButton";
+   import PremiumSettings from "./components/PremiumSettings.svelte";
+   import EffectsTab from "./components/EffectsTab.svelte";
 
    import { getContext, onDestroy, setContext, tick } from "svelte";
-   import { tagsStore, actions, theme } from "../modules/stores.js";
+   import { tagsStore, actions } from "../modules/stores.js";
    setContext("tagsStore", tagsStore);
 
    import Tag from "crew-components/tags";
@@ -66,6 +67,9 @@
    if (setting(SETTINGS.HIDE_IMPORT)) {
       availableTabs = availableTabs.filter((t) => t.mode != "import");
    }
+   if (!isPremium()) {
+      // availableTabs = availableTabs.filter((t) => !t.premium);
+   }
 
    const { height } = position.stores;
 
@@ -89,76 +93,89 @@
    }
 </script>
 
-<ApplicationShell bind:elementRoot>
-   <main class="alpha-ui ui-bg-base-100" data-theme={$theme}>
-      <TagSettings {editTag} showGlobalSetting={true} />
-      {#if !collapsed}
-         <TagsBar on:collapsed={toggleCollapsed} />
-         <div class="ui-tabs ui-tabs-boxed ui-rounded-none">
-            {#each availableTabs as t (t.title)}
-               <!-- <div class="ui-indicator"> -->
-               <a class="ui-tab ui-tab-md" on:click={() => selectMode(t)} class:ui-tab-active={t.mode == mode}>
-                  {t.title}
-                  {#if t.badge}
-                     {@html t.badge}
-                  {/if}
-               </a>
-               <!-- </div> -->
+<AlphaShell bind:elementRoot {id} fullHeight={true}>
+   <TagSettings {editTag} showGlobalSetting={true} />
+   {#if !collapsed}
+      <TagsBar on:collapsed={toggleCollapsed} />
+      <div class="ui-tabs ui-tabs-boxed ui-rounded-none">
+         {#each availableTabs as t (t.title)}
+            <!-- <div class="ui-indicator"> -->
+            <a
+               class="ui-tab ui-tab-md ui-flex ui-flex-row ui-items-center ui-gap-1"
+               on:click={() => selectMode(t)}
+               class:ui-tab-active={t.mode == mode}
+            >
+               {#if t.premium && !isPremium()}
+                  <span title="This setting is Patreon-only">
+                     <iconify-icon icon="fa6-solid:crown" />
+                  </span>
+               {/if}
+               {t.title}
+               {#if t.badge}
+                  {@html t.badge}
+               {/if}
+            </a>
+            <!-- </div> -->
+         {/each}
+      </div>
+
+      {#if mode == "selection"}
+         <SelectionTab {createAction} />
+      {/if}
+      {#if mode == "actions"}
+         <ActionsTab onSelect={() => (mode = "selection")} />
+      {/if}
+      {#if mode == "sequencer"}
+         <SequencerTab />
+      {/if}
+      {#if mode == "hooks"}
+         <HooksTab />
+      {/if}
+      {#if mode == "import"}
+         <ImportTab />
+      {/if}
+      {#if mode == "effects"}
+         <EffectsTab />
+         {#if !isPremium()}
+            <PremiumSettings />
+         {/if}
+      {/if}
+   {:else}
+      <div class="ui-flex ui-flex row ui-gap-2 ui-p-2 ui-bg-base-100" id="action-bar">
+         <div
+            class="ui-flex ui-flex ui-flex-row flex-1 ui-items-center ui-justify-center ui-w-full ui-gap-1 ui-group ui-group-md"
+         >
+            {#each currentActions as item (item.id)}
+               {#if !item.hidden}
+                  <div
+                     class="ui-tooltip ui-tooltip-left ui-tooltip-primary"
+                     data-tip={item.name || item.id}
+                     style="--tooltip-color: {item.color || '#46525D'}; --tooltip-text-color: {contrastColor(
+                        item.color
+                     )};"
+                  >
+                     <button
+                        class="ui-btn ui-btn-square"
+                        on:pointerdown|preventDefault|stopPropagation={() => null}
+                        on:click={(e) => run(e, item)}
+                        style:background-color={item.color}
+                        style:color={contrastColor(item.color)}
+                        class:!ui-p-[8px]={!item.icon}
+                        title={item.name || item.id}
+                     >
+                        <iconify-icon
+                           style:font-size="2rem"
+                           icon={item.icon || "fa-solid:play"}
+                           style:color={contrastColor(item.color)}
+                        />
+                     </button>
+                  </div>
+               {/if}
             {/each}
          </div>
-
-         {#if mode == "selection"}
-            <SelectionTab {createAction} />
-         {/if}
-         {#if mode == "actions"}
-            <ActionsTab onSelect={() => (mode = "selection")} />
-         {/if}
-         {#if mode == "sequencer"}
-            <SequencerTab />
-         {/if}
-         {#if mode == "hooks"}
-            <HooksTab />
-         {/if}
-         {#if mode == "import"}
-            <ImportTab />
-         {/if}
-      {:else}
-         <div class="ui-flex ui-flex row ui-gap-2 ui-p-2 ui-bg-base-100" id="action-bar">
-            <div
-               class="ui-flex ui-flex ui-flex-row flex-1 ui-items-center ui-justify-center ui-w-full ui-gap-1 ui-group ui-group-md"
-            >
-               {#each currentActions as item (item.id)}
-                  {#if !item.hidden}
-                     <div
-                        class="ui-tooltip ui-tooltip-left ui-tooltip-primary"
-                        data-tip={item.name || item.id}
-                        style="--tooltip-color: {item.color || '#46525D'}; --tooltip-text-color: {contrastColor(
-                           item.color
-                        )};"
-                     >
-                        <button
-                           class="ui-btn ui-btn-square"
-                           on:pointerdown|preventDefault|stopPropagation={() => null}
-                           on:click={(e) => run(e, item)}
-                           style:background-color={item.color}
-                           style:color={contrastColor(item.color)}
-                           class:!ui-p-[8px]={!item.icon}
-                           title={item.name || item.id}
-                        >
-                           <iconify-icon
-                              style:font-size="2rem"
-                              icon={item.icon || "fa-solid:play"}
-                              style:color={contrastColor(item.color)}
-                           />
-                        </button>
-                     </div>
-                  {/if}
-               {/each}
-            </div>
-            <div class="ui-flex ui-flex-none ui-group ui-group-md">
-               <CollapseButton on:click={(e) => toggleCollapsed({ detail: !collapsed })} {collapsed} />
-            </div>
+         <div class="ui-flex ui-flex-none ui-group ui-group-md">
+            <CollapseButton on:click={(e) => toggleCollapsed({ detail: !collapsed })} {collapsed} />
          </div>
-      {/if}
-   </main>
-</ApplicationShell>
+      </div>
+   {/if}
+</AlphaShell>

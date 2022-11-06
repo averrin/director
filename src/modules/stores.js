@@ -1,20 +1,21 @@
 import { moduleId, SETTINGS, FLAGS } from '../constants.js';
 import { writable, get } from 'svelte/store';
-import { DSequence } from "./Sequencer.js";
+import { DSequence, Modifier } from "./Sequencer.js";
 import Action from "./Actions.js";
 import Hook from "./Hooks.js";
 import HookManager from './HookManager.js';
 import { classToPlain } from 'class-transformer';
-import { getFlag, hasFlag, logger } from 'crew-components/helpers';
+import { getFlag, hasFlag, logger, setting } from 'crew-components/helpers';
 import { migrateOldTags } from './Tags.js';
 import Tag from './Tags.js';
+import { settingStore, hookedStore, currentScene } from "crew-components/stores"
 
-export const tokensStore = writable([]);
-export const tilesStore = writable([]);
-export const wallsStore = writable([]);
-export const lightsStore = writable([]);
-export const currentScene = writable(null);
-export const theme = writable("light");
+import { getControlledTiles } from "./helpers.js";
+
+export let tokensStore = writable([]);
+export let tilesStore = writable([]);
+export let wallsStore = writable([]);
+export let lightsStore = writable([]);
 
 export const globalTags = writable([]);
 export const tagsStore = writable([]);
@@ -127,7 +128,7 @@ export function initCurrentScene() {
     if (!scene || scene === null || _scene === scene) return;
     _scene = scene;
 
-      logger.info(`update current scene: ${scene.name}`);
+    logger.info(`update current scene: ${scene.name}`);
     loadHooks(scene);
     loadActions(scene);
     loadTags(scene);
@@ -143,15 +144,15 @@ export function initActions() {
     const actions = await result;
     if (!actions) return;
     const scene = get(currentScene);
-      if (!scene || scene == null) return scene;
-      if (getFlag(scene, FLAGS.ACTIONS)?.filter((a) => a) != actions) {
-        const updates = {};
-        updates[`flags.${FLAGS.ACTIONS}`] = actions.filter(a => !a.global).map(a => a.toJSON())
-        scene.update(updates);
-        game.settings.set(moduleId, SETTINGS.ACTIONS, actions.filter(a => a.global));
-        await HookManager.onActionsChange(actions);
-        globalThis.Hooks.call("DirectorUpdateActions", actions);
-      }
+    if (!scene || scene == null) return scene;
+    if (getFlag(scene, FLAGS.ACTIONS)?.filter((a) => a) != actions) {
+      const updates = {};
+      updates[`flags.${FLAGS.ACTIONS}`] = actions.filter(a => !a.global).map(a => a.toJSON())
+      scene.update(updates);
+      game.settings.set(moduleId, SETTINGS.ACTIONS, actions.filter(a => a.global));
+      await HookManager.onActionsChange(actions);
+      globalThis.Hooks.call("DirectorUpdateActions", actions);
+    }
   });
 }
 
@@ -160,21 +161,111 @@ export function initHooks() {
     const hooks = await result;
     if (!hooks) return;
     const scene = get(currentScene);
-      if (!scene || scene == null) return scene;
-      if (getFlag(scene, FLAGS.HOOKS)?.filter((a) => a) != hooks) {
-        const updates = {};
-        updates[`flags.${FLAGS.HOOKS}`] = hooks.filter(a => !a.global);
-        scene.update(updates);
-        game.settings.set(moduleId, SETTINGS.HOOKS, hooks.filter(a => a.global));
+    if (!scene || scene == null) return scene;
+    if (getFlag(scene, FLAGS.HOOKS)?.filter((a) => a) != hooks) {
+      const updates = {};
+      updates[`flags.${FLAGS.HOOKS}`] = hooks.filter(a => !a.global);
+      scene.update(updates);
+      game.settings.set(moduleId, SETTINGS.HOOKS, hooks.filter(a => a.global));
 
-        await HookManager.onHooksChange(hooks);
-        globalThis.Hooks.call("DirectorUpdateHooks", hooks);
-      }
+      await HookManager.onHooksChange(hooks);
+      globalThis.Hooks.call("DirectorUpdateHooks", hooks);
+    }
   });
 }
 
+import { v4 as uuidv4 } from "uuid";
+export let editingEffect = writable(null);
+
+const _m = (t, v) => {
+  const m = new Modifier(uuidv4(), "");
+  m.setType(t, "effect");
+  m.args = v;
+  return m;
+};
+
+function initDropHandler() {
+  Hooks.on("dropCanvasData", (canvas, data) => {
+    if (!setting(SETTINGS.DROPPED_TILES_TO_EFFECTS)) return true;
+    if (data.blockDirector) return true;
+    if (data.type != "Tile" && data.type != "Effect") return true;
+    if (data.type == "Tile") {
+      let file = data.texture.src;
+      const db = Sequencer.Database.inverseFlattenedEntries.get(file)
+      if (db) {
+        file = db
+      }
+
+      const id = uuidv4()
+
+      logger.info(data);
+      canvas["sequencerEffects"].activate();
+      let token;
+      const tokens = canvas.tokens.placeables.filter(t => (t.x + t.w > data.x && t.y + t.h > data.y && t.x < data.x && t.y < data.y))
+      if (tokens.length == 1) {
+        token = tokens[0];
+      }
+      Director.openEffectEditor({
+        data: { id, file, opacity: 1, persist: !data.temp },
+        position: data, token,
+        temp: data.temp, instant: data.instant,
+      });
+      return false;
+    }
+    if (data.type == "Effect") {
+      const id = uuidv4()
+      data.effect.id = id;
+      data.effect.origin = id;
+
+      logger.info(data);
+      canvas["sequencerEffects"].activate();
+      if (data.section) {
+        if (!data.section.modifiers) {
+          data.section = null;
+        } else {
+          data.section.modifiers = data.section.modifiers?.filter(m => !["atLocation", "attachTo"].includes(m.type)) ?? []
+          const tokens = canvas.tokens.placeables.filter(t => (t.x + t.w > data.x && t.y + t.h > data.y && t.x < data.x && t.y < data.y))
+          if (tokens.length == 1) {
+            data.section.modifiers.push(_m("attachTo", ["#token:" + tokens[0].document.id]))
+          } else {
+            data.section.modifiers.push(_m("atLocation", [{ x: data.x, y: data.y }]))
+          }
+        }
+      }
+      //TODO: get rid of section.position. rewrite it with data.x/y
+      Director.openEffectEditor({ data: data.effect, position: data, section: data.section });
+      // Sequencer.EffectManager.play({ data: data.effect, position: data })
+      return false;
+    }
+    return true;
+  });
+}
+
+export let savedEffects = writable(null);
+
 export async function initStores() {
-  theme.set(game.settings.get(moduleId, SETTINGS.THEME));
+
+  savedEffects = settingStore(SETTINGS.SAVED_EFFECTS)
+
+  const HOOKS = [
+    "controlToken",
+    "updateToken",
+    "destroyToken",
+    "controlTile",
+    "updateTile",
+    "destroyTile",
+    "controlWall",
+    "destroyWall",
+    "controlAmbientLight",
+    "updateWall",
+    "updateAmbientLight",
+    "destroyAmbientLight",
+  ];
+
+  tokensStore = hookedStore(HOOKS, _ => canvas.tokens.controlled);
+  tilesStore = hookedStore(HOOKS, _ => getControlledTiles());
+  wallsStore = hookedStore(HOOKS, _ => canvas.walls.controlled);
+  lightsStore = hookedStore(HOOKS, _ => canvas.lighting.controlled);
 
   initCurrentScene();
   initActions();
@@ -183,4 +274,26 @@ export async function initStores() {
   initTagColors();
   initSequences();
   initHooks();
+
+  initDropHandler()
+
+  Hooks.on("renderSequencerDatabaseViewer", (_, html) => {
+    if (setting(SETTINGS.PATCH_SEQ_DB_DROP)) {
+      html[0].querySelectorAll(".database-entry").forEach(e => {
+        e.setAttribute("draggable", true);
+        e.ondragstart = event => {
+
+          logger.info(e.dataset.id)
+          const dragData = {
+            type: "Tile",
+            texture: { src: e.dataset.id },
+            tileSize: 100,
+            temp: event.ctrlKey,
+            instant: event.altKey,
+          };
+          event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+        }
+      })
+    }
+  })
 }

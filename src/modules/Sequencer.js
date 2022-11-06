@@ -22,7 +22,40 @@ export class DSequence {
     }
   }
 
-  async prepare(overrides) {
+  async validate() {
+    logger.info(this.sections);
+    const es = this.sections.find(s => s.type == "effect");
+    if (es.modifiers.find(m => m.type.startsWith(" "))) {
+      return {
+        result: false, error: "premium"
+      };
+    }
+    const am = es.modifiers.find(m => m.type == "attachTo");
+    if (am && (am.args[0] == "" || am.args[0] == "#token:" || am.args[0] == "#id:") ){
+      return { result: false, error: "Attach modifier's target is empty" };
+    }
+    if (!es.modifiers.find(m => m.type == "file")) {
+      return { result: false, error: "File modifier is missed" };
+    }
+    const fm = es.modifiers.find(m => m.type == "file");
+    if (fm.args.length == 0 || fm.args[0] == "") {
+      return { result: false, error: "File modifier is empty" };
+    }
+    if (!es.modifiers.find(m => ["atLocation", "attachTo"].includes(m.type))) {
+      return { result: false, error: "No location modifier" };
+    }
+    if (es.modifiers.find(m => m.type == "atLocation") && es.modifiers.find(m => m.type == "attachTo")) {
+      return { result: false, error: "Two location modifiers" };
+    }
+    try {
+      await this.prepare({}, false)
+    } catch (e) {
+      return { result: false, error: e };
+    }
+    return { result: true };
+  }
+
+  async prepare(overrides, lazy = true) {
     overrides = overrides || {};
     for (const [name, value] of Object.entries(overrides)) {
       if (value === null) continue;
@@ -35,7 +68,7 @@ export class DSequence {
         this.variables.push(hd);
       }
     }
-    return await this.constructSeq(this.sections);
+    return await this.constructSeq(this.sections, lazy);
   }
 
   reset() {
@@ -255,7 +288,7 @@ controlled.forEach(c => c.control({releaseOthers: false}));`;
     ]);
   }
 
-  async makeArgs(obj) {
+  async makeArgs(obj, lazy = true) {
     const args = obj.args;
     const result = [];
     const options = {};
@@ -275,7 +308,7 @@ controlled.forEach(c => c.control({releaseOthers: false}));`;
       }
       const spec = obj._spec.args[n];
       if (val === undefined) {
-        val = await calculateValue(a, spec.type, this);
+        val = await calculateValue(a, spec.type, this, lazy);
       }
       if (spec.option) {
         options[spec.label] = val;
@@ -290,7 +323,7 @@ controlled.forEach(c => c.control({releaseOthers: false}));`;
     return result;
   }
 
-  async constructSeq(seq) {
+  async constructSeq(seq, lazy = true) {
     const s = new globalThis.Sequence(moduleId);
     try {
       let i = 0;
@@ -348,7 +381,7 @@ controlled.forEach(c => c.control({releaseOthers: false}));`;
         let currentModifier;
         for (const m of section.modifiers) {
           if (m.enabled === false) continue;
-          const args = await this.makeArgs(m);
+          const args = await this.makeArgs(m, lazy);
           let modName = m.type;
           if (currentModifier) {
             currentModifier = currentModifier[modName](...args);
@@ -360,7 +393,8 @@ controlled.forEach(c => c.control({releaseOthers: false}));`;
       }
     } catch (error) {
       logger.error(error);
-      alert(error);
+      // alert(error);
+      throw error;
       return null;
     }
     return s;

@@ -18,6 +18,13 @@ export const FLAGS = {
 }
 
 export const SETTINGS = {
+  HIDE_GIZMOS: "hide-gizmos",
+  CTRL_BLOCK_DIRECTOR: "ctrl-block-director",
+  SHIFT_INSTANT_EFFECT: "shift-instant-effect",
+  SAVED_EFFECTS: "saved-effects",
+  DROPPED_TILES_TO_EFFECTS: "dropped-tiles-to-effects",
+  PATCH_SEQ_DB_DROP: "patch-seq-db-drop",
+
   TAGS: "tags",
   GLOBAL_TAGS: "global-tags",
   TAG_COLORS: "tag-colors",
@@ -59,13 +66,14 @@ export const tabs = [
   {
     mode: "hooks",
     title: "Hooks",
-    // badge: "<span class='ui-badge ui-indicator-item ui-mx-1' style='background-color: indianred'>𝛼</span>",
   },
   { mode: "selection", title: "Selection" },
   {
     mode: "sequencer",
     title: "Sequencer",
-    // badge: "<span class='ui-badge ui-indicator-item ui-mx-1' style='background-color: darkorange'>𝛽</span>",
+  },
+  {
+    mode: "effects", title: "Effects", premium: true,
   },
   { mode: "import", title: "Import" },
 ];

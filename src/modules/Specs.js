@@ -243,8 +243,32 @@ export const modifierSpecs = [
 
   //Effect
   { id: 'file', group: 'effect', args: [{ type: 'effect_file', label: 'file' }], cat: "Required" },
-  { id: 'atLocation', group: 'effect', args: [{ type: 'position', label: 'pos' }, { type: 'offset', label: 'offset', option: true }], cat: "Required" },
+  {
+    id: 'atLocation', exclude: "attachTo", group: 'effect', args: [
+      { type: 'position', label: 'pos' },
+      { type: 'offset', label: 'offset', option: true },
+      { type: 'bool', label: 'cacheLocation', option: true },
+      { type: 'bool', label: 'randomOffset', option: true },
+      { type: 'bool', label: 'local', option: true },
+      { type: 'bool', label: 'gridUnits', option: true },
+    ], cat: "Required"
+  },
   //{ id: 'name', group: 'effect', args: [{ type: 'string', label: 'name' }], cat: "Generic" },
+  {
+    id: 'loopProperty', group: 'effect', args: [
+      { type: 'animate-target', label: 'target' },
+      { type: "animate-property", label: "property" },
+      { type: "int", label: "from", option: true },
+      { type: "int", label: "to", option: true },
+      { type: "int", label: "duration", option: true, default: 1000 },
+      { type: "int", label: "delay", option: true },
+      { type: "ease", label: "ease", option: true },
+      { type: "bool", label: "gridUnits", option: true },
+      { type: "int", label: "loop", option: true },
+      { type: "bool", label: "pingPong", option: true },
+    ], cat: "Animate", multi: true, premium: true,
+  },
+
   {
     id: 'animateProperty', group: 'effect', args: [
       { type: 'animate-target', label: 'target' },
@@ -256,35 +280,20 @@ export const modifierSpecs = [
       { type: "ease", label: "ease", option: true },
       { type: "bool", label: "gridUnits", option: true },
       { type: "bool", label: "fromEnd", option: true },
-    ], cat: "Animate", multi: true,
+    ], cat: "Animate", multi: true, premium: true,
   },
 
-  {
-    id: 'loopProperty', group: 'effect', args: [
-      { type: 'animate-target', label: 'target' },
-      { type: "animate-property", label: "property" },
-      { type: "int", label: "from", option: true },
-      { type: "int", label: "to", option: true },
-      { type: "int", label: "duration", option: true },
-      { type: "int", label: "delay", option: true },
-      { type: "ease", label: "ease", option: true },
-      { type: "bool", label: "gridUnits", option: true },
-      { type: "int", label: "loop", option: true },
-      { type: "bool", label: "pingPong", option: true },
-    ], cat: "Animate", multi: true,
-  },
-
-  { id: 'multiply', group: 'effect', args: [{ type: 'targets', label: 'targets' }, { type: "multiply-mode", label: "mode" }], cat: "Special" },
+  { id: 'multiply', restricted: true, group: 'effect', args: [{ type: 'targets', label: 'targets' }, { type: "multiply-mode", label: "mode" }], cat: "Special" },
 
   {
     id: 'scaleToObject', group: 'effect', args: [
-      { type: 'float', label: 'scale' },
+      { type: 'float', label: 'scale', default: 1.5 },
       { type: "bool", label: "uniform", option: true },
     ], cat: "Scale"
   },
-  { id: 'scale', group: 'effect', args: [{ type: 'float', label: 'scale' }], cat: "Scale" },
-  { id: 'scaleIn', group: 'effect', args: [{ type: 'float', label: 'scale' }, { type: 'int', label: 'ms' }], cat: "Scale" }, // {ease: "easeInOutCubic"})
-  { id: 'scaleOut', group: 'effect', args: [{ type: 'float', label: 'scale' }, { type: 'int', label: 'ms' }], cat: "Scale" }, // {ease: "easeInCubic"})
+  { id: 'scale', group: 'effect', args: [{ type: 'scale_xy', label: 'scale' }], cat: "Scale" },
+  { id: 'scaleIn', premium: true, group: 'effect', args: [{ type: 'float', label: 'scale' }, { type: 'int', label: 'ms' }], cat: "Scale" }, // {ease: "easeInOutCubic"})
+  { id: 'scaleOut', premium: true, group: 'effect', args: [{ type: 'float', label: 'scale' }, { type: 'int', label: 'ms' }], cat: "Scale" }, // {ease: "easeInCubic"})
   {
     id: 'size', group: 'effect', args: [
       { type: 'size', label: 'size' },
@@ -301,40 +310,40 @@ export const modifierSpecs = [
   },
 
   {
-    id: 'stretchTo', group: 'effect', args: [
+    id: 'stretchTo', premium: true, group: 'effect', args: [
       { type: 'position', label: 'pos' },
       { type: "bool", label: "attachTo", option: true },
       { type: "bool", label: "cacheLocation", option: true },
       { type: "bool", label: "onlyX", option: true },
       { type: "bool", label: "tiling", option: true },
       { type: 'float', label: 'randomOffset', option: true },
+      { type: 'offset', label: 'offset', option: true },
+      { type: 'bool', label: 'local', option: true },
+      { type: 'bool', label: 'gridUnits', option: true },
     ], cat: 'Move'
   },
   {
-    id: 'attachTo', group: 'effect', args: [
-      { type: 'token', label: 'token' },
+    id: 'attachTo', exclude: "atLocation", group: 'effect', args: [
+      { type: 'token', label: 'token', default: "#token:" },
       { type: 'align', label: 'align', option: true },
       { type: 'edge', label: 'edge', option: true },
       { type: 'bool', label: 'bindVisibility', option: true, default: true },
       { type: 'bool', label: 'bindAlpha', option: true, default: true },
+      { type: 'bool', label: 'bindElevation', option: true, default: true },
       { type: 'bool', label: 'followRotation', option: true, default: true },
       { type: 'float', label: 'randomOffset', option: true },
       { type: 'offset', label: 'offset', option: true },
-    ], cat: 'Move'
+      { type: 'bool', label: 'local', option: true },
+      { type: 'bool', label: 'gridUnits', option: true },
+    ], cat: 'Move', premium: true,
   },
-  { id: 'moveTowards', group: 'effect', args: [{ type: 'position', label: 'pos' }, { type: "ease", label: "ease", option: true }], cat: 'Move' },
+  { id: 'moveTowards', premium: true, group: 'effect', args: [{ type: 'position', label: 'pos' }, { type: "ease", label: "ease", option: true }], cat: 'Move' },
   { id: 'moveSpeed', group: 'effect', args: [{ type: 'int', label: 'speed' }], cat: 'Move' },
   { id: 'snapToGrid', group: 'effect', args: [{ type: 'bool', label: 'val' }], cat: 'Move' },
   { id: 'anchor', group: 'effect', args: [{ type: 'size', label: 'val' }], cat: 'Move' },
   { id: 'spriteAnchor', group: 'effect', args: [{ type: 'float', label: 'val' }], cat: 'Move' },
   { id: 'center', group: 'effect', args: [], cat: 'Move' },
-  {
-    id: 'offset', group: 'effect', args: [
-      { type: 'offset', label: 'offset' },
-      { type: 'bool', label: 'local', option: true },
-      { type: 'bool', label: 'gridUnits', option: true },
-    ], cat: 'Move'
-  },
+  { id: 'elevation', group: 'effect', args: [{ type: 'int', label: "val" }, { type: 'bool', label: 'absolute', default: true }], cat: 'Move' },
   {
     id: 'spriteOffset', group: 'effect', args: [
       { type: 'offset', label: 'offset' },
@@ -350,7 +359,7 @@ export const modifierSpecs = [
   { id: 'from', group: 'effect', args: [{ type: 'placeable', label: 'placeable' }], cat: 'Generic' },
 
   {
-    id: 'rotateTowards', group: 'effect',
+    id: 'rotateTowards', group: 'effect', premium: true,
     args: [
       { type: 'position', label: 'pos' },
       { type: 'int', label: 'duration', option: true },
@@ -362,17 +371,14 @@ export const modifierSpecs = [
   {
     id: 'rotate', group: 'effect', args: [
       { type: 'int', label: 'deg' },
-      { type: 'int', label: 'ms' },
-      { type: "ease", label: "ease", option: true },
-      { type: 'int', label: 'delay', option: true },
     ], cat: 'Rotate'
   },
   { id: 'randomRotation', group: 'effect', args: [], cat: 'Rotate' }, // {ease: "easeInOutCubic"})
-  { id: 'rotateIn', group: 'effect', args: [{ type: 'int', label: 'deg' }, { type: 'int', label: 'ms' }, { type: "ease", label: "ease", option: true }], cat: 'Rotate' }, // {ease: "easeInOutCubic"})
-  { id: 'rotateOut', group: 'effect', args: [{ type: 'int', label: 'deg' }, { type: 'int', label: 'ms' }, { type: "ease", label: "ease", option: true }], cat: 'Rotate' }, //  {ease: "easeInCubic"})
+  { id: 'rotateIn', premium: true, group: 'effect', args: [{ type: 'int', label: 'deg' }, { type: 'int', label: 'ms' }, { type: "ease", label: "ease", option: true }], cat: 'Rotate' }, // {ease: "easeInOutCubic"})
+  { id: 'rotateOut', premium: true, group: 'effect', args: [{ type: 'int', label: 'deg' }, { type: 'int', label: 'ms' }, { type: "ease", label: "ease", option: true }], cat: 'Rotate' }, //  {ease: "easeInCubic"})
   { id: 'zeroSpriteRotation', group: 'effect', args: [{ type: 'bool', label: 'val' }, { type: "ease", label: "ease", option: true }], cat: 'Rotate' },
-  { id: 'fadeIn', group: 'effect', args: [{ type: 'int', label: 'ms' }, { type: "ease", label: "ease", option: true }, { type: "int", label: "delay", option: true }], cat: 'Fade' },
-  { id: 'fadeOut', group: 'effect', args: [{ type: 'int', label: 'ms' }, { type: "ease", label: "ease", option: true }, { type: "int", label: "delay", option: true }], cat: 'Fade' },
+  { id: 'fadeIn', premium: true, group: 'effect', args: [{ type: 'int', label: 'ms' }, { type: "ease", label: "ease", option: true }, { type: "int", label: "delay", option: true }], cat: 'Fade' },
+  { id: 'fadeOut', premium: true, group: 'effect', args: [{ type: 'int', label: 'ms' }, { type: "ease", label: "ease", option: true }, { type: "int", label: "delay", option: true }], cat: 'Fade' },
   { id: 'opacity', group: 'effect', args: [{ type: 'float', label: 'val' }], cat: 'Fade' },
 
   { id: 'playbackRate', group: 'effect', args: [{ type: 'float', label: 'val' }], cat: 'Generic' },
@@ -384,11 +390,12 @@ export const modifierSpecs = [
       { type: 'int', label: 'maxDelay', optional: true }
     ], cat: 'Generic'
   },
+  { id: 'tieToDocuments', group: 'effect', args: [{ type: 'token', label: 'token', default: "#token:" }], cat: 'Generic' },
   { id: 'delay', group: 'effect', args: [{ type: 'int', label: 'minDelay' }, { type: 'int', label: 'maxDelay', optional: true }], cat: 'Generic' },
   { id: 'waitUntilFinished', group: 'effect', args: [{ type: 'int', label: 'minDelay' }, { type: 'int', label: 'maxDelay', optional: true }], cat: 'Generic' },
   { id: 'async', group: 'effect', args: [], cat: 'Generic' },
   { id: 'duration', group: 'effect', args: [{ type: 'int', label: 'ms' }], cat: 'Generic' }, //1500, {ease: "easeOutCubic", delay: 500})
-  { id: 'playIf', group: 'effect', args: [{ type: 'bool', label: 'func' }], cat: 'Generic', multi: true, },
+  { id: 'playIf', restricted: true, group: 'effect', args: [{ type: 'bool', label: 'func' }], cat: 'Generic', multi: true, },
   { id: 'private', group: 'effect', args: [{ type: 'bool', label: 'func' }], cat: 'Generic' },
   { id: 'missed', group: 'effect', args: [{ type: 'bool', label: 'func' }], cat: 'Generic' },
   { id: 'tint', group: 'effect', args: [{ type: 'color', label: 'color' }], cat: 'Generic' },
@@ -403,7 +410,7 @@ export const modifierSpecs = [
       { type: "int", label: "strokeThickness", option: true },
       { type: "int", label: "fontSize", option: true, default: 16 },
       { type: "int", label: "fontWeight", option: true, default: 200 },
-    ], cat: 'Generic', multi: true,
+    ], cat: 'Generic', multi: true, premium: true,
   },
 
   { id: 'mirrorY', group: 'effect', args: [{ type: 'bool', label: 'val' }], cat: "Mirror" },
@@ -420,7 +427,7 @@ export const modifierSpecs = [
   { id: 'belowTiles', group: 'effect', args: [{ type: 'bool', label: 'val' }], cat: "Generic" },
   { id: 'aboveLightning', group: 'effect', args: [{ type: 'bool', label: 'val' }], cat: "Generic" },
   { id: 'zIndex', group: 'effect', args: [{ type: 'int', label: 'val' }], cat: "Generic" },
-  { id: 'locally', group: 'effect', args: [], cat: "Generic" },
+  { id: 'locally', group: 'effect', args: [{ type: "bool", label: "val" }], cat: "Generic" },
   { id: 'noLoop', group: 'effect', args: [{ type: 'bool', label: 'val' }], cat: "Generic" },
 
   {

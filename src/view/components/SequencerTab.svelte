@@ -1,7 +1,7 @@
 <script>
    import SequenceEditor from "./SequenceEditor.svelte";
    import { sequences } from "../../modules/stores";
-   import { onDestroy, getContext } from "svelte";
+   import { onDestroy, getContext, tick } from "svelte";
    import Select from "svelte-select";
    import { Section, DSequence, Variable } from "../../modules/Sequencer.js";
    import { v4 as uuidv4 } from "uuid";
@@ -10,12 +10,19 @@
    import exportFromJSON from "export-from-json";
    import { setting } from "crew-components/helpers";
    import { moduleId, SETTINGS } from "../../constants.js";
+   import { get } from "svelte/store";
 
    const { application } = getContext("external");
    const position = application.position;
    const { height } = position.stores;
    let contentH = $height;
-   onDestroy(height.subscribe((h) => (contentH = h - 124)));
+
+   function updateHeight(h) {
+      contentH = h - (document.getElementById("bottom-bar")?.clientHeight ?? 0) - 20;
+   }
+
+   onDestroy(height.subscribe(updateHeight));
+   tick().then(updateHeight($height));
 
    let seq = undefined;
    let fullCode = "";
@@ -33,6 +40,10 @@
       fullCode = getCode();
       oneliner = getOnelliner();
       globalThis.game.settings.set(moduleId, SETTINGS.SELECTED_SEQ, seq.id);
+      tick().then((_) => {
+         height.set(get(height) - 1);
+         height.set(get(height) + 1);
+      });
    });
    $: debounce(() => {
       fullCode = getCode();
@@ -127,9 +138,20 @@
       preloading = false;
    }
 
+   let validationError;
    async function play() {
       updateSequences();
-      seq.play();
+      const result = await seq.validate();
+      if (result.result) {
+         validationError = undefined;
+         seq.play();
+      } else {
+         validationError = result.error;
+      }
+      tick().then((_) => {
+         height.set(get(height) - 1);
+         height.set(get(height) + 1);
+      });
    }
 
    async function addSection() {
@@ -212,7 +234,15 @@
          <SequenceEditor {seq} />
       </div>
 
-      <div class="ui-bg-base-100 ui-p-2 ui-gap-2 ui-flex ui-flex-col">
+      <div id="bottom-bar" class="ui-bg-base-100 ui-p-2 ui-gap-2 ui-flex ui-flex-col">
+         {#if validationError}
+            <div
+               class="ui-border-solid ui-border ui-border-base-300 ui-flex ui-flex-row ui-bg-error ui-rounded-xl ui-shadow-lg ui-py-2 ui-px-4 ui-gap-2 ui-items-center ui-justify-center ui-font-bold"
+            >
+               {@html validationError}
+            </div>
+         {/if}
+
          <button class="ui-btn ui-btn-outline ui-btn-md ui-w-full" on:click={(e) => addSection()}>Add section</button>
 
          <div class="ui-btn-group ui-btn-group-md ui-w-full ui-justify-center ui-items-start">

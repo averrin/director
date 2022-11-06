@@ -113,6 +113,12 @@ export function calculateValueSync(val, type, seq) {
       return Array.from(globalThis.canvas.scene.tiles.values());
     } else if (val.startsWith("#id:")) {
       return globalThis.Director.getPlaceables().find(t => t.id == val.slice(4) || t.name == val.slice(4));
+    } else if (val.startsWith("#token:")) {
+      val = globalThis.canvas.tokens.get(val.slice(7))
+      if (!val) {
+        throw new Error("Token is not specified")
+      }
+      return val;
     } else if (type == "expression") {
       const vars = {};
       for (const v of seq.variables.filter(v => v.name != varName && v.value != val)) {
@@ -149,10 +155,10 @@ export function calculateValueSync(val, type, seq) {
   return val;
 }
 
-export async function calculateValue(val, type, seq) {
+export async function calculateValue(val, type, seq, lazy = true) {
   const varName = this ? this.name : "inline";
   if (typeof val === 'string' || val instanceof String) {
-    if (val === "#manual") {
+    if (val === "#manual" && lazy) {
       const controlled = [getControlledTiles(), ...globalThis.canvas.tokens.controlled].flat();
       let t = await globalThis.warpgate.crosshairs.show({
         drawIcon: true,

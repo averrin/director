@@ -3,34 +3,18 @@
 
    import { sequences } from "../../modules/stores";
    import { sectionSpecs, modifierSpecs } from "../../modules/Specs.js";
-   import { argSpecs } from "crew-components/specs";
    import { Section, Modifier, DSequence, Variable } from "../../modules/Sequencer.js";
-   // import { logger } from "../../modules/helpers.js";
    import { v4 as uuidv4 } from "uuid";
-   import Select from "svelte-select";
    import Sortable from "./Sortable.svelte";
    import VariableComponent from "./Variable.svelte";
-   import ArgInput from "crew-components/ArgInput";
-   import IconButton from "crew-components/IconButton";
-   import RemoveButton from "crew-components/RemoveButton";
-   import CollapseButton from "crew-components/CollapseButton";
-   import ModifierItem from "./ModifierItem.svelte";
+   import SectionItem from "./SectionItem.svelte";
 
-   const groupBy = (i) => i.group;
-
-   function copySection(section) {
-      const ns = Section.fromPlain(section);
-      ns.id = uuidv4();
-      seq.sections.push(ns);
-      updateSequences();
-   }
-
-   async function playSection(section) {
-      updateSequences();
-      seq.playSection(section.id);
-   }
-
-   async function updateSequences() {
+   async function _updateSequences() {
+      if (JSON.stringify(seq) == JSON.stringify($sequences.find((s) => s.id == seq.id))) {
+         seq = $sequences.find((s) => s.id == seq.id);
+         logger.info(seq);
+         return;
+      }
       sequences.update((seqs) => {
          seq = DSequence.fromPlain(seq);
          const i = seqs.indexOf(seqs.find((s) => s.id == seq.id));
@@ -43,18 +27,7 @@
          return seqs;
       });
    }
-
-   function addModifier(section) {
-      const e = new Modifier(uuidv4(), "");
-      e.setType(
-         modifierSpecs
-            .filter((m) => m.group == section.type)
-            .filter((m) => m.multi || !section.modifiers.find((mod) => mod.type == m.id))[0].id,
-         section.type
-      );
-      seq.sections.find((s) => s.id == section.id).modifiers.push(e);
-      updateSequences();
-   }
+   const updateSequences = foundry.utils.debounce(_updateSequences, 200);
 
    function sortSections(ev) {
       seq.sections = ev.detail;
@@ -62,13 +35,7 @@
       seq = seq;
    }
 
-   function deleteModifier(section, mod) {
-      section.modifiers = section.modifiers.filter((m) => m.id != mod.id);
-      updateSequences();
-   }
-
-   function deleteSection(section) {
-      seq.sections = seq.sections.filter((s) => s.id != section.id);
+   function updateVariable(v) {
       updateSequences();
    }
 
@@ -77,55 +44,15 @@
       updateSequences();
    }
 
-   function setSectionArg(e, section, i) {
-      seq.sections.find((s) => s.id == section.id).args[i] = e.detail || "";
+   function copySection(section) {
+      const ns = Section.fromPlain(section);
+      ns.id = uuidv4();
+      seq.sections.push(ns);
       updateSequences();
    }
 
-   function setModArg(e, m, i, value) {
-      if (value != undefined && value != null && typeof value === "object" && !Array.isArray(e.detail)) {
-         if (value.value) {
-            if (m.args[i] == value.value) return;
-            m.args[i] = value.value;
-            updateSequences();
-         } else {
-            if (JSON.stringify(m.args[i]) == JSON.stringify(value)) return;
-            m.args[i] = value;
-            updateSequences();
-         }
-      } else {
-         if (JSON.stringify(m.args[i]) == JSON.stringify(value)) return;
-         m.args[i] = value;
-         updateSequences();
-      }
-      // if (m.args[i] != null && value != undefined) {
-      // }
-   }
-
-   function setModType(e, section, mod) {
-      mod.setType(e.detail.id, section.type);
-      updateSequences();
-   }
-   function setSectionType(e, section) {
-      section.setType(e.detail.id);
-      updateSequences();
-   }
-
-   function updateVariable(v) {
-      updateSequences();
-   }
-
-   function toggleCollapsed(item) {
-      item.collapsed = !item.collapsed;
-      updateSequences();
-   }
-
-   let specs = sectionSpecs;
-
-   function doShowAddMod(item) {
-      let m = modifierSpecs.filter((m) => item.type == m.group);
-      m = m.filter((m) => m.multi || !item.modifiers.find((mod) => mod.type == m.id));
-      return m.length > 0;
+   function deleteSection(section) {
+      seq.sections = seq.sections.filter((s) => s.id != section.id);
    }
 </script>
 
@@ -136,87 +63,13 @@
 
    <div class="ui-h-full" id="sequencer-content">
       <Sortable items={seq.sections} let:item let:index on:change={sortSections} options={{ handle: ".handle" }}>
-         <div
-            class="ui-flex ui-flex-col ui-bg-base-100 ui-rounded-xl ui-shadow-lg ui-p-2 ui-gap-2 ui-mb-1"
-            id={item.id}
-         >
-            <div class="ui-flex ui-flex-row ui-justify-start ui-gap-2 ui-items-stretch">
-               <div class="ui-flex-1 ui-flex ui-flex-row ui-justify-start ui-gap-2 ui-group ui-group-md">
-                  <IconButton
-                     title="move"
-                     style="color: #46525d"
-                     icon="fa-solid:arrows-alt"
-                     cls="handle"
-                     type="ghost ui-cursor-move"
-                  />
-                  <Select
-                     items={specs}
-                     {groupBy}
-                     optionIdentifier="id"
-                     on:select={(e) => setSectionType(e, item)}
-                     value={item.type}
-                     listAutoWidth={false}
-                  />
-                  {#if item._spec?.args}
-                     {#each item._spec.args as arg, i}
-                        <ArgInput
-                           hideSign={false}
-                           extra={item}
-                           vars={seq.variables.filter((v) =>
-                              argSpecs.find((s) => s.id == arg.type).var_types.includes(v.type)
-                           )}
-                           label={arg.label}
-                           variables={true}
-                           type={arg.type}
-                           bind:value={seq.sections[index].args[i]}
-                           on:change={(e) => setSectionArg(e, item, i)}
-                        />
-                     {/each}
-                  {/if}
-               </div>
-               <div class="ui-flex-none ui-btn-group ui-btn-group-md">
-                  {#if item._spec.collapsible}
-                     <CollapseButton on:click={(e) => toggleCollapsed(item)} collapsed={item.collapsed} />
-                  {/if}
-
-                  <IconButton title="duplicate" on:click={(e) => copySection(item)} icon="fa-solid:copy" />
-                  {#if !item._spec.nonPlayable}
-                     <IconButton
-                        title="play section"
-                        icon="fa-solid:play"
-                        on:click={(e) => playSection(item)}
-                        type="primary"
-                     />
-                  {/if}
-                  <RemoveButton on:click={(e) => deleteSection(item)} />
-               </div>
-            </div>
-
-            {#if !item.collapsed}
-               {#if item.modifiers.length > 0}
-                  <div class="ui-divider ui-m-1 ui-text-base-content">Modifiers</div>
-               {/if}
-               {#each item.modifiers as modifier (modifier.id)}
-                  <ModifierItem
-                     {modifier}
-                     parent={item}
-                     on:changeType={(e) => setModType(e, item, modifier)}
-                     on:changeArg={(e) => setModArg(e, modifier, ...e.detail)}
-                     on:change={updateSequences}
-                     on:delete={(e) => deleteModifier(item, e.detail)}
-                     vars={seq.variables}
-                     variables={true}
-                  />
-               {/each}
-               {#if doShowAddMod(item)}
-                  <div class="ui-p-1">
-                     <button class="ui-btn ui-btn-outline ui-btn-md ui-btn-primary" on:click={(e) => addModifier(item)}
-                        >Add modifier</button
-                     >
-                  </div>
-               {/if}
-            {/if}
-         </div>
+         <SectionItem
+            {item}
+            variables={seq.variables}
+            on:update={updateSequences}
+            on:copy={(e) => copySection(e.detail)}
+            on:remove={(e) => deleteSection(e.detail)}
+         />
       </Sortable>
    </div>
 {/if}

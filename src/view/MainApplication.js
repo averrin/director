@@ -3,11 +3,13 @@ import { moduleId, SETTINGS } from "../constants.js";
 import { setting } from "../modules/settings.js";
 import { tilesStore, wallsStore, tokensStore, currentScene, initStores, sequences, lightsStore } from "../modules/stores.js";
 import { DSequence } from "../modules/Sequencer.js";
-import initIntegrations from "../modules/Integrations.js";
-import { initAPI } from "../modules/API.js";
+import { logger } from "crew-components/helpers"
+import { v4 as uuidv4 } from "uuid";
 
 import MainUI from "./MainUI.svelte";
 import { getControlledTiles } from "../modules/helpers.js";
+import initIntegrations from "../modules/Integrations.js";
+import { initAPI } from "../modules/API.js";
 
 export default class MainApplication extends SvelteApplication {
   // #gameSettings = new TJSGameSettings();
@@ -39,6 +41,7 @@ export default class MainApplication extends SvelteApplication {
     Hooks.on("canvasInit", () => {
       Hooks.once("renderCombatTracker", this.onSceneUpdate.bind(this));
     });
+
   }
 
   static get defaultOptions() {
@@ -62,10 +65,6 @@ export default class MainApplication extends SvelteApplication {
   }
 
   start() {
-    initStores();
-    initAPI();
-
-    initIntegrations();
   }
 
   toggleCollapsed() {
@@ -90,10 +89,6 @@ export default class MainApplication extends SvelteApplication {
   }
 
   onSelectionUpdate() {
-    tokensStore.set(canvas.tokens.controlled);
-    tilesStore.set(getControlledTiles());
-    wallsStore.set(canvas.walls.controlled);
-    lightsStore.set(canvas.lighting.controlled);
   }
   onSceneUpdate() {
     logger.info("update scene")
