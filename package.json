@@ -13,7 +13,7 @@
     "@typhonjs-fvtt/runtime": "^0.0.21",
     "class-transformer": "^0.5.1",
     "consola": "^2.15.3",
-    "crew-components": "../crew-components",
+    "crew-components": "averrin/crew-components",
     "daisyui": "^2.22.0",
     "export-from-json": "^1.6.0",
     "iconify": "^1.4.0",
