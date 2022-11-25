@@ -10,10 +10,10 @@
   ],
   "version": "0.0.0-development",
   "dependencies": {
-    "@typhonjs-fvtt/runtime": "^0.0.19",
+    "@typhonjs-fvtt/runtime": "^0.0.21",
     "class-transformer": "^0.5.1",
     "consola": "^2.15.3",
-    "crew-components": "averrin/crew-components",
+    "crew-components": "../crew-components",
     "daisyui": "^2.22.0",
     "export-from-json": "^1.6.0",
     "iconify": "^1.4.0",

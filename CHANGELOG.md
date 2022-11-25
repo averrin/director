@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
 ## [Unreleased]
+## [1.0.0 - 1.1.0](https://github.com/averrin/director/compare/1.0.0...1.1.0)
+Added:
+  * [Premium] alt key to skip effect editor when dragging effect from the Effects Tab
+  * Ability to attach lights to effects. It's buggy and with a bunch of limitations. Possibly will be reworked in the future.
+
+Fixed:
+  * Toolbar icon changed to fa's instead of emoji
+
+Known bugs/limitations:
+  * After effect recreation (scene switching, foundry refreshing), playing effects lost its saved sequence (animation, attach and so on). Effects are still laying correctly, but editing is not complete and saving is disabled. [Sequencer issue here](https://github.com/fantasycalendar/FoundryVTT-Sequencer/issues/111), please thumb it up!
+  * The same issue affects lights: they detach on effect's recreation
+
 ## [0.9.4 - 1.0.0](https://github.com/averrin/director/compare/0.9.4...1.0.0)
 Important:
   * Drops v9 compatibility (based on new Sequencer versions), updated to match Sequencer 2.3.15 (e.g. `tieToDocuments`)

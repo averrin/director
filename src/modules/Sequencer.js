@@ -4,6 +4,7 @@ import { SETTINGS, moduleId } from "../constants.js";
 import { sectionSpecs, modifierSpecs } from "./Specs.js";
 import { argSpecs } from "crew-components/specs";
 import { calculateValue } from "./helpers.js"
+import { tick } from "svelte";
 
 import { plainToClass, serialize, deserialize, classToPlain } from 'class-transformer';
 
@@ -23,7 +24,6 @@ export class DSequence {
   }
 
   async validate() {
-    logger.info(this.sections);
     const es = this.sections.find(s => s.type == "effect");
     if (es.modifiers.find(m => m.type.startsWith(" "))) {
       return {
@@ -31,7 +31,7 @@ export class DSequence {
       };
     }
     const am = es.modifiers.find(m => m.type == "attachTo");
-    if (am && (am.args[0] == "" || am.args[0] == "#token:" || am.args[0] == "#id:") ){
+    if (am && (am.args[0] == "" || am.args[0] == "#token:" || am.args[0] == "#id:")) {
       return { result: false, error: "Attach modifier's target is empty" };
     }
     if (!es.modifiers.find(m => m.type == "file")) {
@@ -472,6 +472,8 @@ export class Section {
     this.args = args || [];
     this.collapsed = false;
     this.version = 1;
+    this.light = null;
+    this.lightConfig = null;
   }
 
   setType(type) {
@@ -479,6 +481,7 @@ export class Section {
     this.type = type;
     this._spec = sectionSpecs.find(s => s.id == this.type);
     this.modifiers = [];
+    this.light = null;
     if (!this._spec || !this._spec.args) return;
     for (const arg of this._spec?.args) {
       const spec = argSpecs.find(s => s.id == arg.type);
@@ -554,3 +557,165 @@ export class Modifier {
   }
 }
 
+const _m = (t, v) => {
+  const m = new Modifier(uuidv4(), "");
+  m.setType(t, "effect");
+  m.args = v;
+  return m;
+};
+
+export async function detectEffect(section, delay = 15) {
+  return new Promise((f) => {
+    setTimeout((_) => {
+      const effect = Sequencer.EffectManager.getEffects({ origin: section.id })[0];
+      if (effect) {
+        effect.section = section;
+        f(effect);
+      } else {
+        if (delay <= 1000) {
+          detectEffect(section, delay * 2);
+        } else {
+          ui.notifications.error("Something went wrong.");
+          f(null);
+        }
+      }
+    }, delay);
+  });
+}
+
+export async function createLight(section, lightConfig, effect) {
+  let config = lightConfig ?? {
+    config: {
+      dim: 5,
+      bright: 10,
+    },
+  };
+  const pos = effect.position ?? {x:0,y:0};
+  config["x"] = pos.x + (config.offsetX ?? 0);
+  config["y"] = pos.y + (config.offsetY ?? 0);
+  let light = await canvas.scene.createEmbeddedDocuments("AmbientLight", [config]);
+  light = light[0];
+  let hid;
+  let mhid;
+  let rthid;
+  hid = Hooks.on("endedSequencerEffect", (ef) => {
+    if (ef.section?.light == light.id) {
+      canvas.scene.deleteEmbeddedDocuments("AmbientLight", [light.id]);
+      Hooks.off("endedSequencerEffect", hid);
+      Hooks.off("updateSequencerEffect", mhid);
+      if (rthid) {
+        Hooks.off("refreshToken", rthid);
+      }
+    }
+  });
+  mhid = Hooks.on("updateSequencerEffect", (ef) => {
+    if (ef?.section?.light == light.id) {
+      setTimeout((_) => {
+        const e = Sequencer.EffectManager.effects.find((e) => e.id == ef.id);
+        let config = e.section.lightConfig;
+        light.update({ x: e.position.x + (config.offsetX ?? 0), y: e.position.y + (config.offsetY ?? 0) });
+      }, 50);
+    }
+  });
+
+  if (effect.data.attachTo?.active && effect.source) {
+    rthid = Hooks.on("preRefreshToken", (token) => {
+      if (token.id == effect.source.id) {
+        let config = effect.section.lightConfig;
+        light.update({ x: effect.source.center.x + (config.offsetX ?? 0), y: effect.source.center.y + (config.offsetY ?? 0) });
+      }
+    });
+  }
+
+  section.lightConfig = light.toObject();
+  section.lightConfig.offsetX = config.offsetX;
+  section.lightConfig.offsetY = config.offsetY;
+  return light;
+}
+
+export async function playSection(section, showToPlayers = false) {
+  const sid = section.id;
+  let seq = new DSequence(sid, "");
+  let section_clone = Section.fromPlain(section);
+  section_clone.modifiers.push(_m("locally", [!showToPlayers]));
+  seq.sections = [section_clone];
+
+  if (section.light) {
+    const light = canvas.lighting.get(section.light);
+    if (light) {
+      const oc = section.lightConfig;
+      section.lightConfig = light.document.toObject();
+      section.lightConfig.offsetX = oc.offsetX;
+      section.lightConfig.offsetY = oc.offsetY;
+    }
+  }
+  const result = await seq.validate();
+  if (result.result) {
+    Sequencer.EffectManager.endEffects({ origin: section.id });
+    seq.play();
+
+    result.effect = await detectEffect(section);
+    if (section.lightConfig) {
+      setTimeout(
+        async (_) => (section.light = (await createLight(section, section.lightConfig, result.effect)).id),
+        100);
+    }
+  }
+
+  return result;
+}
+
+export function effect2Section(effect) {
+  if (!effect) return null;
+  let section = new Section(uuidv4(), "effect", [
+    effect.data.name ?? effect.data.file.split("/")[effect.data.file.split("/").length - 1],
+  ]);
+  if (!effect) return null;
+  section.modifiers.push(_m("file", [effect.data.file]));
+  const ox = effect.data.offset?.source.x ?? 0;
+  const oy = effect.data.offset?.source.y ?? 0;
+  if (effect.token) {
+    section.modifiers.push(_m("attachTo", ["#token:" + effect.token.document.id]));
+  } else {
+    section.modifiers.push(
+      _m("atLocation", [
+        {
+          x: effect?.position.x - ox,
+          y: effect?.position.y - oy,
+        },
+        { x: ox, y: oy },
+      ])
+    );
+  }
+  if (effect.data.scale && (effect.data.scale?.x != 1 || effect.data.scale?.y != 1)) {
+    section.modifiers.push(_m("scale", [{ x: effect.data.scale.x, y: effect.data.scale.y }]));
+  }
+  if (effect.data.tint) {
+    section.modifiers.push(_m("tint", [effect.data.tint]));
+  }
+  if (effect.data.opacity != 1) {
+    section.modifiers.push(_m("opacity", [effect.data.opacity]));
+  }
+  if (effect.data.angle && effect.data.angle != 0) {
+    section.modifiers.push(_m("rotate", [effect.data.angle]));
+  }
+  if (effect.data.flipX) {
+    section.modifiers.push(_m("flipX", [true]));
+  }
+
+  if (effect.data.flipY) {
+    section.modifiers.push(_m("flipY", [true]));
+  }
+
+  if (effect.data.zIndex) {
+    section.modifiers.push(_m("zIndex", [effect.data.zIndex]));
+  }
+  if (effect.data.elevation) {
+    section.modifiers.push(_m("elevation", [effect.data.elevation]));
+  }
+  if (effect.data.persist) {
+    section.modifiers.push(_m("persist", [true, effect.data.persistOptions?.persistTokenPrototype ?? false]));
+  }
+
+  return section;
+}

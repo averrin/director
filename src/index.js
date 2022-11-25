@@ -14,13 +14,12 @@ import HelpActions from "./view/help/HelpActions.html?raw"
 import CreateApplication from "crew-components/AlphaApplication"
 import MainUI from "./view/MainUI.svelte"
 import EffectEditor from "./view/EffectEditor.svelte"
-const effectEditor = new (CreateApplication("effect-editor", "Effect Editor [BETA]", EffectEditor, 800))();
-const app = new (CreateApplication("director", "Director", MainUI))();
+const app = new (CreateApplication({moduleId: "director", app_id: "director", title: "Director", component: MainUI}))();
+const effectEditor = new (CreateApplication({moduleId: "director", app_id: "effect-editor", title: "Effect Editor [BETA]", component: EffectEditor, width: 800}))();
 
 
 import initIntegrations from "./modules/Integrations.js";
 import { initAPI } from "./modules/API.js";
-
 
 
 Hooks.once('init', async () => {
@@ -102,7 +101,7 @@ Hooks.on('getSceneControlButtons', (buttons) => {
       tokenButton.tools.push({
         name: "director",
         title: "Toggle Director",
-        icon: "fas director-icon",
+        icon: "fas fa-clapperboard",
         visible: game.user.isGM,
         onClick: () => {
           app.toggle();

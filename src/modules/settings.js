@@ -27,12 +27,6 @@ export async function migrateFromString(key) {
 
 const debouncedReload = debounce(() => window.location.reload(), 100);
 export function initSettings(app) {
-  game.settings.register(moduleId, SETTINGS.SHOW, {
-    scope: "client",
-    config: false,
-    type: Boolean,
-    default: false,
-  });
 
   game.settings.register(moduleId, SETTINGS.COLLAPSED, {
     scope: "client",

@@ -1,5 +1,5 @@
 <script>
-   import { Section } from "../../modules/Sequencer.js";
+   import { Section, playSection, effect2Section } from "../../modules/Sequencer.js";
    import { v4 as uuidv4 } from "uuid";
    import { onHook } from "crew-components/helpers";
    import Icon from "crew-components/Icon";
@@ -99,7 +99,9 @@
          section = Section.fromPlain(effect.section);
          section.id = uuidv4();
          section.savedId = section.id;
+         section.light = null;
       }
+      logger.info(section);
       savedEffects.update((e) => {
          e.push({ data: effect.data, section });
          return e;
@@ -123,6 +125,8 @@
          type: "Effect",
          effect: effect.data,
          section,
+         temp: event.ctrlKey,
+         instant: event.altKey,
       };
       event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
    }
@@ -164,6 +168,18 @@
       return null;
    }
 
+   function refreshEffect(effect) {
+      let show = true;
+      if (!effect.data.users || effect.data.users.length == 0) {
+         show = false;
+      }
+     if (!effect.section) {
+       effect.section = effect2Section(effect)
+    globalThis.Sequencer.EffectManager.endEffects({ origin: effect.origin });
+     }
+      playSection(effect.section, show);
+   }
+
    updateEffects();
 </script>
 
@@ -188,6 +204,10 @@
                   class="ui-rounded-md ui-h-6 ui-border-none"
                />
                {@html getEffectName(effect)}
+
+               {#if effect.section?.lightConfig}
+                  <Icon icon="fa6-solid:lightbulb" />
+               {/if}
             </div>
             <div class="ui-flex ui-flex-none ui-flex-row ui-gap-2 ui-items-center">
                <IconButton
@@ -250,8 +270,17 @@
                {#if effect.section}
                   <Icon icon="twemoji:clapper-board" />
                {/if}
+               {#if effect.section?.lightConfig}
+                  <Icon icon="fa6-solid:lightbulb" />
+               {/if}
             </div>
             <div class="ui-flex ui-flex-none ui-flex-row ui-gap-2 ui-group-xs">
+               <IconButton
+                  <!-- disabled={!effect.section} -->
+                  on:click={(_) => refreshEffect(effect)}
+                  icon="fa:refresh"
+                  title="Refresh effect"
+               />
                <IconButton
                   disabled={!isPremium()}
                   on:click={(_) => preloadEffect(effect)}
@@ -279,7 +308,7 @@
                />
                <IconButton
                   type="primary"
-                  disabled={!effect.section || ( !isPremium() && $savedEffects.length >= 3)}
+                  disabled={!effect.section || (!isPremium() && $savedEffects.length >= 3)}
                   on:click={(_) => saveEffect(effect)}
                   icon="bxs:bookmark-plus"
                   title="Save effect"

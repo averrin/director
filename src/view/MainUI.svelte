@@ -26,7 +26,7 @@
    import { tagsStore, actions } from "../modules/stores.js";
    setContext("tagsStore", tagsStore);
 
-   import Tag from "crew-components/tags";
+   import Tag from "crew-components/tagsLogic";
 
    import Action from "../modules/Actions";
    import { actionTypes } from "../modules/Specs";

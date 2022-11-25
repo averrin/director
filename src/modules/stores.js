@@ -22,7 +22,7 @@ export const tagsStore = writable([]);
 
 function loadTags(scene) {
   const global = game.settings.get(moduleId, SETTINGS.GLOBAL_TAGS);
-  let inScene;
+  let inScene = [];
   if (scene) {
     inScene = hasFlag(scene, FLAGS.TAGS)
       ? getFlag(scene, FLAGS.TAGS).filter((a) => a)
@@ -230,10 +230,19 @@ function initDropHandler() {
           } else {
             data.section.modifiers.push(_m("atLocation", [{ x: data.x, y: data.y }]))
           }
+          if (data.section.lightConfig) {
+            data.section.lightConfig.x = data.x;
+            data.section.lightConfig.y = data.y;
+            logger.info(data, data.section.lightConfig)
+          }
         }
       }
       //TODO: get rid of section.position. rewrite it with data.x/y
-      Director.openEffectEditor({ data: data.effect, position: data, section: data.section });
+      Director.openEffectEditor({
+        data: data.effect, position: data, section: data.section,
+        temp: data.temp, instant: data.instant,
+        persist: !data.temp
+      });
       // Sequencer.EffectManager.play({ data: data.effect, position: data })
       return false;
     }
@@ -245,7 +254,7 @@ export let savedEffects = writable(null);
 
 export async function initStores() {
 
-  savedEffects = settingStore(SETTINGS.SAVED_EFFECTS)
+  savedEffects = settingStore(savedEffects, SETTINGS.SAVED_EFFECTS)
 
   const HOOKS = [
     "controlToken",
